@@ -1,0 +1,10 @@
+bin/
+build/
+.ycm*
+
+ignore/
+assets/
+exec
+a.out
+*.o
+debug.log
