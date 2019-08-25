@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
     // load characters
     Character test_character;
-    init_character(&test_character, "assets/test_character.png", 2, TRUE, 12, 4);
+    init_character(&test_character, "assets/sprites/characters/test_character.png", 2, TRUE, 12, 4);
 
     /* double size of sprites as the images are really small
      * 16 pixels w/h is too small for recent screens but
