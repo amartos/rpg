@@ -20,5 +20,8 @@ void logger(const int error_id, const char sdl_message[])
         case VIDEO_MODE_LOAD_FAILURE:
             printe(now, error_id, "video mode loading failed", sdl_message);
             break;
+        case SPRITE_LOAD_FAILURE:
+            printe(now, error_id, "sprite load failure", sdl_message);
+            break;
     }
 }
