@@ -9,11 +9,14 @@
 void logger(const int error_id, const char sdl_message[]);
 
 // custom errors
-#define SCREEN_INIT_FAILURE 1
-#define VIDEO_MODE_LOAD_FAILURE 2
-#define SPRITE_LOAD_FAILURE 3
-#define FLIP_SCREEN_FAILURE 4
-#define CHARACTER_NOT_ANIMATED 5
-#define CHARACTER_NOT_MOVING 6
+enum Errors
+{
+    SCREEN_INIT_FAILURE = 1,
+    VIDEO_MODE_LOAD_FAILURE,
+    SPRITE_LOAD_FAILURE,
+    FLIP_SCREEN_FAILURE,
+    CHARACTER_NOT_ANIMATED,
+    CHARACTER_NOT_MOVING
+};
 
 #endif // define RPG_ERROR
