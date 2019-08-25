@@ -1,6 +1,6 @@
 CPP=gcc
 CFLAGS=-O3
-LDFLAGS=-lSDL -lSDL_mixer -lSDL_image
+LDFLAGS=-lSDL -lSDL_mixer -lSDL_image -lSDL_gfx
 FILES=*
 
 all: compile clean
