@@ -34,15 +34,26 @@ struct Character
     Face direction;
     SDL_Rect infos;
     int animated;
+    int moving;
     int number_of_frames;
     int velocity;
     SDL_Rect frames[4][6][30]; // possible positions, State, max number of frames
     int current_frame;
     int framerate;
+    int previous_time;
 };
 
 // prototypes
-void init_character(Character *character, const char sprite_path[], const int number_of_frames, const int fps, const int velocity);
+
+void init_character(
+        Character *character,
+        const char sprite_path[],
+        const int number_of_frames,
+        const int moving,
+        const int fps,
+        const int velocity
+        );
 void free_character(Character *character);
+void move_character(Character *character, const int direction, const int current_time);
 
 #endif // define RPG_CHARACTERS

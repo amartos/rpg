@@ -13,6 +13,7 @@ void logger(const int error_id, const char sdl_message[]);
 #define VIDEO_MODE_LOAD_FAILURE 2
 #define SPRITE_LOAD_FAILURE 3
 #define FLIP_SCREEN_FAILURE 4
-
+#define CHARACTER_NOT_ANIMATED 5
+#define CHARACTER_NOT_MOVING 6
 
 #endif // define RPG_ERROR

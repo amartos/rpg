@@ -26,5 +26,11 @@ void logger(const int error_id, const char sdl_message[])
         case FLIP_SCREEN_FAILURE:
             printe(now, error_id, "flip screen failure", sdl_message);
             break;
+        case CHARACTER_NOT_ANIMATED:
+            printe(now, error_id, "character not animated", sdl_message);
+            break;
+        case CHARACTER_NOT_MOVING:
+            printe(now, error_id, "character not moving", sdl_message);
+            break;
     }
 }

@@ -1,6 +1,13 @@
 #include "characters.h"
 
-void init_character(Character *character, const char sprite_path[], const int number_of_frames, const int fps, const int velocity)
+void init_character(
+        Character *character,
+        const char sprite_path[],
+        const int number_of_frames,
+        const int moving,
+        const int fps,
+        const int velocity
+        )
 {
     TRY
     {
@@ -50,10 +57,65 @@ void init_character(Character *character, const char sprite_path[], const int nu
         character->framerate = 0;
         character->velocity = 0;
     }
+    character->moving = moving;
     character->current_frame = 0;
+    character->previous_time = 0;
 }
 
 void free_character(Character *character)
 {
     SDL_FreeSurface(character->sprite);
+}
+
+void move_character(Character *character, const int direction, const int current_time)
+{
+    TRY
+    {
+        if (character->animated)
+        {
+            if (character->moving)
+            {
+                switch(direction)
+                {
+                    case UP:
+                        character->infos.y -= character->velocity;
+                        break;
+                    case DOWN:
+                        character->infos.y += character->velocity;
+                        break;
+                    case LEFT:
+                        character->infos.x -= character->velocity;
+                        break;
+                    case RIGHT:
+                        character->infos.x += character->velocity;
+                        break;
+                }
+                character->direction = direction;
+                if (current_time - character->previous_time > character->framerate)
+                {
+                    (character->current_frame)++;
+                    if (character->current_frame >= character->number_of_frames)
+                        character->current_frame = 0;
+                    character->previous_time = current_time;
+                }
+            }
+            else
+                THROW(CHARACTER_NOT_MOVING);
+        }
+        else
+            THROW(CHARACTER_NOT_ANIMATED);
+    }
+    CATCH(CHARACTER_NOT_ANIMATED)
+    {
+        char message[100] = {0};
+        sprintf(message, "%s is not animated", get_name(character));
+        logger(CHARACTER_NOT_ANIMATED, message);
+    }
+    CATCH(CHARACTER_NOT_MOVING)
+    {
+        char message[100] = {0};
+        sprintf(message, "%s cannot move", get_name(character));
+        logger(CHARACTER_NOT_ANIMATED, message);
+    }
+    ETRY;
 }
