@@ -23,5 +23,8 @@ void logger(const int error_id, const char sdl_message[])
         case SPRITE_LOAD_FAILURE:
             printe(now, error_id, "sprite load failure", sdl_message);
             break;
+        case FLIP_SCREEN_FAILURE:
+            printe(now, error_id, "flip screen failure", sdl_message);
+            break;
     }
 }
