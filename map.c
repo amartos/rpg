@@ -54,26 +54,39 @@ void init_map(Map *map, const char map_path[])
     TRY
     {
 
-        map->tiles = malloc(sizeof(unsigned int *) * column_count);
+        map->background_tiles = malloc(sizeof(unsigned int *) * column_count);
+        map->foreground_tiles = malloc(sizeof(unsigned int *) * column_count);
         map->collisions = malloc(sizeof(unsigned int *) * column_count);
         map->weather = malloc(sizeof(unsigned int *) * column_count);
 
-        if (map->tiles == NULL || map->collisions == NULL || map->weather == NULL)
+        if (
+            map->background_tiles == NULL ||
+            map->foreground_tiles == NULL ||
+            map->collisions == NULL || 
+            map->weather == NULL
+            )
             THROW(MAP_MALLOC_FAILURE);
 
         for(i=0;i<column_count; i++)
         {
-            map->tiles[i] = malloc(sizeof(unsigned int) * line_count);
+            map->background_tiles[i] = malloc(sizeof(unsigned int) * line_count);
+            map->foreground_tiles[i] = malloc(sizeof(unsigned int) * line_count);
             map->collisions[i] = malloc(sizeof(unsigned int) * line_count);
             map->weather[i] = malloc(sizeof(unsigned int) * line_count);
-            if (map->tiles[i] == NULL || map->collisions[i] == NULL || map->weather[i] == NULL)
+            if (
+                    map->background_tiles[i] == NULL ||
+                    map->foreground_tiles[i] == NULL ||
+                    map->collisions[i] == NULL ||
+                    map->weather[i] == NULL
+                    )
                 THROW(MAP_MALLOC_FAILURE);
         }
       
         for (i=0;i<column_count;i++) 
             for (j=0;j<line_count;j++)
             {
-                map->tiles[i][j] = 0;
+                map->background_tiles[i][j] = 0;
+                map->foreground_tiles[i][j] = 0;
                 map->collisions[i][j] = 0;
                 map->weather[i][j] = 0;
             }
@@ -125,7 +138,12 @@ void init_map(Map *map, const char map_path[])
                 case 1:
                     for (i=0;i<column_count;i++)
                     {
-                        sscanf(data, "%X ", &map->tiles[i][j]);
+                        sscanf(data, "%X ", &map->background_tiles[i][j]);
+                        if (map->background_tiles[i][j] == 0x0101)
+                        {
+                            map->foreground_tiles[i][j] = map->background_tiles[i][j];
+                            map->background_tiles[i][j] = 0;
+                        }
                         data += offset;
                     }
                     break;
@@ -157,11 +175,13 @@ void free_map(Map *map)
     int j;
     for (j=0;j<map->infos.y;j++)
     {
-        free(map->tiles[j]);
+        free(map->background_tiles[j]);
+        free(map->foreground_tiles[j]);
         free(map->collisions[j]);
         free(map->weather[j]);
     }
-    free(map->tiles);
+    free(map->background_tiles);
+    free(map->foreground_tiles);
     free(map->collisions);
     free(map->weather);
 }

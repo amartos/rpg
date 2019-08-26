@@ -21,7 +21,8 @@ struct Map
      * divide total width or height by x or y */
     SDL_Rect infos;
 
-    unsigned int **tiles;
+    unsigned int **background_tiles;
+    unsigned int **foreground_tiles;
     unsigned int **collisions;
     unsigned int **weather;
 };

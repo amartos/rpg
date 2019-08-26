@@ -78,12 +78,13 @@ int main(int argc, char *argv[])
                     break;
             }
             set_BG_color(&screen, screen_bg_color);
-            apply_background(&screen, test_map, test_tile);
+            apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.background_tiles, test_tile);
             SDL_BlitSurface(
                     test_character.sprite,
                     &test_character.frames[test_character.direction][MOVE][test_character.current_frame], 
                     screen, &test_character.infos
                     );
+            apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.foreground_tiles, test_tile);
 
             TRY
             {
