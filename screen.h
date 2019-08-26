@@ -10,6 +10,7 @@
 
 #include "errors.h"
 #include "try_throw_catch.h"
+#include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,5 +20,8 @@
 // prototypes
 void init_screen(SDL_Surface *(*screen));
 void set_BG_color(SDL_Surface *(*screen), const int rgb[3]);
+
+// SDL_Surface tile will change for an array once more tiles are included
+void apply_background(SDL_Surface *(*screen), const Map map, SDL_Surface *tile);
 
 #endif // define RPG_SCREEN

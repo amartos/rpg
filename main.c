@@ -4,6 +4,7 @@
 
 #include "screen.h"
 #include "characters.h"
+#include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,11 +28,17 @@ int main(int argc, char *argv[])
     Character test_character;
     init_character(&test_character, "assets/sprites/characters/test_character.png", 2, TRUE, 12, 4);
 
+    // load maps
+    Map test_map;
+    init_map(&test_map, "assets/maps/test_map");
+    SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
+
     /* double size of sprites as the images are really small
      * 16 pixels w/h is too small for recent screens but
      * good for GBC, and the test sprites are from this console
      * this will be delete when real sprites are done */
     test_character.sprite = rotozoomSurface(test_character.sprite, 0.0, 2.0, 0.0);
+    test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
 
     // start at center of screen
     test_character.infos.x = screen->w/2;
@@ -72,6 +79,7 @@ int main(int argc, char *argv[])
                     break;
             }
             set_BG_color(&screen, screen_bg_color);
+            apply_background(&screen, test_map, test_tile);
             SDL_BlitSurface(
                     test_character.sprite,
                     &test_character.frames[test_character.direction][MOVE][test_character.current_frame], 
@@ -95,5 +103,7 @@ int main(int argc, char *argv[])
     }
 
     free_character(&test_character);
+    free_map(&test_map);
+    SDL_FreeSurface(test_tile);
     return 0;
 }
