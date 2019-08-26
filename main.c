@@ -41,8 +41,7 @@ int main(int argc, char *argv[])
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
 
     // start at center of screen
-    test_character.infos.x = screen->w/2;
-    test_character.infos.y = screen->h/2;
+    place_character(&test_character, screen->w/2, screen->h/2);
 
     // main loop
     int done = FALSE;
@@ -64,16 +63,16 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_UP:
-                            move_character(&test_character, UP, time);
+                            move_character(&test_character, UP, time, test_map);
                             break;
                         case SDLK_DOWN:
-                            move_character(&test_character, DOWN, time);
+                            move_character(&test_character, DOWN, time, test_map);
                             break;
                         case SDLK_LEFT:
-                            move_character(&test_character, LEFT, time);
+                            move_character(&test_character, LEFT, time, test_map);
                             break;
                         case SDLK_RIGHT:
-                            move_character(&test_character, RIGHT, time);
+                            move_character(&test_character, RIGHT, time, test_map);
                             break;
                     }
                     break;

@@ -3,10 +3,15 @@
 
 #define SPRITES_WIDTH 32
 #define SPRITES_HEIGHT 32
+#define COLLISION_BOX_WIDTH 24
+#define COLLISION_BOX_HEIGHT 4
+#define COLLISION_BOX_OFFSET_X 4
+#define COLLISION_BOX_OFFSET_Y 28
 
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
+#include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +38,7 @@ struct Character
     State state;
     Face direction;
     SDL_Rect infos;
+    SDL_Rect collision_box;
     int animated;
     int moving;
     int number_of_frames;
@@ -54,6 +60,7 @@ void init_character(
         const int velocity
         );
 void free_character(Character *character);
-void move_character(Character *character, const int direction, const int current_time);
+void move_character(Character *character, const int direction, const int current_time, const Map map);
+void place_character(Character *character, const int x, const int y);
 
 #endif // define RPG_CHARACTERS

@@ -28,6 +28,12 @@ void init_character(
     character->infos.y = 0;
     character->infos.w = SPRITES_WIDTH;
     character->infos.h = SPRITES_HEIGHT;
+
+    character->collision_box.x = character->infos.x + COLLISION_BOX_OFFSET_X;
+    character->collision_box.y = character->infos.y + COLLISION_BOX_OFFSET_Y;
+    character->collision_box.w = COLLISION_BOX_WIDTH;
+    character->collision_box.h = COLLISION_BOX_HEIGHT;
+
     character->number_of_frames = number_of_frames;
 
     int f, i, j;
@@ -67,7 +73,53 @@ void free_character(Character *character)
     SDL_FreeSurface(character->sprite);
 }
 
-void move_character(Character *character, const int direction, const int current_time)
+static int check_collisions(const Character character, const int direction, const Map map)
+{
+    int wall = FALSE, i, j, k, m; // k is i' and m is j'
+    SDL_Rect curr_pos = character.infos, next_pos;
+    int velocity = character.velocity;
+    switch(direction)
+    {
+        case UP:
+            next_pos.x = curr_pos.x + COLLISION_BOX_OFFSET_X;
+            next_pos.y = curr_pos.y + COLLISION_BOX_OFFSET_Y - velocity;
+            break;
+        case DOWN:
+            next_pos.x = curr_pos.x + COLLISION_BOX_OFFSET_X;
+            next_pos.y = curr_pos.y + COLLISION_BOX_OFFSET_Y + velocity;
+            break;
+        case LEFT:
+            next_pos.x = curr_pos.x + COLLISION_BOX_OFFSET_X - velocity;
+            next_pos.y = curr_pos.y + COLLISION_BOX_OFFSET_Y;
+            break;
+        case RIGHT:
+            next_pos.x = curr_pos.x + COLLISION_BOX_OFFSET_X + velocity;
+            next_pos.y = curr_pos.y + COLLISION_BOX_OFFSET_Y;
+            break;
+    }
+
+    i = next_pos.x/TILES_WIDTH;
+    j = next_pos.y/TILES_HEIGHT;
+    if (map.collisions[i][j])
+        wall = TRUE;
+
+    k = (next_pos.x + character.collision_box.w) / TILES_WIDTH;
+    m = (next_pos.y + character.collision_box.h) / TILES_HEIGHT;
+    if (map.collisions[k][m])
+        wall = TRUE;
+
+    return wall;
+}
+
+void place_character(Character *character, const int x, const int y)
+{
+    character->infos.x = x;
+    character->infos.y = y;
+    character->collision_box.x = x+COLLISION_BOX_OFFSET_X;
+    character->collision_box.x = x+COLLISION_BOX_OFFSET_Y;
+}
+
+void move_character(Character *character, const int direction, const int current_time, const Map map)
 {
     TRY
     {
@@ -78,16 +130,20 @@ void move_character(Character *character, const int direction, const int current
                 switch(direction)
                 {
                     case UP:
-                        character->infos.y -= character->velocity;
+                        if (!check_collisions(*character, direction, map))
+                            character->infos.y -= character->velocity;
                         break;
                     case DOWN:
-                        character->infos.y += character->velocity;
+                        if (!check_collisions(*character, direction, map))
+                            character->infos.y += character->velocity;
                         break;
                     case LEFT:
-                        character->infos.x -= character->velocity;
+                        if (!check_collisions(*character, direction, map))
+                            character->infos.x -= character->velocity;
                         break;
                     case RIGHT:
-                        character->infos.x += character->velocity;
+                        if (!check_collisions(*character, direction, map))
+                            character->infos.x += character->velocity;
                         break;
                 }
                 character->direction = direction;
