@@ -32,5 +32,14 @@ void logger(const int error_id, const char sdl_message[])
         case CHARACTER_NOT_MOVING:
             printe(now, error_id, "character not moving", sdl_message);
             break;
+        case MAP_FILE_LOADING_FAILURE:
+            printe(now, error_id, "map file loading failure", sdl_message);
+            break;
+        case CONVERTER_FILE_LOADING_FAILURE:
+            printe(now, error_id, "converter file loading failure", sdl_message);
+            break;
+        case MAP_MALLOC_FAILURE:
+            printe(now, error_id, "map memory allocation failure", sdl_message);
+            break;
     }
 }
