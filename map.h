@@ -14,6 +14,15 @@
 
 
 // structures
+
+// This is an embryo of a tile structure, unused yet
+typedef struct Tile Tile;
+struct Tile
+{
+    SDL_Surface *image;
+    int collision;
+};
+
 typedef struct Map Map;
 struct Map
 {
