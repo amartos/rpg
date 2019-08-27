@@ -5,6 +5,7 @@
 #include "screen.h"
 #include "characters.h"
 #include "map.h"
+#include "images.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,30 @@ int main(int argc, char *argv[])
 
     // load characters
     Character test_character;
-    init_character(&test_character, "assets/sprites/characters/test_character.png", 2, TRUE, 12, 4);
+    init_character(&test_character, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+
+    /* in order to be able to change colors of sprites depending on the day or
+       others, the sprites need to be in shades of grey. Thus this sets the colors */
+    SDL_Color o, n;
+    /* green, clothes */
+    o.r = 0x91, o.g = 0x91, o.b = 0x91;
+    n.r = 0x10, n.g = 0xA8, n.b = 0x40;
+    set_color(test_character.sprite, o, n);
+
+    /* cream, skin, clothes */
+    o.r = 0xC6, o.g = 0xC6, o.b = 0xC6;
+    n.r = 0xF8, n.g = 0xB8, n.b = 0x88;
+    set_color(test_character.sprite, o, n);
+
+    /* blue 7f7f7f, sword */
+    /* n.r = 0x18; */
+    /* n.g = 0x80; */
+    /* n.b = 0xF8; */
+
+    /* red 919191, clothes */
+    /* n.r = 0xF8; */
+    /* n.g = 0x00; */
+    /* n.b = 0x00; */
 
     // load maps
     Map test_map;
