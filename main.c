@@ -5,7 +5,6 @@
 #include "screen.h"
 #include "characters.h"
 #include "map.h"
-#include "images.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,31 +25,18 @@ int main(int argc, char *argv[])
      * SDL_EnableKeyRepeat(0, 0); */
 
     // load characters
-    Character test_character;
-    init_character(&test_character, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+    Character test_character_green, test_character_red;
+    SDL_Color green[COLOR_PALETTE], red[COLOR_PALETTE];
+    green[0].r = 0x10, green[0].g = 0xA8, green[0].b = 0x40;
+    green[1].r = 0xF8, green[1].g = 0xB8, green[1].b = 0x88;
+    green[2].r = 0x18, green[2].g = 0x80, green[2].b = 0xF8;
 
-    /* in order to be able to change colors of sprites depending on the day or
-       others, the sprites need to be in shades of grey. Thus this sets the colors */
-    SDL_Color o, n;
-    /* green, clothes */
-    o.r = 0x91, o.g = 0x91, o.b = 0x91;
-    n.r = 0x10, n.g = 0xA8, n.b = 0x40;
-    set_color(test_character.sprite, o, n);
+    red[0].r = 0xF8, red[0].g = 0x00, red[0].b = 0x00;
+    red[1].r = 0xF8, red[1].g = 0xB8, red[1].b = 0x88;
+    red[2].r = 0x18, red[2].g = 0x80, red[2].b = 0xF8;
 
-    /* cream, skin, clothes */
-    o.r = 0xC6, o.g = 0xC6, o.b = 0xC6;
-    n.r = 0xF8, n.g = 0xB8, n.b = 0x88;
-    set_color(test_character.sprite, o, n);
-
-    /* blue 7f7f7f, sword */
-    /* n.r = 0x18; */
-    /* n.g = 0x80; */
-    /* n.b = 0xF8; */
-
-    /* red 919191, clothes */
-    /* n.r = 0xF8; */
-    /* n.g = 0x00; */
-    /* n.b = 0x00; */
+    init_character(&test_character_green, green, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+    init_character(&test_character_red, red, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
 
     // load maps
     Map test_map;
@@ -61,11 +47,13 @@ int main(int argc, char *argv[])
      * 16 pixels w/h is too small for recent screens but
      * good for GBC, and the test sprites are from this console
      * this will be delete when real sprites are done */
-    test_character.sprite = rotozoomSurface(test_character.sprite, 0.0, 2.0, 0.0);
+    test_character_green.sprite = rotozoomSurface(test_character_green.sprite, 0.0, 2.0, 0.0);
+    test_character_red.sprite = rotozoomSurface(test_character_red.sprite, 0.0, 2.0, 0.0);
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
 
     // start at center of screen
-    place_character(&test_character, screen->w/2, screen->h/2);
+    place_character(&test_character_green, screen->w/2, screen->h/2);
+    place_character(&test_character_red, test_character_green.infos.x+64, test_character_green.infos.y+64);
 
     // main loop
     int done = FALSE;
@@ -104,9 +92,14 @@ int main(int argc, char *argv[])
             set_BG_color(&screen, screen_bg_color);
             apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.background_tiles, test_tile);
             SDL_BlitSurface(
-                    test_character.sprite,
-                    &test_character.frames[test_character.direction][MOVE][test_character.current_frame], 
-                    screen, &test_character.infos
+                    test_character_green.sprite,
+                    &test_character_green.frames[test_character_green.direction][MOVE][test_character_green.current_frame], 
+                    screen, &test_character_green.infos
+                    );
+            SDL_BlitSurface(
+                    test_character_red.sprite,
+                    &test_character_red.frames[test_character_red.direction][MOVE][test_character_red.current_frame], 
+                    screen, &test_character_red.infos
                     );
             apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.foreground_tiles, test_tile);
 
@@ -126,7 +119,8 @@ int main(int argc, char *argv[])
             SDL_Delay(FRAMERATE - (time - prev_time));
     }
 
-    free_character(&test_character);
+    free_character(&test_character_green);
+    free_character(&test_character_red);
     free_map(&test_map);
     SDL_FreeSurface(test_tile);
     return 0;

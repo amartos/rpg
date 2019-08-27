@@ -7,11 +7,13 @@
 #define COLLISION_BOX_HEIGHT 4
 #define COLLISION_BOX_OFFSET_X 4
 #define COLLISION_BOX_OFFSET_Y 28
+#define COLOR_PALETTE 3
 
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
 #include "map.h"
+#include "images.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +55,7 @@ struct Character
 
 void init_character(
         Character *character,
+        SDL_Color colors[],
         const char sprite_path[],
         const int number_of_frames,
         const int moving,

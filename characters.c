@@ -2,6 +2,7 @@
 
 void init_character(
         Character *character,
+        SDL_Color colors[],
         const char sprite_path[],
         const int number_of_frames,
         const int moving,
@@ -22,6 +23,20 @@ void init_character(
     }
     ETRY;
 
+    /* in order to be able to change colors of sprites depending on the day or
+       others, the sprites need to be in shades of grey. Thus this sets the colors */
+
+    int i, j, f;
+
+    // for now this is half-manual, but LUT will be used in the future
+    SDL_Color greys[COLOR_PALETTE];
+    greys[0].r = 0x91, greys[0].g = 0x91, greys[0].b = 0x91;
+    greys[1].r = 0xC6, greys[1].g = 0xC6, greys[1].b = 0xC6;
+    greys[2].r = 0x7f, greys[2].g = 0x7f, greys[2].b = 0x7f;
+
+    for (i=0;i<COLOR_PALETTE;i++)
+        set_color(character->sprite, greys[i], colors[i]);
+
     character->state = MOVE;
     character->direction = DOWN;
     character->infos.x = 0;
@@ -36,7 +51,6 @@ void init_character(
 
     character->number_of_frames = number_of_frames;
 
-    int f, i, j;
     for (i=LEFT;i<=RIGHT;i++)
     {
         for (j=MOVE;j<=MOVE_SHIELD;j++)
