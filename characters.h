@@ -7,6 +7,7 @@
 #define COLLISION_BOX_HEIGHT 4
 #define COLLISION_BOX_OFFSET_X 4
 #define COLLISION_BOX_OFFSET_Y 28
+#define MAX_CHARACTERS 2
 
 #include "errors.h"
 #include "try_throw_catch.h"

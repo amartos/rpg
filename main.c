@@ -13,9 +13,12 @@
 // this should be removed at some point
 #include <SDL/SDL_rotozoom.h>
 
+enum {GREEN, RED};
 
 int main(int argc, char *argv[])
 {
+    int i;
+
     //load screen
     SDL_Surface *screen = NULL;
     init_screen(&screen);
@@ -25,35 +28,32 @@ int main(int argc, char *argv[])
      * SDL_EnableKeyRepeat(0, 0); */
 
     // load characters
-    Character test_character_green, test_character_red;
-    SDL_Color green[COLOR_PALETTE], red[COLOR_PALETTE];
-    green[0].r = 0x10, green[0].g = 0xA8, green[0].b = 0x40;
-    green[1].r = 0xF8, green[1].g = 0xB8, green[1].b = 0x88;
-    green[2].r = 0x18, green[2].g = 0x80, green[2].b = 0xF8;
+    Character all_characters[MAX_CHARACTERS]; // 0 test_character_green, 1 test_character_red;
+    SDL_Color palette[MAX_CHARACTERS][COLOR_PALETTE], green[COLOR_PALETTE], red[COLOR_PALETTE];
+    palette[GREEN][0].r = 0x10, palette[GREEN][0].g = 0xA8, palette[GREEN][0].b = 0x40;
+    palette[GREEN][1].r = 0xF8, palette[GREEN][1].g = 0xB8, palette[GREEN][1].b = 0x88;
+    palette[GREEN][2].r = 0x18, palette[GREEN][2].g = 0x80, palette[GREEN][2].b = 0xF8;
 
-    red[0].r = 0xF8, red[0].g = 0x00, red[0].b = 0x00;
-    red[1].r = 0xF8, red[1].g = 0xB8, red[1].b = 0x88;
-    red[2].r = 0x18, red[2].g = 0x80, red[2].b = 0xF8;
+    palette[RED][0].r = 0xF8, palette[RED][0].g = 0x00, palette[RED][0].b = 0x00;
+    palette[RED][1].r = 0xF8, palette[RED][1].g = 0xB8, palette[RED][1].b = 0x88;
+    palette[RED][2].r = 0x18, palette[RED][2].g = 0x80, palette[RED][2].b = 0xF8;
 
-    init_character(&test_character_green, green, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
-    init_character(&test_character_red, red, "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+    for (i=0;i<MAX_CHARACTERS;i++)
+    {
+        init_character(&all_characters[i], palette[i], "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+        /* double size of sprites as the images are really small
+         * 16 pixels w/h is too small for recent screens but
+         * good for GBC, and the test sprites are from this console
+         * this will be delete when real sprites are done */
+        all_characters[i].sprite = rotozoomSurface(all_characters[i].sprite, 0.0, 2.0, 0.0);
+        place_character(&all_characters[i], screen->w/2 + (i * 64), screen->h/2 + (i * 64));
+    }
 
     // load maps
     Map test_map;
     init_map(&test_map, "assets/maps/test_map");
     SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
-
-    /* double size of sprites as the images are really small
-     * 16 pixels w/h is too small for recent screens but
-     * good for GBC, and the test sprites are from this console
-     * this will be delete when real sprites are done */
-    test_character_green.sprite = rotozoomSurface(test_character_green.sprite, 0.0, 2.0, 0.0);
-    test_character_red.sprite = rotozoomSurface(test_character_red.sprite, 0.0, 2.0, 0.0);
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
-
-    // start at center of screen
-    place_character(&test_character_green, screen->w/2, screen->h/2);
-    place_character(&test_character_red, test_character_green.infos.x+64, test_character_green.infos.y+64);
 
     // main loop
     int done = FALSE;
@@ -75,32 +75,32 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_UP:
-                            move_character(&test_character, UP, time, test_map);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                                move_character(&all_characters[i], UP, time, test_map);
                             break;
                         case SDLK_DOWN:
-                            move_character(&test_character, DOWN, time, test_map);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                                move_character(&all_characters[i], DOWN, time, test_map);
                             break;
                         case SDLK_LEFT:
-                            move_character(&test_character, LEFT, time, test_map);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                                move_character(&all_characters[i], LEFT, time, test_map);
                             break;
                         case SDLK_RIGHT:
-                            move_character(&test_character, RIGHT, time, test_map);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                                move_character(&all_characters[i], RIGHT, time, test_map);
                             break;
                     }
                     break;
             }
             set_BG_color(&screen, screen_bg_color);
             apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.background_tiles, test_tile);
-            SDL_BlitSurface(
-                    test_character_green.sprite,
-                    &test_character_green.frames[test_character_green.direction][MOVE][test_character_green.current_frame], 
-                    screen, &test_character_green.infos
-                    );
-            SDL_BlitSurface(
-                    test_character_red.sprite,
-                    &test_character_red.frames[test_character_red.direction][MOVE][test_character_red.current_frame], 
-                    screen, &test_character_red.infos
-                    );
+            for (i=0;i<MAX_CHARACTERS;i++)
+                SDL_BlitSurface(
+                        all_characters[i].sprite,
+                        &all_characters[i].frames[all_characters[i].direction][MOVE][all_characters[i].current_frame], 
+                        screen, &all_characters[i].infos
+                        );
             apply_tiles(&screen, test_map.infos.x, test_map.infos.h, test_map.foreground_tiles, test_tile);
 
             TRY
@@ -118,9 +118,9 @@ int main(int argc, char *argv[])
         else // do not overuse CPU
             SDL_Delay(FRAMERATE - (time - prev_time));
     }
-
-    free_character(&test_character_green);
-    free_character(&test_character_red);
+    
+    for (i=0;i<MAX_CHARACTERS;i++)
+        free_character(&all_characters[i]);
     free_map(&test_map);
     SDL_FreeSurface(test_tile);
     return 0;
