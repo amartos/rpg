@@ -14,6 +14,9 @@
 
 
 // structures
+// Background always fist, weather always last
+typedef enum MapType MapType;
+enum MapType {BACKGROUND, FOREGROUND, COLLISIONS, WEATHER};
 
 // This is an embryo of a tile structure, unused yet
 typedef struct Tile Tile;
@@ -26,14 +29,11 @@ struct Tile
 typedef struct Map Map;
 struct Map
 {
-    /* To get the width and height of each unit,
-     * divide total width or height by x or y */
-    SDL_Rect infos;
-
-    unsigned int **background_tiles;
-    unsigned int **foreground_tiles;
-    unsigned int **collisions;
-    unsigned int **weather;
+    unsigned int w, h;
+    unsigned int x_tiles, y_tiles;
+    unsigned int total_tiles;
+    unsigned int xscroll, yscroll;
+    unsigned int ***schematics;
 };
 
 

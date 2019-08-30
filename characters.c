@@ -114,12 +114,12 @@ static int check_collisions(const Character character, const int direction, cons
 
     i = next_pos.x/TILES_WIDTH;
     j = next_pos.y/TILES_HEIGHT;
-    if (map.collisions[i][j])
+    if (map.schematics[COLLISIONS][i][j])
         wall = TRUE;
 
     k = (next_pos.x + character.collision_box.w) / TILES_WIDTH;
     m = (next_pos.y + character.collision_box.h) / TILES_HEIGHT;
-    if (map.collisions[k][m])
+    if (map.schematics[COLLISIONS][k][m])
         wall = TRUE;
 
     return wall;

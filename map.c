@@ -6,6 +6,7 @@ void init_map(Map *map, const char map_path[])
     /* A tile converter file will probably be used in the future
      * FILE *converter_file = NULL; */
     int i = 0, j = 0, line_count = 0, column_count = 0, len = 0;
+    unsigned int t = 0, n_types = WEATHER + 1; // weather always last
     char line[MAX_SIZE_LINE] = {0};
 
     TRY
@@ -44,52 +45,35 @@ void init_map(Map *map, const char map_path[])
             line_count++;
     }
 
-    line_count = line_count/3;
-    map->infos.x = column_count;
-    map->infos.y = line_count;
-    map->infos.w = TILES_WIDTH * column_count;
-    map->infos.h = TILES_HEIGHT * line_count;
+    line_count = line_count/(n_types-1); // BG and FG in same map
+    map->x_tiles = column_count, map->y_tiles = line_count;
+    map->total_tiles = map->x_tiles + map->y_tiles;
+    map->w = TILES_WIDTH * column_count, map->h = TILES_HEIGHT * line_count;
+    map->xscroll = map->yscroll = 0;
 
-    // malloc needs to be better checked
+    // TODO: malloc needs to be better checked
     TRY
     {
-
-        map->background_tiles = malloc(sizeof(unsigned int *) * column_count);
-        map->foreground_tiles = malloc(sizeof(unsigned int *) * column_count);
-        map->collisions = malloc(sizeof(unsigned int *) * column_count);
-        map->weather = malloc(sizeof(unsigned int *) * column_count);
-
-        if (
-            map->background_tiles == NULL ||
-            map->foreground_tiles == NULL ||
-            map->collisions == NULL || 
-            map->weather == NULL
-            )
+        map->schematics = malloc(sizeof(unsigned int *) * n_types);
+        if (map->schematics == NULL)
             THROW(MAP_MALLOC_FAILURE);
 
-        for(i=0;i<column_count; i++)
+        for (t=BACKGROUND;t<n_types;t++)
         {
-            map->background_tiles[i] = malloc(sizeof(unsigned int) * line_count);
-            map->foreground_tiles[i] = malloc(sizeof(unsigned int) * line_count);
-            map->collisions[i] = malloc(sizeof(unsigned int) * line_count);
-            map->weather[i] = malloc(sizeof(unsigned int) * line_count);
-            if (
-                    map->background_tiles[i] == NULL ||
-                    map->foreground_tiles[i] == NULL ||
-                    map->collisions[i] == NULL ||
-                    map->weather[i] == NULL
-                    )
+            map->schematics[t] = malloc(sizeof(unsigned int *) * column_count);
+            if (map->schematics[t] == NULL)
                 THROW(MAP_MALLOC_FAILURE);
-        }
-      
-        for (i=0;i<column_count;i++) 
-            for (j=0;j<line_count;j++)
+
+            for(i=0;i<column_count;i++)
             {
-                map->background_tiles[i][j] = 0;
-                map->foreground_tiles[i][j] = 0;
-                map->collisions[i][j] = 0;
-                map->weather[i][j] = 0;
+                map->schematics[t][i] = malloc(sizeof(unsigned int) * line_count);
+                if (map->schematics[t][i] == NULL)
+                    THROW(MAP_MALLOC_FAILURE);
+
+                for (j=0;j<line_count;j++)
+                    map->schematics[t][i][j] = 0;
             }
+        }
     }
     CATCH(MAP_MALLOC_FAILURE)
     {
@@ -112,19 +96,19 @@ void init_map(Map *map, const char map_path[])
     {
         if (!strcmp(line, "# tiles\n"))
         {
-            map_type = 1;
+            map_type = BACKGROUND;
             j = 0;
             offset = 5;
         }
         else if (!strcmp(line, "# collisions\n"))
         {
-            map_type = 2;
+            map_type = COLLISIONS;
             j = 0;
             offset = 2;
         }
         else if (!strcmp(line, "# weather\n"))
         {
-            map_type = 3;
+            map_type = WEATHER;
             j = 0;
             offset = 5;
         }
@@ -135,29 +119,29 @@ void init_map(Map *map, const char map_path[])
             data = line;
             switch (map_type)
             {
-                case 1:
+                case BACKGROUND:
                     for (i=0;i<column_count;i++)
                     {
-                        sscanf(data, "%X ", &map->background_tiles[i][j]);
-                        if (map->background_tiles[i][j] == 0x0101)
+                        sscanf(data, "%X ", &map->schematics[BACKGROUND][i][j]);
+                        if (map->schematics[BACKGROUND][i][j] == 0x0101)
                         {
-                            map->foreground_tiles[i][j] = map->background_tiles[i][j];
-                            map->background_tiles[i][j] = 0;
+                            map->schematics[FOREGROUND][i][j] = map->schematics[BACKGROUND][i][j];
+                            map->schematics[BACKGROUND][i][j] = 0;
                         }
                         data += offset;
                     }
                     break;
-                case 2:
+                case COLLISIONS:
                     for (i=0;i<column_count;i++)
                     {
-                        sscanf(data, "%d ", &map->collisions[i][j]);
+                        sscanf(data, "%d ", &map->schematics[COLLISIONS][i][j]);
                         data += offset;
                     }
                     break;
-                case 3:
+                case WEATHER:
                     for (i=0;i<column_count;i++)
                     {
-                        sscanf(data, "%X ", &map->weather[i][j]);
+                        sscanf(data, "%X ", &map->schematics[WEATHER][i][j]);
                         data += offset;
                     }
                     break;
@@ -172,16 +156,11 @@ void init_map(Map *map, const char map_path[])
 
 void free_map(Map *map)
 {
-    int j;
-    for (j=0;j<map->infos.y;j++)
+    unsigned int t,i, n_types = WEATHER + 1;
+    for (t=BACKGROUND;t<n_types;t++)
     {
-        free(map->background_tiles[j]);
-        free(map->foreground_tiles[j]);
-        free(map->collisions[j]);
-        free(map->weather[j]);
+        for (i=0;i<map->x_tiles;i++)
+            free(map->schematics[t][i]);
+        free(map->schematics[t]);
     }
-    free(map->background_tiles);
-    free(map->foreground_tiles);
-    free(map->collisions);
-    free(map->weather);
 }
