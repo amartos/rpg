@@ -4,6 +4,7 @@
 
 #include "screen.h"
 #include "characters.h"
+#include "movement.h"
 #include "map.h"
 
 #include <stdio.h>
@@ -18,6 +19,7 @@ enum {GREEN, RED};
 int main(int argc, char *argv[])
 {
     int i;
+    Coord start_position; init_coord(&start_position);
 
     //load screen
     SDL_Surface *screen = NULL;
@@ -40,13 +42,20 @@ int main(int argc, char *argv[])
 
     for (i=0;i<MAX_CHARACTERS;i++)
     {
-        init_character(&all_characters[i], palette[i], "assets/sprites/characters/test_character_grey.png", 2, TRUE, 12, 4);
+        start_position.x = screen->w/2 + (i*64);
+        start_position.y = screen->h/2 + (i*64);
+        init_character(
+                &all_characters[i],
+                palette[i],
+                "assets/sprites/characters/test_character_grey.png",
+                2, TRUE, 12, 4, // N frames, moving, FPS, velocity
+                start_position
+                );
         /* double size of sprites as the images are really small
          * 16 pixels w/h is too small for recent screens but
          * good for GBC, and the test sprites are from this console
          * this will be delete when real sprites are done */
         all_characters[i].sprite = rotozoomSurface(all_characters[i].sprite, 0.0, 2.0, 0.0);
-        place_character(&all_characters[i], screen->w/2 + (i * 64), screen->h/2 + (i * 64));
     }
 
     // load maps
@@ -54,9 +63,14 @@ int main(int argc, char *argv[])
     init_map(&test_map, "assets/maps/test_map");
     SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
+    Coord max_coord; init_coord(&max_coord);
+    max_coord.x = test_map.x_tiles;
+    max_coord.y = test_map.y_tiles;
 
     // main loop
     int done = FALSE;
+    int movement = FALSE;
+    unsigned int sum = 0;
     int time = 0, prev_time = 0;
     SDL_Event event;
     while (!done)
@@ -75,24 +89,79 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_UP:
+                            movement = TRUE;
                             for (i=0;i<MAX_CHARACTERS;i++)
-                                move_character(&all_characters[i], UP, time, test_map);
+                            {
+                                all_characters[i].direction = UP;
+                                all_characters[i].goal.x = all_characters[i].position.x;
+                                all_characters[i].goal.y = all_characters[i].position.y;
+                                all_characters[i].goal.y -= all_characters[i].velocity;
+                            }
                             break;
                         case SDLK_DOWN:
+                            movement = TRUE;
                             for (i=0;i<MAX_CHARACTERS;i++)
-                                move_character(&all_characters[i], DOWN, time, test_map);
+                            {
+                                all_characters[i].direction = DOWN;
+                                all_characters[i].goal.x = all_characters[i].position.x;
+                                all_characters[i].goal.y = all_characters[i].position.y;
+                                all_characters[i].goal.y += all_characters[i].velocity;
+                            }
                             break;
                         case SDLK_LEFT:
+                            movement = TRUE;
                             for (i=0;i<MAX_CHARACTERS;i++)
-                                move_character(&all_characters[i], LEFT, time, test_map);
+                            {
+                                all_characters[i].direction = LEFT;
+                                all_characters[i].goal.x = all_characters[i].position.x;
+                                all_characters[i].goal.y = all_characters[i].position.y;
+                                all_characters[i].goal.x -= all_characters[i].velocity;
+                            }
                             break;
                         case SDLK_RIGHT:
+                            movement = TRUE;
                             for (i=0;i<MAX_CHARACTERS;i++)
-                                move_character(&all_characters[i], RIGHT, time, test_map);
+                            {
+                                all_characters[i].direction = RIGHT;
+                                all_characters[i].goal.x = all_characters[i].position.x;
+                                all_characters[i].goal.y = all_characters[i].position.y;
+                                all_characters[i].goal.x += all_characters[i].velocity;
+                            }
                             break;
                     }
                     break;
             }
+
+            if (movement)
+            {
+                for (i=0;i<MAX_CHARACTERS;i++)
+                {
+                    move(
+                            &(all_characters[i].position),
+                            &(all_characters[i].goal),
+                            WALK,
+                            max_coord,
+                            test_map.schematics[COLLISIONS],
+                            all_characters[i].velocity
+                            );
+                    // TODO: two sets of same coord is useless
+                    all_characters[i].infos.x = all_characters[i].position.x;
+                    all_characters[i].infos.y = all_characters[i].position.y;
+                    if (time - all_characters[i].previous_time > all_characters[i].framerate)
+                    {
+                        all_characters[i].current_frame++;
+                        if (all_characters[i].current_frame >= all_characters[i].number_of_frames)
+                            all_characters[i].current_frame = 0;
+                        all_characters[i].previous_time = time;
+                    }
+                }
+                sum = 0;
+                for (i=0;i<MAX_CHARACTERS;i++)
+                    sum += all_characters[i].goal.x + all_characters[i].goal.y;
+                if (!sum)
+                    movement = FALSE;
+            }
+
             set_BG_color(&screen, screen_bg_color);
             apply_tiles(&screen, BACKGROUND, test_map, test_tile);
             for (i=0;i<MAX_CHARACTERS;i++)

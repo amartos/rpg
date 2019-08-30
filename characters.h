@@ -10,20 +10,13 @@
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
-#include "map.h"
 #include "images.h"
+#include "movement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-
-// structures
-typedef enum Face Face;
-enum Face 
-{
-    LEFT, DOWN, UP, RIGHT
-};
 
 typedef enum State State;
 enum State 
@@ -36,9 +29,12 @@ struct Character
 {
     SDL_Surface *sprite;
     State state;
-    Face direction;
     SDL_Rect infos;
-    SDL_Rect collision_box;
+
+    Coord position;
+    Direction direction;
+    Coord goal;
+
     int animated;
     int moving;
     int number_of_frames;
@@ -58,10 +54,9 @@ void init_character(
         const int number_of_frames,
         const int moving,
         const int fps,
-        const int velocity
+        const int velocity,
+        const Coord start_position
         );
 void free_character(Character *character);
-void move_character(Character *character, const int direction, const int current_time, const Map map);
-void place_character(Character *character, const int x, const int y);
 
 #endif // define RPG_CHARACTERS
