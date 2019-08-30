@@ -9,7 +9,7 @@ compile: libs
 	@${CPP} $(CFLAGS) -o exec *.o ${LDFLAGS}
 
 libs:
-	@${CPP} $(CFLAGS) -c $(FILES).c
+	@${CPP} $(CFLAGS) -g -c $(FILES).c
 
 clean:	
 	@rm -rf *.o
