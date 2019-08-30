@@ -10,6 +10,7 @@
 
 #include "errors.h"
 #include "try_throw_catch.h"
+#include "macros.h"
 #include "map.h"
 
 #include <stdio.h>

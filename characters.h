@@ -5,8 +5,6 @@
 #define SPRITES_HEIGHT 32
 #define COLLISION_BOX_WIDTH 24
 #define COLLISION_BOX_HEIGHT 4
-#define COLLISION_BOX_OFFSET_X 4
-#define COLLISION_BOX_OFFSET_Y 28
 #define MAX_CHARACTERS 2
 
 #include "errors.h"

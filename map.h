@@ -2,11 +2,10 @@
 #define RPG_MAP
 
 #define MAX_SIZE_LINE 1000
-#define TILES_WIDTH 32
-#define TILES_HEIGHT 32
 
 #include "errors.h"
 #include "try_throw_catch.h"
+#include "macros.h"
 
 #include <stdio.h>
 #include <stdlib.h>
