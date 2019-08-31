@@ -1,5 +1,5 @@
-#ifndef RPG_TILES
-#define RPG_TILES
+#ifndef RPG_IMAGES
+#define RPG_IMAGES
 
 #define SPRITES_WIDTH 32
 #define SPRITES_HEIGHT 32
@@ -15,4 +15,4 @@
 // prototypes
 void set_color(SDL_Surface *image, SDL_Color original_color, SDL_Color new_color);
 
-#endif // define RPG_TILES
+#endif // define RPG_IMAGES
