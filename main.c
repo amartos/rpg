@@ -113,6 +113,16 @@ int main(int argc, char *argv[])
                                 }
                             }
                             break;
+                        case SDL_BUTTON_RIGHT:
+                            movement = TRUE;
+                            movement_type = TELEPORT;
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                            {
+                                movement_type = TELEPORT;
+                                all_characters[i].goal.x = (i * 64) + event.button.x;
+                                all_characters[i].goal.y = (i * 64) + event.button.y;
+                            }
+                            break;
                     }
                     break;
                 case SDL_KEYDOWN:
