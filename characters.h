@@ -1,10 +1,6 @@
 #ifndef RPG_CHARACTERS
 #define RPG_CHARACTERS
 
-#define SPRITES_WIDTH 32
-#define SPRITES_HEIGHT 32
-#define COLLISION_BOX_WIDTH 24
-#define COLLISION_BOX_HEIGHT 4
 #define MAX_CHARACTERS 2
 
 #include "errors.h"
