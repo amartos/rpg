@@ -8,6 +8,7 @@
 // prototypes
 void logger(const int error_id, const char sdl_message[]);
 
+// structures
 // custom errors
 enum Errors
 {

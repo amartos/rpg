@@ -1,5 +1,6 @@
 #include "characters.h"
 
+
 void init_character(
         Character *character,
         SDL_Color colors[],
@@ -11,6 +12,47 @@ void init_character(
         const Coord start_position
         )
 {
+    int i, j, f;
+
+    character->state = MOVE;
+    character->direction = DOWN;
+    character->nodes = 0;
+    character->current_frame = 0;
+    character->previous_time = 0;
+
+    character->moving = moving;
+    character->number_of_frames = number_of_frames;
+    if (number_of_frames > 1)
+    {
+        character->animated = TRUE;
+        character->framerate = 1000/fps;
+        character->velocity = velocity;
+    }
+    else
+    {
+        character->animated = FALSE;
+        character->framerate = 0;
+        character->velocity = 0;
+    }
+
+    // SDL_Rect infos
+    character->infos.x = start_position.x;
+    character->infos.y = start_position.y;
+    character->infos.w = SPRITES_WIDTH;
+    character->infos.h = SPRITES_HEIGHT;
+
+    // Coord position
+    character->position.x = start_position.x;
+    character->position.y = start_position.x;
+
+    // Coord goal
+    character->goal.x = 0;
+    character->goal.y = 0;
+
+    // Coord *path
+    character->path = NULL;
+
+    // SDL_Surface *sprite
     TRY
     {
         character->sprite = IMG_Load(sprite_path);
@@ -24,10 +66,8 @@ void init_character(
     }
     ETRY;
 
-    /* in order to be able to change colors of sprites depending on the day or
-       others, the sprites need to be in shades of grey. Thus this sets the colors */
-
-    int i, j, f;
+    // in order to be able to change colors of sprites depending on the day or
+    // others, the sprites need to be in shades of grey. Thus this sets the colors
 
     // for now this is half-manual, but LUT will be used in the future
     SDL_Color greys[COLOR_PALETTE];
@@ -38,28 +78,11 @@ void init_character(
     for (i=0;i<COLOR_PALETTE;i++)
         set_color(character->sprite, greys[i], colors[i]);
 
-    character->state = MOVE;
-    character->direction = DOWN;
-    character->infos.x = start_position.x;
-    character->infos.y = start_position.y;
-    character->infos.w = SPRITES_WIDTH;
-    character->infos.h = SPRITES_HEIGHT;
-
-    character->position.x = start_position.x;
-    character->position.y = start_position.x;
-    character->goal.x = 0;
-    character->goal.y = 0;
-    character->path = NULL;
-    character->nodes = 0;
-
-    character->number_of_frames = number_of_frames;
-
+    // SDL_Rect ***frames
     // This depends on the sprite order
     // TODO: if(sprite changes), reorder
     for (i=LEFT;i<=RIGHT;i++)
-    {
         for (j=MOVE;j<=MOVE_SHIELD;j++)
-        {
             for (f=0;f<number_of_frames;f++)
             {
                 character->frames[i][j][f].x = (i * 2 + f) * SPRITES_WIDTH;
@@ -67,24 +90,6 @@ void init_character(
                 character->frames[i][j][f].w = SPRITES_WIDTH;
                 character->frames[i][j][f].h = SPRITES_HEIGHT;
             }
-        }
-    }
-
-    if (number_of_frames > 1)
-    {
-        character->animated = TRUE;
-        character->framerate = 1000/fps;
-        character->velocity = velocity;
-    }
-    else
-    {
-        character->animated = FALSE;
-        character->framerate = 0;
-        character->velocity = 0;
-    }
-    character->moving = moving;
-    character->current_frame = 0;
-    character->previous_time = 0;
 }
 
 void free_character(Character *character)

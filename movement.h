@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 // structures
 typedef struct Coord Coord;
 struct Coord

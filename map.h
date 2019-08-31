@@ -20,7 +20,8 @@ enum MapType {
     FOREGROUND,
     COLLISIONS,
     COST,
-    WEATHER};
+    WEATHER
+};
 
 // This is an embryo of a tile structure, unused yet
 typedef struct Tile Tile;
@@ -39,7 +40,6 @@ struct Map
     unsigned int xscroll, yscroll;
     unsigned int ***schematics;
 };
-
 
 // prototypes
 void init_map(Map *map, const char map_path[]);

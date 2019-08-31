@@ -1,9 +1,10 @@
 #include "images.h"
 
+
 void set_color(SDL_Surface *image, SDL_Color original_color, SDL_Color new_color)
 {
     int w = image->w, h = image->h;
-    int total_pixels = w*h, i;
+    int total_pixels = w * h, i;
     Uint8 r, g, b;
     Uint32 *pixels = (Uint32 *)image->pixels;
 

@@ -1,5 +1,6 @@
 #include "screen.h"
 
+
 void init_screen(SDL_Surface *(*screen))
 {
     TRY
@@ -25,7 +26,6 @@ void init_screen(SDL_Surface *(*screen))
     }
     ETRY;
 }
-
 
 void set_BG_color(SDL_Surface *(*screen), const int rgb[3])
 {

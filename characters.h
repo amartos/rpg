@@ -18,6 +18,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
+
 typedef enum State State;
 enum State 
 {
@@ -28,7 +29,6 @@ typedef struct Character Character;
 struct Character
 {
     SDL_Surface *sprite;
-    State state;
     SDL_Rect infos;
 
     Coord position;
@@ -37,6 +37,7 @@ struct Character
     Coord *path;
     int nodes;
 
+    State state;
     Bool animated;
     Bool moving;
     int number_of_frames;
@@ -48,7 +49,6 @@ struct Character
 };
 
 // prototypes
-
 void init_character(
         Character *character,
         SDL_Color colors[],

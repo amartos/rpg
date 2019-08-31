@@ -14,6 +14,7 @@
 // this should be removed at some point
 #include <SDL/SDL_rotozoom.h>
 
+
 enum {GREEN, RED};
 
 int main(int argc, char *argv[])
@@ -26,8 +27,8 @@ int main(int argc, char *argv[])
     init_screen(&screen);
     int screen_bg_color[3] = {0xFF, 0xFF, 0xFF};
     set_BG_color(&screen, screen_bg_color);
-    /* Oddly, for now this is not needed
-     * SDL_EnableKeyRepeat(0, 0); */
+    // Oddly, for now this is not needed
+    // SDL_EnableKeyRepeat(0, 0);
 
     // load characters
     Character all_characters[MAX_CHARACTERS]; // 0 test_character_green, 1 test_character_red;
@@ -51,10 +52,10 @@ int main(int argc, char *argv[])
                 2, TRUE, 12, 4, // N frames, moving, FPS, velocity
                 start_position
                 );
-        /* double size of sprites as the images are really small
-         * 16 pixels w/h is too small for recent screens but
-         * good for GBC, and the test sprites are from this console
-         * this will be delete when real sprites are done */
+        // double size of sprites as the images are really small
+        // 16 pixels w/h is too small for recent screens but
+        // good for GBC, and the test sprites are from this console
+        // this will be delete when real sprites are done
         all_characters[i].sprite = rotozoomSurface(all_characters[i].sprite, 0.0, 2.0, 0.0);
     }
 

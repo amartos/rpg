@@ -1,10 +1,9 @@
 #include "map.h"
 
+
 void init_map(Map *map, const char map_path[])
 {
-    FILE *map_file = NULL;
-    /* A tile converter file will probably be used in the future
-     * FILE *converter_file = NULL; */
+    FILE *map_file = NULL;// FILE *converter_file = NULL;
     int i = 0, j = 0, line_count = 0, column_count = 0, len = 0;
     unsigned int t = 0, n_types = WEATHER + 1; // weather always last
     char line[MAX_SIZE_LINE] = {0};
@@ -15,9 +14,9 @@ void init_map(Map *map, const char map_path[])
         if (map_file == NULL)
             THROW(MAP_FILE_LOADING_FAILURE);
 
-        /* converter_file = fopen("assets/maps/converter", "r"); */
-        /* if (converter_file == NULL) */
-        /*     THROW(CONVERTER_FILE_LOADING_FAILURE); */
+        // converter_file = fopen("assets/maps/converter", "r");
+        // if (converter_file == NULL)
+        //     THROW(CONVERTER_FILE_LOADING_FAILURE);
     }
     CATCH(MAP_FILE_LOADING_FAILURE)
     {
@@ -33,9 +32,9 @@ void init_map(Map *map, const char map_path[])
     }
     ETRY;
 
-    /* size of map
-     * len of line should always be a multiple of 5
-     * (4 hex digit + space/en of line) */
+    // size of map
+    // len of line should always be a multiple of 5
+    // (4 hex digit + space/en of line)
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
         len = strlen(line)/5;
@@ -84,11 +83,11 @@ void init_map(Map *map, const char map_path[])
 
     rewind(map_file);
 
-    /* This is a nasty piece of code as it supposes that the map files are all
-     * constructed EXACTLY the same way, and that all the map lines are of the
-     * same length (a multiple of 4 digits hex numbers + 1 space). It is too 
-     * much constraint, but it's a start. If RLE compression is implemented, 
-     * this code will definitely need to change */
+    // This is a nasty piece of code as it supposes that the map files are all
+    // constructed EXACTLY the same way, and that all the map lines are of the
+    // same length (a multiple of 4 digits hex numbers + 1 space). It is too 
+    // much constraint, but it's a start. If RLE compression is implemented, 
+    // this code will definitely need to change
     char *data = NULL;
     int offset = 0;
     MapType map_type = 0;
@@ -166,7 +165,7 @@ void init_map(Map *map, const char map_path[])
     }
 
     fclose(map_file);
-    /* fclose(converter_file); */
+    // fclose(converter_file);
 }
 
 void free_map(Map *map)

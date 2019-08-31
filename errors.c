@@ -1,11 +1,15 @@
 #include "errors.h"
 
+
 // this is only temporary, to change in log in file
 void printe(const time_t now, const int error_id, 
         const char error_def[], const char sdl_message[])
 {
-    printf("[%ld] Error %d (%s): %s\n", now, error_id, 
-            error_def, sdl_message);
+    printf("[%ld] Error %d (%s): %s\n",
+            now,
+            error_id,
+            error_def, sdl_message
+            );
 }
 
 void logger(const int error_id, const char sdl_message[])

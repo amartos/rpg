@@ -1,5 +1,6 @@
 #include "movement.h"
 
+
 void init_coord(Coord *coord)
 {
     coord->x = 0;
@@ -30,8 +31,8 @@ static Bool is_colliding(
 
     if (pixel)
     {
-        /* As the collision box is located on the feet, add the x and y coord to
-         * obtain the true (0,0) corner of the image, then check */
+        // As the collision box is located on the feet, add the x and y coord to
+        // obtain the true (0,0) corner of the image, then check
         x = (goal.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
         y = (goal.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
     }
@@ -42,7 +43,6 @@ static Bool is_colliding(
     }
 
     collide = collision_map[x][y];
-
     return collide;
 }
 
@@ -94,9 +94,7 @@ static Direction walk(Coord *start, Coord *goal, int const velocity)
     return direction;
 }
 
-/*
-   A* pathfinding
-*/
+// A* pathfinding
 
 static void set_in_queue(unsigned int const max_array, unsigned int queue[], unsigned int const next)
 {
@@ -311,7 +309,11 @@ unsigned int find_path(
     cost[nstart] = 0;
 
     // A* starts here
-    if (!is_same_coord(start, goal) && !is_colliding(goal, collision_map, FALSE) && !is_out_of_map(goal, max_coord))
+    if (
+            !is_same_coord(start, goal) &&
+            !is_colliding(goal, collision_map, FALSE) &&
+            !is_out_of_map(goal, max_coord)
+        )
     {
         while (!done)
         {

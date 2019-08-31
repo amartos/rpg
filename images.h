@@ -1,6 +1,8 @@
 #ifndef RPG_TILES
 #define RPG_TILES
 
+#define SPRITES_WIDTH 32
+#define SPRITES_HEIGHT 32
 #define COLOR_PALETTE 3
 
 #include "macros.h"
