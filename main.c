@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
                         all_characters[i].goal.y = 0;
                     }
 
-                    move(
+                    all_characters[i].direction = move(
                             &(all_characters[i].position),
                             &(all_characters[i].goal),
                             movement_type,

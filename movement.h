@@ -37,7 +37,7 @@ unsigned int find_path(
         unsigned int** const collision_map,
         unsigned int** const movement_cost_map
         );
-void move(
+Direction move(
         Coord *start,
         Coord *goal,
         MovementType const type,

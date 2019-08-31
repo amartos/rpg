@@ -61,20 +61,36 @@ static void teleport(Coord *start, Coord *goal)
     *start = *goal;
 }
 
-static void walk(Coord *start, Coord *goal, int const velocity)
+static Direction walk(Coord *start, Coord *goal, int const velocity)
 {
+    Direction direction = DOWN;
     int Dx, Dy;
-    Dx = start->x - goal->x;
-    if (Dx < 0)
-        start->x += velocity;
-    else if (Dx > 0)
-        start->x -= velocity;
 
     Dy = start->y - goal->y;
     if (Dy < 0)
+    {
+        direction = DOWN;
         start->y += velocity;
+    }
     else if (Dy > 0)
+    {
+        direction = UP;
         start->y -= velocity;
+    }
+
+    Dx = start->x - goal->x;
+    if (Dx < 0)
+    {
+        direction = RIGHT;
+        start->x += velocity;
+    }
+    else if (Dx > 0)
+    {
+        direction = LEFT;
+        start->x -= velocity;
+    }
+
+    return direction;
 }
 
 /*
@@ -381,7 +397,7 @@ unsigned int find_path(
     return nodes;
 }
 
-void move(
+Direction move(
         Coord *start,
         Coord *goal,
         MovementType const type,
@@ -390,6 +406,7 @@ void move(
         int const velocity
         )
 {
+    Direction direction = DOWN;
     if (
             !is_same_coord(*start, *goal) &&
             !is_colliding(*goal, collision_map, TRUE) &&
@@ -400,7 +417,7 @@ void move(
         {
             case PATH:
             case WALK:
-                walk(start, goal, velocity);
+                direction = walk(start, goal, velocity);
                 break;
             case TELEPORT:
                 teleport(start, goal);
@@ -410,4 +427,6 @@ void move(
 
     if (is_same_coord(*start, *goal))
         reset_coord(goal);
+
+    return direction;
 }
