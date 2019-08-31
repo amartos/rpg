@@ -125,6 +125,8 @@ void init_map(Map *map, const char map_path[])
             data = line;
             switch (map_type)
             {
+                case FOREGROUND: // this is not use in map files
+                    break;
                 case BACKGROUND:
                     for (i=0;i<column_count;i++)
                     {
