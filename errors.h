@@ -8,6 +8,7 @@
 
 // structures
 // custom errors
+typedef enum Errors Errors;
 enum Errors
 {
     SCREEN_INIT_FAILURE = 1,
