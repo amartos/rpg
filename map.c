@@ -91,7 +91,7 @@ void init_map(Map *map, const char map_path[])
      * this code will definitely need to change */
     char *data = NULL;
     int offset = 0;
-    int map_type = 0;
+    MapType map_type = 0;
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
         if (!strcmp(line, "# tiles\n"))

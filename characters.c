@@ -5,7 +5,7 @@ void init_character(
         SDL_Color colors[],
         const char sprite_path[],
         const int number_of_frames,
-        const int moving,
+        const Bool moving,
         const int fps,
         const int velocity,
         const Coord start_position

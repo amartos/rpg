@@ -67,9 +67,9 @@ int main(int argc, char *argv[])
     max_coord.y = test_map.h;//y_tiles;
 
     // main loop
-    int done = FALSE;
-    int movement = FALSE;
-    int movement_type = WALK;
+    Bool done = FALSE;
+    Bool movement = FALSE;
+    MovementType movement_type = WALK;
     unsigned int nodes = 0;
     unsigned int current_node = 0;
     int time = 0, prev_time = 0;

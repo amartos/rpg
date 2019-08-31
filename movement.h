@@ -28,7 +28,7 @@ enum Cardinals {N, S, E, W, NE, NW, SE, SW};
 
 // prototypes
 void init_coord(Coord *coord);
-unsigned int is_same_coord(Coord a, Coord b);
+Bool is_same_coord(Coord a, Coord b);
 unsigned int find_path(
         Coord *(*path),
         Coord const start,

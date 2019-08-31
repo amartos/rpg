@@ -37,8 +37,8 @@ struct Character
     Coord *path;
     int nodes;
 
-    int animated;
-    int moving;
+    Bool animated;
+    Bool moving;
     int number_of_frames;
     int velocity;
     SDL_Rect frames[4][6][30]; // possible positions, State, max number of frames
@@ -54,7 +54,7 @@ void init_character(
         SDL_Color colors[],
         const char sprite_path[],
         const int number_of_frames,
-        const int moving,
+        const Bool moving,
         const int fps,
         const int velocity,
         const Coord start_position

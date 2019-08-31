@@ -11,21 +11,23 @@ static void reset_coord(Coord *coord)
     init_coord(coord);
 }
 
-unsigned int is_same_coord(Coord a, Coord b)
+Bool is_same_coord(Coord a, Coord b)
 {
-    unsigned int same = FALSE;
+    Bool same = FALSE;
     if (a.x == b.x && a.y == b.y)
         same = TRUE;
     return same;
 }
 
-static unsigned int is_colliding(
+static Bool is_colliding(
         Coord const goal,
         unsigned int** const collision_map,
-        unsigned int pixel
+        Bool pixel
         )
 {
-    unsigned x, y;
+    unsigned int x, y;
+    Bool collide = FALSE;
+
     if (pixel)
     {
         /* As the collision box is located on the feet, add the x and y coord to
@@ -39,15 +41,14 @@ static unsigned int is_colliding(
         y = goal.y;
     }
 
-    unsigned int collide = FALSE;
     collide = collision_map[x][y];
 
     return collide;
 }
 
-static unsigned int is_out_of_map(Coord const goal, Coord const max_coord)
+static Bool is_out_of_map(Coord const goal, Coord const max_coord)
 {
-    unsigned int is_out = FALSE;
+    Bool is_out = FALSE;
     unsigned int x = goal.x, y = goal.y;
 
     if (goal.x < 0 || goal.y < 0 || x >= max_coord.x || y >= max_coord.y)
@@ -99,7 +100,8 @@ static Direction walk(Coord *start, Coord *goal, int const velocity)
 
 static void set_in_queue(unsigned int const max_array, unsigned int queue[], unsigned int const next)
 {
-    unsigned int i, already_in = FALSE;
+    unsigned int i;
+    Bool already_in = FALSE;
     for (i=0;i<max_array;i++)
         if (queue[i] == next)
             already_in = TRUE;
@@ -120,18 +122,20 @@ static void delete_from_queue(unsigned int const max_array, unsigned int queue[]
             queue[i] = 0;
 }
 
-static unsigned int check_queue(unsigned int const max_array, unsigned int const queue[])
+static Bool check_queue(unsigned int const max_array, unsigned int const queue[])
 {
-    unsigned i, done = TRUE;
+    unsigned i;
+    Bool done = TRUE;
     for (i=0;i<max_array;i++)
         if (queue[i])
             done = FALSE;
     return done;
 }
 
-static unsigned int is_queue_ordered(unsigned int const max_array, unsigned int const queue[], unsigned int const cost[])
+static Bool is_queue_ordered(unsigned int const max_array, unsigned int const queue[], unsigned int const cost[])
 {
-    unsigned int i, current, next, done = TRUE;
+    unsigned int i, current, next;
+    Bool done = TRUE;
     for (i=0;i<max_array-1;i++)
     {
         current = queue[i];
@@ -145,7 +149,8 @@ static unsigned int is_queue_ordered(unsigned int const max_array, unsigned int 
 
 static void order_queue(unsigned int const max_array, unsigned int queue[], unsigned int const cost[])
 {
-    unsigned int i, current, next, done = FALSE;
+    unsigned int i, current, next;
+    Bool done = FALSE;
 
     while (!done)
     {
@@ -283,7 +288,8 @@ unsigned int find_path(
     unsigned int ngoal = convert_coord_to_number(goal, max_coord);
     unsigned int max_array = max_coord.x * max_coord.y;
     unsigned int queue[max_array], cost[max_array+1], came_from[max_array+1];
-    unsigned int new_cost = 0, done = FALSE;
+    unsigned int new_cost = 0;
+    Bool done = FALSE;
 
     Coord current; init_coord(&current);
     Coord next; init_coord(&next);
