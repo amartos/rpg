@@ -112,6 +112,12 @@ void init_map(Map *map, const char map_path[])
             j = 0;
             offset = 5;
         }
+        else if (!strcmp(line, "# movement cost\n"))
+        {
+            map_type = COST;
+            j = 0;
+            offset = 2;
+        }
         else if (!strcmp(line, "\n"))
             continue;
         else
@@ -142,6 +148,13 @@ void init_map(Map *map, const char map_path[])
                     for (i=0;i<column_count;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[WEATHER][i][j]);
+                        data += offset;
+                    }
+                    break;
+                case COST:
+                    for (i=0;i<column_count;i++)
+                    {
+                        sscanf(data, "%X ", &map->schematics[COST][i][j]);
                         data += offset;
                     }
                     break;

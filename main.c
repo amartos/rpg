@@ -59,19 +59,21 @@ int main(int argc, char *argv[])
     }
 
     // load maps
-    Map test_map;
-    init_map(&test_map, "assets/maps/test_map");
+    Map test_map; init_map(&test_map, "assets/maps/test_map2");
     SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
     Coord max_coord; init_coord(&max_coord);
-    max_coord.x = test_map.x_tiles;
-    max_coord.y = test_map.y_tiles;
+    max_coord.x = test_map.w;//x_tiles;
+    max_coord.y = test_map.h;//y_tiles;
 
     // main loop
     int done = FALSE;
     int movement = FALSE;
-    unsigned int sum = 0;
+    int movement_type = WALK;
+    unsigned int nodes = 0;
+    unsigned int current_node = 0;
     int time = 0, prev_time = 0;
+    Coord goal; init_coord(&goal);
     SDL_Event event;
     while (!done)
     {
@@ -84,6 +86,34 @@ int main(int argc, char *argv[])
             {
                 case SDL_QUIT:
                     done = TRUE;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    switch(event.button.button)
+                    {
+                        case SDL_BUTTON_LEFT:
+                            movement = TRUE;
+                            movement_type = PATH;
+                            for (i=MAX_CHARACTERS-1;i>=0;i--)
+                            {
+                                goal.x = (i * 64) + event.button.x;
+                                goal.y = (i * 64) + event.button.y;
+                                nodes = find_path(
+                                        &(all_characters[i].path),
+                                        all_characters[i].position,
+                                        goal,
+                                        max_coord,
+                                        test_map.schematics[COLLISIONS],
+                                        test_map.schematics[COST]
+                                        );
+
+                                if (nodes && all_characters[i].path != NULL)
+                                {
+                                    all_characters[i].nodes = nodes;
+                                    nodes = 0;
+                                }
+                            }
+                            break;
+                    }
                     break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
@@ -136,17 +166,35 @@ int main(int argc, char *argv[])
             {
                 for (i=0;i<MAX_CHARACTERS;i++)
                 {
+                    if (all_characters[i].path != NULL && (movement_type == PATH || all_characters[i].nodes))
+                    {
+                        current_node = all_characters[i].nodes;
+                        if (is_same_coord(all_characters[i].path[current_node], all_characters[i].position))
+                        {
+                            all_characters[i].nodes--;
+                            current_node = all_characters[i].nodes;
+                        }
+                        all_characters[i].goal = all_characters[i].path[current_node];
+                    }
+
+                    if (!all_characters[i].nodes && all_characters[i].path != NULL)
+                    {
+                        all_characters[i].path = NULL;
+                        all_characters[i].goal.x = 0;
+                        all_characters[i].goal.y = 0;
+                    }
+
                     move(
                             &(all_characters[i].position),
                             &(all_characters[i].goal),
-                            WALK,
+                            movement_type,
                             max_coord,
                             test_map.schematics[COLLISIONS],
                             all_characters[i].velocity
                             );
-                    // TODO: two sets of same coord is useless
-                    all_characters[i].infos.x = all_characters[i].position.x;
-                    all_characters[i].infos.y = all_characters[i].position.y;
+
+                    if (!(all_characters[i].goal.x || all_characters[i].goal.y) && all_characters[i].path == NULL)
+                        movement = FALSE;
                     if (time - all_characters[i].previous_time > all_characters[i].framerate)
                     {
                         all_characters[i].current_frame++;
@@ -155,21 +203,23 @@ int main(int argc, char *argv[])
                         all_characters[i].previous_time = time;
                     }
                 }
-                sum = 0;
-                for (i=0;i<MAX_CHARACTERS;i++)
-                    sum += all_characters[i].goal.x + all_characters[i].goal.y;
-                if (!sum)
-                    movement = FALSE;
+                if (movement_type != WALK)
+                    movement_type = WALK;
             }
 
             set_BG_color(&screen, screen_bg_color);
             apply_tiles(&screen, BACKGROUND, test_map, test_tile);
             for (i=0;i<MAX_CHARACTERS;i++)
+            {
+                // TODO: two sets of same coord is useless
+                all_characters[i].infos.x = all_characters[i].position.x;
+                all_characters[i].infos.y = all_characters[i].position.y;
                 SDL_BlitSurface(
                         all_characters[i].sprite,
                         &all_characters[i].frames[all_characters[i].direction][MOVE][all_characters[i].current_frame], 
                         screen, &all_characters[i].infos
                         );
+            }
             apply_tiles(&screen, FOREGROUND, test_map, test_tile);
 
             TRY

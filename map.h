@@ -15,7 +15,12 @@
 // structures
 // Background always fist, weather always last
 typedef enum MapType MapType;
-enum MapType {BACKGROUND, FOREGROUND, COLLISIONS, WEATHER};
+enum MapType {
+    BACKGROUND,
+    FOREGROUND,
+    COLLISIONS,
+    COST,
+    WEATHER};
 
 // This is an embryo of a tile structure, unused yet
 typedef struct Tile Tile;

@@ -34,6 +34,8 @@ struct Character
     Coord position;
     Direction direction;
     Coord goal;
+    Coord *path;
+    int nodes;
 
     int animated;
     int moving;

@@ -49,6 +49,8 @@ void init_character(
     character->position.y = start_position.x;
     character->goal.x = 0;
     character->goal.y = 0;
+    character->path = NULL;
+    character->nodes = 0;
 
     character->number_of_frames = number_of_frames;
 

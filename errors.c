@@ -41,5 +41,8 @@ void logger(const int error_id, const char sdl_message[])
         case MAP_MALLOC_FAILURE:
             printe(now, error_id, "map memory allocation failure", sdl_message);
             break;
+        case PATHFIND_MALLOC_FAILURE:
+            printe(now, error_id, "pathfind memory allocation failure", sdl_message);
+            break;
     }
 }
