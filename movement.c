@@ -250,14 +250,6 @@ static unsigned int calculate_cost(
     return next_cost;
 }
 
-static void number_ticks(int *start, char msg[])
-{
-    int now = clock();
-    int n = now - *start;
-    printf("Step %s, %d ticks\n\n", msg, n);
-    *start = now;
-}
-
 unsigned int find_path(
         Coord *(*path),
         Coord const start_pixels,
@@ -267,7 +259,6 @@ unsigned int find_path(
         unsigned int** const movement_cost_map
         )
 {
-    int start_clock = clock();
     // vars init
     unsigned int nodes = 0;
 
