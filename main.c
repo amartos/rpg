@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
     // load characters
     Character all_characters[MAX_CHARACTERS]; // 0 test_character_green, 1 test_character_red;
-    SDL_Color palette[MAX_CHARACTERS][COLOR_PALETTE], green[COLOR_PALETTE], red[COLOR_PALETTE];
+    SDL_Color palette[MAX_CHARACTERS][COLOR_PALETTE];
     palette[GREEN][0].r = 0x10, palette[GREEN][0].g = 0xA8, palette[GREEN][0].b = 0x40;
     palette[GREEN][1].r = 0xF8, palette[GREEN][1].g = 0xB8, palette[GREEN][1].b = 0x88;
     palette[GREEN][2].r = 0x18, palette[GREEN][2].g = 0x80, palette[GREEN][2].b = 0xF8;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
 
             TRY
             {
-                if (SDL_Flip(screen) == -1)
+                if (SDL_Flip(screen))
                     THROW(FLIP_SCREEN_FAILURE);
             }
             CATCH(FLIP_SCREEN_FAILURE)
