@@ -12,7 +12,7 @@ void printe(const time_t now, const int error_id,
             );
 }
 
-void logger(const int error_id, const char sdl_message[])
+void logger(const Errors error_id, const char sdl_message[])
 {
     time_t now;
     time(&now);

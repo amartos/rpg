@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-// prototypes
-void logger(const int error_id, const char sdl_message[]);
 
 // structures
 // custom errors
@@ -23,5 +21,8 @@ enum Errors
     MAP_MALLOC_FAILURE,
     PATHFIND_MALLOC_FAILURE
 };
+
+// prototypes
+void logger(const Errors error_id, const char sdl_message[]);
 
 #endif // define RPG_ERROR
