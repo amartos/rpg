@@ -1,7 +1,5 @@
 #include "screen.h"
 
-enum {R, G, B};
-
 void init_screen(SDL_Surface *(*screen))
 {
     TRY

@@ -18,6 +18,9 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
+// structures
+enum {R, G, B};
+
 // prototypes
 void init_screen(SDL_Surface *(*screen));
 void set_BG_color(SDL_Surface *(*screen), const int rgb[3]);
