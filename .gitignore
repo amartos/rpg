@@ -3,7 +3,8 @@ build/
 .ycm*
 
 ignore/
-assets/
+assets/sprites/
+assets/tiles/
 exec
 a.out
 *.o
