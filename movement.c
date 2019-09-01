@@ -5,17 +5,8 @@ void init_coord(Coord *coord)
 {
     coord->x = 0;
     coord->y = 0;
-}
-
-void init_offset(Offset *offset)
-{
-    offset->x = 0;
-    offset->y = 0;
-}
-
-static void reset_coord(Coord *coord)
-{
-    init_coord(coord);
+    coord->ox = 0;
+    coord->oy = 0;
 }
 
 Bool is_same_coord(Coord const a, Coord const b)
@@ -413,7 +404,7 @@ unsigned int find_path(
     return nodes;
 }
 
-Coord offsetting(Coord const center, Offset const offset)
+Coord offsetting(Coord const center, Coord const offset)
 {
     Coord sum; init_coord(&sum);
     Coord absoffset; init_coord(&absoffset);
@@ -436,7 +427,7 @@ Coord offsetting(Coord const center, Offset const offset)
     return sum;
 }
 
-void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment const deployment)
+void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deployment)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined

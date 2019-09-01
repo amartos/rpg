@@ -15,13 +15,8 @@ struct Coord
 {
     unsigned int x;
     unsigned int y;
-};
-
-typedef struct Offset Offset;
-struct Offset
-{
-    int x;
-    int y;
+    int ox; // offset
+    int oy;
 };
 
 typedef enum MovementType MovementType;
@@ -39,9 +34,8 @@ enum Deployment {LINE, SQUARE, TRIANGLE, CIRCLE};
 
 // prototypes
 void init_coord(Coord *coord);
-void init_offset(Offset *offset);
-Coord offsetting(Coord const center, Offset const offset);
-void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment const deployment);
+Coord offsetting(Coord const center, Coord const offset);
+void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deployment);
 Bool is_same_coord(Coord const a, Coord const b);
 unsigned int find_path(
         Coord *(*path),

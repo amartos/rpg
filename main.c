@@ -4,7 +4,7 @@
 static void handle_movement(
         Character *character,
         Coord center,
-        Offset const offset,
+        Coord const offset,
         Coord const max_coord,
         Map const map
         )
@@ -128,9 +128,9 @@ int main(int argc, char *argv[])
 
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
-    Offset offset[MAX_CHARACTERS];
+    Coord offset[MAX_CHARACTERS];
     for (i=0;i<MAX_CHARACTERS;i++)
-        init_offset(offset+i);
+        init_coord(offset+i);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
 
