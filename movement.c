@@ -251,7 +251,8 @@ static unsigned int calculate_cost(
 unsigned int find_path(
         Coord *(*path),
         Coord const start_pixels,
-        Coord const goal_pixels,
+        Coord goal_pixels,
+        unsigned int const velocity,
         Coord const max_coord_pixels,
         unsigned int** const collision_map,
         unsigned int** const movement_cost_map
@@ -382,7 +383,11 @@ unsigned int find_path(
         ETRY;
 
         ncurrent = ngoal;
-        (*path)[0] = conversion[ngoal];
+        if (goal_pixels.x % velocity)
+            goal_pixels.x += velocity - (goal_pixels.x % velocity);
+        if (goal_pixels.y % velocity)
+            goal_pixels.y += velocity - (goal_pixels.y % velocity);
+        (*path)[0] = goal_pixels;
         for (i=1;i<nodes;i++)
         {
             (*path)[i].x = conversion[ncurrent].x * TILES_WIDTH;

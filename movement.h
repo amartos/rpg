@@ -33,7 +33,8 @@ Bool is_same_coord(Coord a, Coord b);
 unsigned int find_path(
         Coord *(*path),
         Coord const start,
-        Coord const goal,
+        Coord goal,
+        unsigned int const velocity,
         Coord const max_coord,
         unsigned int** const collision_map,
         unsigned int** const movement_cost_map

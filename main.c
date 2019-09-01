@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
                                         &(all_characters[i].path),
                                         all_characters[i].position,
                                         goal,
+                                        all_characters[i].velocity,
                                         max_coord,
                                         test_map.schematics[COLLISIONS],
                                         test_map.schematics[COST]
@@ -198,7 +199,11 @@ int main(int argc, char *argv[])
                         all_characters[i].goal = all_characters[i].path[current_node];
                     }
 
-                    if (!all_characters[i].nodes && all_characters[i].path != NULL)
+                    if (
+                            !all_characters[i].nodes &&
+                            all_characters[i].path != NULL &&
+                            is_same_coord(all_characters[i].path[0], all_characters[i].position)
+                         )
                     {
                         all_characters[i].path = NULL;
                         all_characters[i].goal.x = 0;
