@@ -7,6 +7,12 @@ void init_coord(Coord *coord)
     coord->y = 0;
 }
 
+void init_offset(Offset *offset)
+{
+    offset->x = 0;
+    offset->y = 0;
+}
+
 static void reset_coord(Coord *coord)
 {
     init_coord(coord);
@@ -399,6 +405,87 @@ unsigned int find_path(
     }
 
     return nodes;
+}
+
+Coord offsetting(Coord center, Offset offset)
+{
+    Coord sum; init_coord(&sum);
+    Coord absoffset; init_coord(&absoffset);
+
+    absoffset.x = abs(offset.x);
+    absoffset.y = abs(offset.y);
+
+    if (absoffset.x > center.x && offset.x < 0)
+        sum.x = 0;
+    else
+        sum.x = center.x + offset.x;
+
+
+    if (absoffset.y > center.y && offset.y < 0)
+        sum.y = 0;
+    else
+        sum.y = center.y + offset.y;
+
+
+    return sum;
+}
+
+void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment deployment)
+{
+    // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
+    // linked as it is very specific, thus need to be independently defined
+    unsigned int i;
+    switch(deployment)
+    {
+        case LINE:
+            for (i=0;i<MAX_CHARACTERS;i++)
+                offset[i].x = 0;
+
+            offset[0].y = -2 * TILES_HEIGHT*1.5;
+            offset[1].y = -1 * TILES_HEIGHT*1.5;
+            offset[2].y = TILES_HEIGHT*1.5;
+            offset[3].y = 2 * TILES_HEIGHT*1.5;
+            break;
+        case SQUARE:
+            offset[0].x = -1 * TILES_WIDTH*1.5;
+            offset[0].y = TILES_HEIGHT*1.5;
+
+            offset[1].x = -1 * TILES_WIDTH*1.5;
+            offset[1].y = -1 * TILES_HEIGHT*1.5;
+
+            offset[2].x = TILES_WIDTH*1.5;
+            offset[2].y = -1 * TILES_HEIGHT*1.5;
+
+            offset[3].x = TILES_WIDTH*1.5;
+            offset[3].y = TILES_HEIGHT*1.5;
+            break;
+        case TRIANGLE:
+            offset[0].x = 0;
+            offset[0].y = 0;
+
+            offset[1].x = 0;
+            offset[1].y = -1 * TILES_HEIGHT*1.5;
+
+            offset[2].x = -1 * TILES_WIDTH*1.5;
+            offset[2].y = TILES_HEIGHT*1.5;
+
+            offset[3].x = TILES_WIDTH*1.5;
+            offset[3].y = TILES_HEIGHT*1.5;
+            break;
+        case CIRCLE:
+            offset[0].x = -1 * TILES_WIDTH*3;
+            offset[0].y = TILES_HEIGHT*1.5;
+
+            offset[1].x = -1 * TILES_WIDTH*1.5;
+            offset[1].y = 0;
+
+            offset[2].x = TILES_WIDTH*1.5;
+            offset[2].y = 0;
+
+            offset[3].x = TILES_WIDTH*3;
+            offset[3].y = TILES_HEIGHT*1.5;
+            break;
+    }
 }
 
 Direction move(

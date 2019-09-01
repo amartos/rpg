@@ -51,10 +51,16 @@ int main(int argc, char *argv[])
     palette[YELLOW][1].r = 0xF8, palette[YELLOW][1].g = 0xB8, palette[YELLOW][1].b = 0x88;
     palette[YELLOW][2].r = 0x18, palette[YELLOW][2].g = 0x80, palette[YELLOW][2].b = 0xF8;
 
+    Coord center; init_coord(&center);
+    Offset offset[MAX_CHARACTERS];
+    for (i=0;i<MAX_CHARACTERS;i++)
+        init_offset(offset+i);
+    get_formation_offset(offset, SQUARE);
+    center.x = TILES_WIDTH * 4;
+    center.y = TILES_HEIGHT * 4;
     for (i=0;i<MAX_CHARACTERS;i++)
     {
-        start_position.x = screen->w/2 + (i*64);
-        start_position.y = screen->h/2 + (i*64);
+        start_position = offsetting(center, offset[i]);
         init_character(
                 &all_characters[i],
                 palette[i],
@@ -104,10 +110,11 @@ int main(int argc, char *argv[])
                         case SDL_BUTTON_LEFT:
                             movement = TRUE;
                             movement_type = PATH;
-                            for (i=MAX_CHARACTERS-1;i>=0;i--)
+                            center.x = event.button.x;
+                            center.y = event.button.y;
+                            for (i=0;i<MAX_CHARACTERS;i++)
                             {
-                                goal.x = (i * 64) + event.button.x;
-                                goal.y = (i * 64) + event.button.y;
+                                goal = offsetting(center, offset[i]);
                                 nodes = find_path(
                                         &(all_characters[i].path),
                                         all_characters[i].position,
@@ -131,8 +138,10 @@ int main(int argc, char *argv[])
                             for (i=0;i<MAX_CHARACTERS;i++)
                             {
                                 movement_type = TELEPORT;
-                                all_characters[i].goal.x = (i * 64) + event.button.x;
-                                all_characters[i].goal.y = (i * 64) + event.button.y;
+                                center.x = event.button.x;
+                                center.y = event.button.y;
+                                goal = offsetting(center, offset[i]);
+                                all_characters[i].goal = goal;
                             }
                             break;
                     }
