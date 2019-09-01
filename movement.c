@@ -440,56 +440,54 @@ void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment const deploy
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
-    unsigned int i;
+    unsigned int i, space = TILES_WIDTH/4;
     switch(deployment)
     {
         case LINE:
             for (i=0;i<MAX_CHARACTERS;i++)
+            {
                 offset[i].x = 0;
-
-            offset[0].y = -2 * TILES_HEIGHT*1.5;
-            offset[1].y = -1 * TILES_HEIGHT*1.5;
-            offset[2].y = TILES_HEIGHT*1.5;
-            offset[3].y = 2 * TILES_HEIGHT*1.5;
+                offset[i].y = i * TILES_HEIGHT + space;
+            }
             break;
         case SQUARE:
-            offset[0].x = -1 * TILES_WIDTH*1.5;
-            offset[0].y = TILES_HEIGHT*1.5;
+            offset[0].x = -1 * TILES_WIDTH;
+            offset[0].y = TILES_HEIGHT;
 
-            offset[1].x = -1 * TILES_WIDTH*1.5;
-            offset[1].y = -1 * TILES_HEIGHT*1.5;
+            offset[1].x = -1 * TILES_WIDTH;
+            offset[1].y = -1 * TILES_HEIGHT;
 
-            offset[2].x = TILES_WIDTH*1.5;
-            offset[2].y = -1 * TILES_HEIGHT*1.5;
+            offset[2].x = TILES_WIDTH;
+            offset[2].y = -1 * TILES_HEIGHT;
 
-            offset[3].x = TILES_WIDTH*1.5;
-            offset[3].y = TILES_HEIGHT*1.5;
+            offset[3].x = TILES_WIDTH;
+            offset[3].y = TILES_HEIGHT;
             break;
         case TRIANGLE:
             offset[0].x = 0;
             offset[0].y = 0;
 
             offset[1].x = 0;
-            offset[1].y = -1 * TILES_HEIGHT*1.5;
+            offset[1].y = -1 * (TILES_HEIGHT + space);
 
-            offset[2].x = -1 * TILES_WIDTH*1.5;
-            offset[2].y = TILES_HEIGHT*1.5;
+            offset[2].x = -1 * TILES_WIDTH;
+            offset[2].y = TILES_HEIGHT;
 
-            offset[3].x = TILES_WIDTH*1.5;
-            offset[3].y = TILES_HEIGHT*1.5;
+            offset[3].x = TILES_WIDTH;
+            offset[3].y = TILES_HEIGHT;
             break;
         case CIRCLE:
-            offset[0].x = -1 * TILES_WIDTH*3;
-            offset[0].y = TILES_HEIGHT*1.5;
+            offset[0].x = -2 * TILES_WIDTH;
+            offset[0].y = TILES_HEIGHT;
 
-            offset[1].x = -1 * TILES_WIDTH*1.5;
+            offset[1].x = -1 * TILES_WIDTH;
             offset[1].y = 0;
 
-            offset[2].x = TILES_WIDTH*1.5;
+            offset[2].x = 0;
             offset[2].y = 0;
 
-            offset[3].x = TILES_WIDTH*3;
-            offset[3].y = TILES_HEIGHT*1.5;
+            offset[3].x = TILES_WIDTH;
+            offset[3].y = TILES_HEIGHT;
             break;
     }
 }
