@@ -180,7 +180,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
     next[E].y = current.y;
     next[W].y = current.y;
 
-    if (current.y < 0) //edge
+    if (current.y <= 0) //edge
     {
         next[N].y = current.y;
         next[NE].y = current.y;
@@ -219,7 +219,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[SE].x = current.x + 1;
     }
 
-    if (current.x < 0) // edge
+    if (current.x <= 0) // edge
     {
         next[W].x = current.x;
         next[NW].x = current.x;
