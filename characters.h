@@ -23,8 +23,6 @@ typedef struct Character Character;
 struct Character
 {
     SDL_Surface *sprite;
-    SDL_Rect infos;
-
     Coord position;
     Direction direction;
     Coord goal;
@@ -33,6 +31,7 @@ struct Character
 
     State state;
     Bool animated;
+    MovementType movement_type;
     Bool moving;
     unsigned int number_of_frames;
     unsigned int velocity;
@@ -48,11 +47,11 @@ void init_character(
         SDL_Color const colors[],
         char const sprite_path[],
         unsigned int const number_of_frames,
-        Bool const moving,
         unsigned int const fps,
         unsigned int const velocity,
         Coord const start_position
         );
 void free_character(Character *character);
+void free_path(Character *character);
 
 #endif // define RPG_CHARACTERS

@@ -6,7 +6,6 @@ void init_character(
         SDL_Color const colors[],
         char const sprite_path[],
         unsigned int const number_of_frames,
-        Bool const moving,
         unsigned int const fps,
         unsigned int const velocity,
         Coord const start_position
@@ -20,7 +19,8 @@ void init_character(
     character->current_frame = 0;
     character->previous_time = 0;
 
-    character->moving = moving;
+    character->movement_type = WALK;
+    character->moving = FALSE;
     character->number_of_frames = number_of_frames;
     if (number_of_frames > 1)
     {
@@ -34,12 +34,6 @@ void init_character(
         character->framerate = 0;
         character->velocity = 0;
     }
-
-    // SDL_Rect infos
-    character->infos.x = start_position.x;
-    character->infos.y = start_position.y;
-    character->infos.w = SPRITES_WIDTH;
-    character->infos.h = SPRITES_HEIGHT;
 
     // Coord position
     character->position.x = start_position.x;
@@ -95,4 +89,12 @@ void init_character(
 void free_character(Character *character)
 {
     SDL_FreeSurface(character->sprite);
+    if (character->path != NULL)
+        free_path(character);
+}
+
+void free_path(Character *character)
+{
+    free(character->path);
+    character->path = NULL;
 }
