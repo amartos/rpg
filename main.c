@@ -49,26 +49,23 @@ static void handle_movement(
             }
             goto make_a_move;
         case WALK:
-            if (character->path != NULL)
+            current_node = character->nodes;
+            if (is_same_coord(character->path[current_node], character->position))
             {
-                current_node = character->nodes;
-                if (is_same_coord(character->path[current_node], character->position))
+                if (current_node)
                 {
-                    if (current_node)
-                    {
-                        character->nodes--;
-                        current_node = character->nodes;
-                        character->goal = character->path[current_node];
-                    }
-                    else
-                    {
-                        free_path(character);
-                        goto end_move;
-                    }
+                    character->nodes--;
+                    current_node = character->nodes;
+                    character->goal = character->path[current_node];
                 }
                 else
-                    character->goal = character->path[current_node];
+                {
+                    free_path(character);
+                    goto end_move;
+                }
             }
+            else
+                character->goal = character->path[current_node];
             goto make_a_move;
         make_a_move:
             character->direction = move(
