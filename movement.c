@@ -389,16 +389,22 @@ unsigned int find_path(
         ETRY;
 
         ncurrent = ngoal;
-        if (goal_pixels.x % velocity)
-            goal_pixels.x += velocity - (goal_pixels.x % velocity);
-        if (goal_pixels.y % velocity)
-            goal_pixels.y += velocity - (goal_pixels.y % velocity);
-        (*path)[0] = goal_pixels;
-        for (i=1;i<nodes;i++)
+        for (i=0;i<nodes;i++)
         {
-            (*path)[i].x = conversion[ncurrent].x * TILES_WIDTH;
-            (*path)[i].y = conversion[ncurrent].y * TILES_HEIGHT;
-            ncurrent = came_from[ncurrent];
+            nnext = came_from[ncurrent];
+            current.x = conversion[ncurrent].x * TILES_WIDTH;
+            current.y = conversion[ncurrent].y * TILES_HEIGHT;
+            next.x = conversion[nnext].x * TILES_WIDTH;
+            next.y = conversion[nnext].y * TILES_HEIGHT;
+
+            if (abs(current.x - next.x) % velocity)
+                current.x += abs(current.x - next.x) % velocity;
+            if (abs(current.y - next.y) % velocity)
+                current.y += abs(current.y - next.y) % velocity;
+
+            (*path)[i].x = current.x;
+            (*path)[i].y = current.y;
+            ncurrent = nnext;
         }
 
         nodes--;
@@ -515,9 +521,6 @@ Direction move(
                 break;
         }
     }
-
-    if (is_same_coord(*start, *goal))
-        reset_coord(goal);
 
     return direction;
 }
