@@ -102,6 +102,22 @@ static void check_character_frame(Character *character, unsigned int const time)
     }
 }
 
+static void fire_movement(Character characters[MAX_CHARACTERS], MovementType const movement)
+{
+    unsigned int i;
+    for (i=0;i<MAX_CHARACTERS;i++)
+    {
+        characters[i].moving = TRUE;
+        characters[i].movement_type = movement;
+    }
+}
+
+static void change_formation(Character characters[MAX_CHARACTERS], Coord offset[MAX_CHARACTERS], Deployment formation)
+{
+    get_formation_offset(offset, formation);
+    fire_movement(characters, PATH);
+}
+
 int main(int argc, char *argv[])
 {
     unsigned int i = 0, current_frame = 0;
@@ -195,18 +211,10 @@ int main(int argc, char *argv[])
                     switch(event.button.button)
                     {
                         case SDL_BUTTON_LEFT:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = PATH;
-                            }
+                            fire_movement(all_characters, PATH);
                             break;
                         case SDL_BUTTON_RIGHT:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = TELEPORT;
-                            }
+                            fire_movement(all_characters, TELEPORT);
                             break;
                     }
                     break;
@@ -214,36 +222,16 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_a:
-                            get_formation_offset(offset, LINE);
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = PATH;
-                            }
+                            change_formation(all_characters, offset, LINE);
                             break;
                         case SDLK_z:
-                            get_formation_offset(offset, SQUARE);
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = PATH;
-                            }
+                            change_formation(all_characters, offset, SQUARE);
                             break;
                         case SDLK_e:
-                            get_formation_offset(offset, TRIANGLE);
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = PATH;
-                            }
+                            change_formation(all_characters, offset, TRIANGLE);
                             break;
                         case SDLK_r:
-                            get_formation_offset(offset, CIRCLE);
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = PATH;
-                            }
+                            change_formation(all_characters, offset, CIRCLE);
                             break;
                         case SDLK_UP:
                             break;
