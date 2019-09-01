@@ -48,7 +48,7 @@ unsigned int find_path(
         );
 Direction move(
         Coord *start,
-        Coord *goal,
+        Coord const goal,
         MovementType const type,
         Coord const max_coord,
         unsigned int** const collision_map,

@@ -70,7 +70,7 @@ static void handle_movement(
         make_a_move:
             character->direction = move(
                     &character->position,
-                    &character->goal,
+                    character->goal,
                     character->movement_type,
                     max_coord,
                     map.schematics[COLLISIONS],

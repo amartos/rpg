@@ -54,17 +54,18 @@ static Bool is_out_of_map(Coord const goal, Coord const max_coord)
     return is_out;
 }
 
-static void teleport(Coord *start, Coord *goal)
+static void teleport(Coord *start, Coord const goal)
 {
-    *start = *goal;
+    start->x = goal.x;
+    start->y = goal.y;
 }
 
-static Direction walk(Coord *start, Coord *goal, unsigned int const velocity)
+static Direction walk(Coord *start, Coord const goal, unsigned int const velocity)
 {
     Direction direction = DOWN;
     int Dx, Dy;
 
-    Dy = start->y - goal->y;
+    Dy = start->y - goal.y;
     if (Dy < 0)
     {
         direction = DOWN;
@@ -76,7 +77,7 @@ static Direction walk(Coord *start, Coord *goal, unsigned int const velocity)
         start->y -= velocity;
     }
 
-    Dx = start->x - goal->x;
+    Dx = start->x - goal.x;
     if (Dx < 0)
     {
         direction = RIGHT;
@@ -488,7 +489,7 @@ void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deploym
 
 Direction move(
         Coord *start,
-        Coord *goal,
+        Coord const goal,
         MovementType const type,
         Coord const max_coord,
         unsigned int** const collision_map,
@@ -497,9 +498,9 @@ Direction move(
 {
     Direction direction = DOWN;
     if (
-            !is_same_coord(*start, *goal) &&
-            !is_colliding(*goal, collision_map, TRUE) &&
-            !is_out_of_map(*goal, max_coord)
+            !is_same_coord(*start, goal) &&
+            !is_colliding(goal, collision_map, TRUE) &&
+            !is_out_of_map(goal, max_coord)
         )
     {
         switch (type)
