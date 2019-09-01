@@ -368,7 +368,7 @@ unsigned int find_path(
 
         TRY
         {
-            *path = (Coord *)malloc(sizeof(Coord *) * nodes);
+            *path = (Coord *)realloc(*path, sizeof(Coord) * nodes);
             if (*path == NULL)
                 THROW(PATHFIND_MALLOC_FAILURE);
         }
