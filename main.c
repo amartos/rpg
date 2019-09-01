@@ -211,60 +211,12 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_UP:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = WALK;
-                            }
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].direction = UP;
-                                all_characters[i].goal.x = all_characters[i].position.x;
-                                all_characters[i].goal.y = all_characters[i].position.y;
-                                all_characters[i].goal.y -= all_characters[i].velocity;
-                            }
                             break;
                         case SDLK_DOWN:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = WALK;
-                            }
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].direction = DOWN;
-                                all_characters[i].goal.x = all_characters[i].position.x;
-                                all_characters[i].goal.y = all_characters[i].position.y;
-                                all_characters[i].goal.y += all_characters[i].velocity;
-                            }
                             break;
                         case SDLK_LEFT:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = WALK;
-                            }
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].direction = LEFT;
-                                all_characters[i].goal.x = all_characters[i].position.x;
-                                all_characters[i].goal.y = all_characters[i].position.y;
-                                all_characters[i].goal.x -= all_characters[i].velocity;
-                            }
                             break;
                         case SDLK_RIGHT:
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].moving = TRUE;
-                                all_characters[i].movement_type = WALK;
-                            }
-                            for (i=0;i<MAX_CHARACTERS;i++)
-                            {
-                                all_characters[i].direction = RIGHT;
-                                all_characters[i].goal.x = all_characters[i].position.x;
-                                all_characters[i].goal.y = all_characters[i].position.y;
-                                all_characters[i].goal.x += all_characters[i].velocity;
-                            }
                             break;
                     }
                     break;
