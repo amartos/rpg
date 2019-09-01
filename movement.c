@@ -258,6 +258,7 @@ unsigned int find_path(
     // vars init
     unsigned int nodes = 0;
 
+    Coord *tmp = NULL;
     Coord start; init_coord(&start);
     Coord goal; init_coord(&goal);
     Coord max_coord; init_coord(&max_coord);
@@ -368,9 +369,11 @@ unsigned int find_path(
 
         TRY
         {
-            *path = (Coord *)realloc(*path, sizeof(Coord) * nodes);
-            if (*path == NULL)
+            tmp = (Coord *)realloc(*path, sizeof(Coord) * nodes);
+            if (tmp == NULL)
                 THROW(PATHFIND_MALLOC_FAILURE);
+            else
+                *path = tmp;
         }
         CATCH(PATHFIND_MALLOC_FAILURE)
         {

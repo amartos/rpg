@@ -177,4 +177,5 @@ void free_map(Map *map)
             free(map->schematics[t][i]);
         free(map->schematics[t]);
     }
+    free(map->schematics);
 }
