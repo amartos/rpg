@@ -1,21 +1,5 @@
-#include "errors.h"
-#include "try_throw_catch.h"
-#include "macros.h"
+#include "main.h"
 
-#include "screen.h"
-#include "characters.h"
-#include "movement.h"
-#include "map.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-// this should be removed at some point
-#include <SDL/SDL_rotozoom.h>
-
-
-enum {GREEN, RED, BLUE, YELLOW};
 
 int main(int argc, char *argv[])
 {
