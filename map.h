@@ -42,7 +42,7 @@ struct Map
 };
 
 // prototypes
-void init_map(Map *map, const char map_path[]);
+void init_map(Map *map, char const map_path[]);
 void free_map(Map *map);
 
 #endif // define RPG_MAP

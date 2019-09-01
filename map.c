@@ -1,10 +1,10 @@
 #include "map.h"
 
 
-void init_map(Map *map, const char map_path[])
+void init_map(Map *map, char const map_path[])
 {
     FILE *map_file = NULL;// FILE *converter_file = NULL;
-    int i = 0, j = 0, line_count = 0, column_count = 0, len = 0;
+    unsigned int i = 0, j = 0, line_count = 0, column_count = 0, len = 0;
     unsigned int t = 0, n_types = WEATHER + 1; // weather always last
     char line[MAX_SIZE_LINE] = {0};
 
@@ -89,7 +89,7 @@ void init_map(Map *map, const char map_path[])
     // much constraint, but it's a start. If RLE compression is implemented, 
     // this code will definitely need to change
     char *data = NULL;
-    int offset = 0;
+    unsigned int offset = 0;
     MapType map_type = 0;
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {

@@ -2,8 +2,12 @@
 
 
 // this is only temporary, to change in log in file
-void printe(const time_t now, const int error_id, 
-        const char error_def[], const char sdl_message[])
+static void printe(
+        time_t const now,
+        unsigned int const error_id,
+        char const error_def[],
+        char const sdl_message[]
+        )
 {
     printf("[%ld] Error %d (%s): %s\n",
             now,
@@ -12,7 +16,7 @@ void printe(const time_t now, const int error_id,
             );
 }
 
-void logger(const Errors error_id, const char sdl_message[])
+void logger(Errors const error_id, char const sdl_message[])
 {
     time_t now;
     time(&now);

@@ -29,29 +29,29 @@ struct Character
     Direction direction;
     Coord goal;
     Coord *path;
-    int nodes;
+    unsigned int nodes;
 
     State state;
     Bool animated;
     Bool moving;
-    int number_of_frames;
-    int velocity;
+    unsigned int number_of_frames;
+    unsigned int velocity;
     SDL_Rect frames[4][6][30]; // possible positions, State, max number of frames
-    int current_frame;
-    int framerate;
-    int previous_time;
+    unsigned int current_frame;
+    unsigned int framerate;
+    unsigned int previous_time;
 };
 
 // prototypes
 void init_character(
         Character *character,
-        SDL_Color colors[],
-        const char sprite_path[],
-        const int number_of_frames,
-        const Bool moving,
-        const int fps,
-        const int velocity,
-        const Coord start_position
+        SDL_Color const colors[],
+        char const sprite_path[],
+        unsigned int const number_of_frames,
+        Bool const moving,
+        unsigned int const fps,
+        unsigned int const velocity,
+        Coord const start_position
         );
 void free_character(Character *character);
 

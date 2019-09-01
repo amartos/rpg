@@ -18,7 +18,7 @@ static void reset_coord(Coord *coord)
     init_coord(coord);
 }
 
-Bool is_same_coord(Coord a, Coord b)
+Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
     if (a.x == b.x && a.y == b.y)
@@ -29,7 +29,7 @@ Bool is_same_coord(Coord a, Coord b)
 static Bool is_colliding(
         Coord const goal,
         unsigned int** const collision_map,
-        Bool pixel
+        Bool const pixel
         )
 {
     unsigned int x, y;
@@ -68,7 +68,7 @@ static void teleport(Coord *start, Coord *goal)
     *start = *goal;
 }
 
-static Direction walk(Coord *start, Coord *goal, int const velocity)
+static Direction walk(Coord *start, Coord *goal, unsigned int const velocity)
 {
     Direction direction = DOWN;
     int Dx, Dy;
@@ -407,7 +407,7 @@ unsigned int find_path(
     return nodes;
 }
 
-Coord offsetting(Coord center, Offset offset)
+Coord offsetting(Coord const center, Offset const offset)
 {
     Coord sum; init_coord(&sum);
     Coord absoffset; init_coord(&absoffset);
@@ -430,7 +430,7 @@ Coord offsetting(Coord center, Offset offset)
     return sum;
 }
 
-void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment deployment)
+void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment const deployment)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
@@ -494,7 +494,7 @@ Direction move(
         MovementType const type,
         Coord const max_coord,
         unsigned int** const collision_map,
-        int const velocity
+        unsigned int const velocity
         )
 {
     Direction direction = DOWN;

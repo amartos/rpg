@@ -40,9 +40,9 @@ enum Deployment {LINE, SQUARE, TRIANGLE, CIRCLE};
 // prototypes
 void init_coord(Coord *coord);
 void init_offset(Offset *offset);
-Coord offsetting(Coord center, Offset offset);
-void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment deployment);
-Bool is_same_coord(Coord a, Coord b);
+Coord offsetting(Coord const center, Offset const offset);
+void get_formation_offset(Offset offset[MAX_CHARACTERS], Deployment const deployment);
+Bool is_same_coord(Coord const a, Coord const b);
 unsigned int find_path(
         Coord *(*path),
         Coord const start,
@@ -58,7 +58,7 @@ Direction move(
         MovementType const type,
         Coord const max_coord,
         unsigned int** const collision_map,
-        int const velocity
+        unsigned int const velocity
         );
 
 #endif // define RPG_MOVEMENT

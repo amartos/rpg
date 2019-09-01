@@ -27,12 +27,12 @@ void init_screen(SDL_Surface *(*screen))
     ETRY;
 }
 
-void set_BG_color(SDL_Surface *(*screen), const int rgb[3])
+void set_BG_color(SDL_Surface *(*screen), unsigned int* const rgb)
 {
     SDL_FillRect(*screen, NULL, SDL_MapRGB((*screen)->format, rgb[R], rgb[G], rgb[B])); 
 }
 
-void apply_tiles(SDL_Surface *(*screen), MapType type, Map map, SDL_Surface *tile)
+void apply_tiles(SDL_Surface *(*screen), MapType const type, Map const map, SDL_Surface* const tile)
 {
     unsigned int i, j;
     SDL_Rect tiles_positions;

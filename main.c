@@ -3,13 +3,13 @@
 
 int main(int argc, char *argv[])
 {
-    int i;
+    unsigned int i;
     Coord start_position; init_coord(&start_position);
 
     //load screen
     SDL_Surface *screen = NULL;
     init_screen(&screen);
-    int screen_bg_color[3] = {0xFF, 0xFF, 0xFF};
+    unsigned int screen_bg_color[3] = {0xFF, 0xFF, 0xFF};
     set_BG_color(&screen, screen_bg_color);
     // Oddly, for now this is not needed
     // SDL_EnableKeyRepeat(0, 0);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     MovementType movement_type = WALK;
     unsigned int nodes = 0;
     unsigned int current_node = 0;
-    int time = 0, prev_time = 0;
+    unsigned int time = 0, prev_time = 0;
     Coord goal; init_coord(&goal);
     SDL_Event event;
     while (!done)

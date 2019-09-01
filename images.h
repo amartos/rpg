@@ -13,6 +13,6 @@
 #include <SDL/SDL_image.h>
 
 // prototypes
-void set_color(SDL_Surface *image, SDL_Color original_color, SDL_Color new_color);
+void set_color(SDL_Surface *image, SDL_Color const original_color, SDL_Color const new_color);
 
 #endif // define RPG_IMAGES

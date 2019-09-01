@@ -3,16 +3,16 @@
 
 void init_character(
         Character *character,
-        SDL_Color colors[],
-        const char sprite_path[],
-        const int number_of_frames,
-        const Bool moving,
-        const int fps,
-        const int velocity,
-        const Coord start_position
+        SDL_Color const colors[],
+        char const sprite_path[],
+        unsigned int const number_of_frames,
+        Bool const moving,
+        unsigned int const fps,
+        unsigned int const velocity,
+        Coord const start_position
         )
 {
-    int i, j, f;
+    unsigned int i, j, f;
 
     character->state = MOVE;
     character->direction = DOWN;

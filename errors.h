@@ -24,6 +24,6 @@ enum Errors
 };
 
 // prototypes
-void logger(const Errors error_id, const char sdl_message[]);
+void logger(Errors const error_id, char const sdl_message[]);
 
 #endif // define RPG_ERROR
