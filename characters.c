@@ -43,7 +43,7 @@ void init_character(
 
     // Coord position
     character->position.x = start_position.x;
-    character->position.y = start_position.x;
+    character->position.y = start_position.y;
 
     // Coord goal
     character->goal.x = 0;
