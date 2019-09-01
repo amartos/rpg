@@ -5,7 +5,7 @@
 #define SCREEN_HEIGHT 640
 #define SCREEN_BPP 32
 #define BG_COLOR 0xFF, 0xFF, 0xFF
-#define FPS 30
+#define FPS 60
 #define FRAMERATE 1000/FPS
 
 #include "errors.h"
