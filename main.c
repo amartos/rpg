@@ -15,7 +15,7 @@
 #include <SDL/SDL_rotozoom.h>
 
 
-enum {GREEN, RED};
+enum {GREEN, RED, BLUE, YELLOW};
 
 int main(int argc, char *argv[])
 {
@@ -34,12 +34,22 @@ int main(int argc, char *argv[])
     Character all_characters[MAX_CHARACTERS]; // 0 test_character_green, 1 test_character_red;
     SDL_Color palette[MAX_CHARACTERS][COLOR_PALETTE];
     palette[GREEN][0].r = 0x10, palette[GREEN][0].g = 0xA8, palette[GREEN][0].b = 0x40;
+    palette[RED][0].r = 0xF8, palette[RED][0].g = 0x00, palette[RED][0].b = 0x00;
+    palette[BLUE][0].r = 0x18, palette[BLUE][0].g = 0x80, palette[BLUE][0].b = 0xf8;
+    palette[YELLOW][0].r = 0xf0, palette[YELLOW][0].g = 0xe8, palette[YELLOW][0].b = 0x18;
+
+    // common values
     palette[GREEN][1].r = 0xF8, palette[GREEN][1].g = 0xB8, palette[GREEN][1].b = 0x88;
     palette[GREEN][2].r = 0x18, palette[GREEN][2].g = 0x80, palette[GREEN][2].b = 0xF8;
 
-    palette[RED][0].r = 0xF8, palette[RED][0].g = 0x00, palette[RED][0].b = 0x00;
     palette[RED][1].r = 0xF8, palette[RED][1].g = 0xB8, palette[RED][1].b = 0x88;
     palette[RED][2].r = 0x18, palette[RED][2].g = 0x80, palette[RED][2].b = 0xF8;
+
+    palette[BLUE][1].r = 0xF8, palette[BLUE][1].g = 0xB8, palette[BLUE][1].b = 0x88;
+    palette[BLUE][2].r = 0x18, palette[BLUE][2].g = 0x80, palette[BLUE][2].b = 0xF8;
+
+    palette[YELLOW][1].r = 0xF8, palette[YELLOW][1].g = 0xB8, palette[YELLOW][1].b = 0x88;
+    palette[YELLOW][2].r = 0x18, palette[YELLOW][2].g = 0x80, palette[YELLOW][2].b = 0xF8;
 
     for (i=0;i<MAX_CHARACTERS;i++)
     {

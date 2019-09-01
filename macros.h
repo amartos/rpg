@@ -9,6 +9,8 @@
 #define TILES_HEIGHT 32
 #define COLLISION_BOX_OFFSET_X 4
 #define COLLISION_BOX_OFFSET_Y 28
+#define MAX_CHARACTERS 4
+
 
 // structures
 typedef enum Bool Bool;

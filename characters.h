@@ -1,8 +1,6 @@
 #ifndef RPG_CHARACTERS
 #define RPG_CHARACTERS
 
-#define MAX_CHARACTERS 2
-
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
