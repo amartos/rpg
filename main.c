@@ -16,6 +16,12 @@ static void handle_movement(
     {
         case PATH:
             character->movement_type = WALK;
+            if (character->path != NULL)
+            {
+                free_path(character);
+                character->nodes = 0;
+            }
+
             nodes = find_path(
                     &character->path,
                     character->position,
