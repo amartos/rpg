@@ -213,6 +213,38 @@ int main(int argc, char *argv[])
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
                     {
+                        case SDLK_a:
+                            get_formation_offset(offset, LINE);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                            {
+                                all_characters[i].moving = TRUE;
+                                all_characters[i].movement_type = PATH;
+                            }
+                            break;
+                        case SDLK_z:
+                            get_formation_offset(offset, SQUARE);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                            {
+                                all_characters[i].moving = TRUE;
+                                all_characters[i].movement_type = PATH;
+                            }
+                            break;
+                        case SDLK_e:
+                            get_formation_offset(offset, TRIANGLE);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                            {
+                                all_characters[i].moving = TRUE;
+                                all_characters[i].movement_type = PATH;
+                            }
+                            break;
+                        case SDLK_r:
+                            get_formation_offset(offset, CIRCLE);
+                            for (i=0;i<MAX_CHARACTERS;i++)
+                            {
+                                all_characters[i].moving = TRUE;
+                                all_characters[i].movement_type = PATH;
+                            }
+                            break;
                         case SDLK_UP:
                             break;
                         case SDLK_DOWN:
