@@ -446,19 +446,19 @@ Coord offsetting(Coord const center, Coord const offset)
     Coord sum; init_coord(&sum);
     Coord absoffset; init_coord(&absoffset);
 
-    absoffset.x = abs(offset.x);
-    absoffset.y = abs(offset.y);
+    absoffset.x = abs(offset.ox);
+    absoffset.y = abs(offset.oy);
 
-    if (absoffset.x > center.x && offset.x < 0)
+    if (absoffset.x > center.x && offset.ox < 0)
         sum.x = 0;
     else
-        sum.x = center.x + offset.x;
+        sum.x = center.x + offset.ox;
 
 
-    if (absoffset.y > center.y && offset.y < 0)
+    if (absoffset.y > center.y && offset.oy < 0)
         sum.y = 0;
     else
-        sum.y = center.y + offset.y;
+        sum.y = center.y + offset.oy;
 
 
     return sum;
@@ -474,48 +474,48 @@ void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deploym
         case LINE:
             for (i=0;i<MAX_CHARACTERS;i++)
             {
-                offset[i].x = 0;
-                offset[i].y = i * TILES_HEIGHT + space;
+                offset[i].ox = 0;
+                offset[i].oy = i * TILES_HEIGHT + space;
             }
             break;
         case SQUARE:
-            offset[0].x = -1 * TILES_WIDTH;
-            offset[0].y = TILES_HEIGHT;
+            offset[0].ox = -1 * TILES_WIDTH;
+            offset[0].oy = TILES_HEIGHT;
 
-            offset[1].x = -1 * TILES_WIDTH;
-            offset[1].y = -1 * TILES_HEIGHT;
+            offset[1].ox = -1 * TILES_WIDTH;
+            offset[1].oy = -1 * TILES_HEIGHT;
 
-            offset[2].x = TILES_WIDTH;
-            offset[2].y = -1 * TILES_HEIGHT;
+            offset[2].ox = TILES_WIDTH;
+            offset[2].oy = -1 * TILES_HEIGHT;
 
-            offset[3].x = TILES_WIDTH;
-            offset[3].y = TILES_HEIGHT;
+            offset[3].ox = TILES_WIDTH;
+            offset[3].oy = TILES_HEIGHT;
             break;
         case TRIANGLE:
-            offset[0].x = 0;
-            offset[0].y = 0;
+            offset[0].ox = 0;
+            offset[0].oy = 0;
 
-            offset[1].x = 0;
-            offset[1].y = -1 * (TILES_HEIGHT + space);
+            offset[1].ox = 0;
+            offset[1].oy = -1 * (TILES_HEIGHT + space);
 
-            offset[2].x = -1 * TILES_WIDTH;
-            offset[2].y = TILES_HEIGHT;
+            offset[2].ox = -1 * TILES_WIDTH;
+            offset[2].oy = TILES_HEIGHT;
 
-            offset[3].x = TILES_WIDTH;
-            offset[3].y = TILES_HEIGHT;
+            offset[3].ox = TILES_WIDTH;
+            offset[3].oy = TILES_HEIGHT;
             break;
         case CIRCLE:
-            offset[0].x = -2 * TILES_WIDTH;
-            offset[0].y = TILES_HEIGHT;
+            offset[0].ox = -2 * TILES_WIDTH;
+            offset[0].oy = TILES_HEIGHT;
 
-            offset[1].x = -1 * TILES_WIDTH;
-            offset[1].y = 0;
+            offset[1].ox = -1 * TILES_WIDTH;
+            offset[1].oy = 0;
 
-            offset[2].x = 0;
-            offset[2].y = 0;
+            offset[2].ox = 0;
+            offset[2].oy = 0;
 
-            offset[3].x = TILES_WIDTH;
-            offset[3].y = TILES_HEIGHT;
+            offset[3].ox = TILES_WIDTH;
+            offset[3].oy = TILES_HEIGHT;
             break;
     }
 }
