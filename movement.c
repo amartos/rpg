@@ -25,25 +25,28 @@ static Bool is_colliding(
         Bool const pixel
         )
 {
-    unsigned int x, y;
-    Bool collide = FALSE;
+    unsigned int xl, yu, xr, yd;
     Coord goal_offset = offsetting(goal);
 
-    if (pixel)
+    if (!pixel)
     {
-        // As the collision box is located on the feet, add the x and y coord to
-        // obtain the true (0,0) corner of the image, then check
-        x = (goal_offset.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
-        y = (goal_offset.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
-    }
-    else
-    {
-        x = goal_offset.x;
-        y = goal_offset.y;
+        goal_offset.x *= TILES_WIDTH;
+        goal_offset.y *= TILES_HEIGHT;
     }
 
-    collide = collision_map[x][y];
-    return collide;
+    // As the collision box is located on the feet, add the x and y collision
+    // coord to obtain the true (0,0) corner of the image.
+    // check also the right side by adding the collision box w/h
+    xl = (goal_offset.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
+    yu = (goal_offset.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
+
+    xr = (goal_offset.x + COLLISION_BOX_OFFSET_X + COLLISION_BOX_WIDTH) / TILES_WIDTH;
+    yd = (goal_offset.y + COLLISION_BOX_OFFSET_Y + COLLISION_BOX_HEIGHT) / TILES_HEIGHT;
+    
+    if (collision_map[xl][yu] || collision_map[xr][yd]) // up left || down right corners
+        return TRUE;
+    else
+        return FALSE;
 }
 
 static Bool is_out_of_map(Coord const goal, Coord const max_coord)
