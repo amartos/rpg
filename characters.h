@@ -24,7 +24,7 @@ struct Character
 {
     SDL_Surface *sprite;
     Coord position;
-    Direction direction;
+    Cardinals direction;
     Coord goal;
     Coord *path;
     unsigned int nodes;

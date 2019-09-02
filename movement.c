@@ -9,12 +9,6 @@ void init_coord(Coord *coord)
     coord->oy = 0;
 }
 
-void init_direction_vector(DirectionVector *direction)
-{
-    direction->x = NONE;
-    direction->y = NONE;
-}
-
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
@@ -70,24 +64,24 @@ static void teleport(Coord *start, Coord const goal)
     start->y = goal.y;
 }
 
-static DirectionVector determine_direction(Coord const start, Coord const goal)
+static Cardinals determine_direction(Coord const start, Coord const goal)
 {
-    DirectionVector direction; init_direction_vector(&direction);
+    Cardinals direction = S;
     int Dx, Dy;
     Coord start_offset = offsetting(start);
     Coord goal_offset = offsetting(goal);
 
     Dy = start_offset.y - goal_offset.y;
     if (Dy < 0)
-        direction.y = DOWN;
+        direction = S;
     else if (Dy > 0)
-        direction.y = UP;
+        direction = N;
 
     Dx = start_offset.x - goal_offset.x;
     if (Dx < 0)
-        direction.x = RIGHT;
+        direction = E;
     else if (Dx > 0)
-        direction.x = LEFT;
+        direction = W;
 
     return direction;
 }
@@ -108,27 +102,26 @@ static Coord determine_decrease(Coord const start, Coord const goal, unsigned in
     return decrease;
 }
 
-static DirectionVector walk(Coord *start, Coord const goal, unsigned int const velocity)
+static Cardinals walk(Coord *start, Coord const goal, unsigned int const velocity)
 {
-    DirectionVector direction = determine_direction(*start, goal);
+    Cardinals direction = determine_direction(*start, goal);
     Coord decrease = determine_decrease(*start, goal, velocity);
 
-    switch(direction.x)
+    switch(direction)
     {
-        case LEFT:
+        case W:
             start->x -= velocity - decrease.x;
             break;
-        case RIGHT:
+        case E:
             start->x += velocity - decrease.x;
             break;
-    }
-    switch(direction.y)
-    {
-        case DOWN:
+        case S:
             start->y += velocity - decrease.y;
             break;
-        case UP:
+        case N:
             start->y -= velocity - decrease.y;
+            break;
+        default:
             break;
     }
     return direction;
@@ -347,7 +340,7 @@ unsigned int find_path(
     Coord all_next[8];
     Coord conversion[max_array+1];
 
-    for (i=N;i<=SW;i++)
+    for (i=W;i<=SW;i++)
         init_coord(&all_next[i]);
     for (i=0;i<max_array;i++)
         queue[i] = 0;
@@ -384,7 +377,7 @@ unsigned int find_path(
                 delete_from_queue(max_array, queue, ncurrent);
                 current = conversion[ncurrent]; // get coord from number
                 get_neighbours(all_next, current, max_coord);
-                for (i=N;i<=SW;i++)
+                for (i=W;i<=SW;i++)
                 {
                     if (
                         !is_same_coord(start, all_next[i]) &&
@@ -573,7 +566,7 @@ void get_formation_offset(Coord *position, unsigned int const char_number, Deplo
         }
 }
 
-Direction move(
+Cardinals move(
         Coord *start,
         Coord const goal,
         MovementType const type,
@@ -582,7 +575,7 @@ Direction move(
         unsigned int const velocity
         )
 {
-    DirectionVector direction; init_direction_vector(&direction);
+    Cardinals direction = S;
     if (
             !is_same_coord(*start, goal) &&
             !is_colliding(goal, collision_map, TRUE) &&
@@ -601,10 +594,5 @@ Direction move(
         }
     }
 
-    if (direction.x != NONE)
-        return direction.x;
-    else if (direction.x == NONE && direction.y != NONE)
-        return direction.y;
-    else
-        return DOWN;
+    return direction;
 }

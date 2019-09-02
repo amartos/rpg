@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     Bool done = FALSE;
 
     MovementType movement_type = WALK;
-    Direction direction = UP;
+    Cardinals direction = S;
 
     Character all_characters[MAX_CHARACTERS];
     State state = MOVE;

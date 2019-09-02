@@ -14,7 +14,7 @@ void init_character(
     unsigned int i, j, f;
 
     character->state = MOVE;
-    character->direction = DOWN;
+    character->direction = S;
     character->nodes = 0;
     character->current_frame = 0;
     character->previous_time = 0;
@@ -79,7 +79,7 @@ void init_character(
     // SDL_Rect ***frames
     // This depends on the sprite order
     // TODO: if(sprite changes), reorder
-    for (i=LEFT;i<=RIGHT;i++)
+    for (i=W;i<=E;i++)
         for (j=MOVE;j<=MOVE_SHIELD;j++)
             for (f=0;f<number_of_frames;f++)
             {

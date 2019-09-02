@@ -22,19 +22,9 @@ struct Coord
 typedef enum MovementType MovementType;
 enum MovementType {WALK, PATH, TELEPORT};
 
-typedef enum Direction Direction;
-// this order depends on the sprite order
-enum Direction{LEFT, DOWN, UP, RIGHT, NONE};
-
-typedef struct DirectionVector DirectionVector;
-struct DirectionVector
-{
-    Direction x;
-    Direction y;
-};
-
 typedef enum Cardinals Cardinals;
-enum Cardinals {N, S, E, W, NE, NW, SE, SW};
+// this order depends on the sprite order
+enum Cardinals {W, S, N, E, NE, NW, SE, SW};
 
 typedef enum Deployment Deployment;
 enum Deployment {LINE, SQUARE, TRIANGLE, CIRCLE};
@@ -57,7 +47,7 @@ unsigned int find_path(
         unsigned int** const collision_map,
         unsigned int** const movement_cost_map
         );
-Direction move(
+Cardinals move(
         Coord *start,
         Coord const goal,
         MovementType const type,
