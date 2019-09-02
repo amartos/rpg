@@ -24,7 +24,14 @@ enum MovementType {WALK, PATH, TELEPORT};
 
 typedef enum Direction Direction;
 // this order depends on the sprite order
-enum Direction{LEFT, DOWN, UP, RIGHT};
+enum Direction{LEFT, DOWN, UP, RIGHT, NONE};
+
+typedef struct DirectionVector DirectionVector;
+struct DirectionVector
+{
+    Direction x;
+    Direction y;
+};
 
 typedef enum Cardinals Cardinals;
 enum Cardinals {N, S, E, W, NE, NW, SE, SW};

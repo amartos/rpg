@@ -9,6 +9,12 @@ void init_coord(Coord *coord)
     coord->oy = 0;
 }
 
+void init_direction_vector(DirectionVector *direction)
+{
+    direction->x = NONE;
+    direction->y = NONE;
+}
+
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
@@ -60,43 +66,62 @@ static void teleport(Coord *start, Coord const goal)
     start->y = goal.y;
 }
 
-static Direction walk(Coord *start, Coord const goal, unsigned int const velocity)
+static DirectionVector determine_direction(Coord const start, Coord const goal)
 {
-    Direction direction = DOWN;
+    DirectionVector direction; init_direction_vector(&direction);
     int Dx, Dy;
-    unsigned int absDy = 0, absDx = 0, decrease = 0;
 
-    Dy = start->y - goal.y;
-    absDy = abs(Dy);
-    if (absDy < velocity)
-        decrease = velocity - absDy;
+    Dy = start.y - goal.y;
     if (Dy < 0)
-    {
-        direction = DOWN;
-        start->y += velocity - decrease;
-    }
+        direction.y = DOWN;
     else if (Dy > 0)
-    {
-        direction = UP;
-        start->y -= velocity - decrease;
-    }
+        direction.y = UP;
 
-    decrease = 0;
-    Dx = start->x - goal.x;
-    absDx = abs(Dx);
-    if (absDx < velocity)
-        decrease = velocity - absDx;
+    Dx = start.x - goal.x;
     if (Dx < 0)
-    {
-        direction = RIGHT;
-        start->x += velocity - decrease;
-    }
+        direction.x = RIGHT;
     else if (Dx > 0)
-    {
-        direction = LEFT;
-        start->x -= velocity - decrease;
-    }
+        direction.x = LEFT;
 
+    return direction;
+}
+
+static Coord determine_decrease(Coord const start, Coord const goal, unsigned int const velocity)
+{
+    unsigned int Dx = abs(start.x - goal.x), Dy = abs(start.y - goal.y);
+    Coord decrease; init_coord(&decrease);
+
+    if (Dy < velocity)
+        decrease.y = velocity - Dy;
+    if (Dx < velocity)
+        decrease.x = velocity - Dx;
+
+    return decrease;
+}
+
+static DirectionVector walk(Coord *start, Coord const goal, unsigned int const velocity)
+{
+    DirectionVector direction = determine_direction(*start, goal);
+    Coord decrease = determine_decrease(*start, goal, velocity);
+
+    switch(direction.x)
+    {
+        case LEFT:
+            start->x -= velocity - decrease.x;
+            break;
+        case RIGHT:
+            start->x += velocity - decrease.x;
+            break;
+    }
+    switch(direction.y)
+    {
+        case DOWN:
+            start->y += velocity - decrease.y;
+            break;
+        case UP:
+            start->y -= velocity - decrease.y;
+            break;
+    }
     return direction;
 }
 
@@ -504,7 +529,7 @@ Direction move(
         unsigned int const velocity
         )
 {
-    Direction direction = DOWN;
+    DirectionVector direction; init_direction_vector(&direction);
     if (
             !is_same_coord(*start, goal) &&
             !is_colliding(goal, collision_map, TRUE) &&
@@ -523,5 +548,10 @@ Direction move(
         }
     }
 
-    return direction;
+    if (direction.x != NONE)
+        return direction.x;
+    else if (direction.x == NONE && direction.y != NONE)
+        return direction.y;
+    else
+        return DOWN;
 }
