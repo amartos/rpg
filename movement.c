@@ -64,29 +64,37 @@ static Direction walk(Coord *start, Coord const goal, unsigned int const velocit
 {
     Direction direction = DOWN;
     int Dx, Dy;
+    unsigned int absDy = 0, absDx = 0, decrease = 0;
 
     Dy = start->y - goal.y;
+    absDy = abs(Dy);
+    if (absDy < velocity)
+        decrease = velocity - absDy;
     if (Dy < 0)
     {
         direction = DOWN;
-        start->y += velocity;
+        start->y += velocity - decrease;
     }
     else if (Dy > 0)
     {
         direction = UP;
-        start->y -= velocity;
+        start->y -= velocity - decrease;
     }
 
+    decrease = 0;
     Dx = start->x - goal.x;
+    absDx = abs(Dx);
+    if (absDx < velocity)
+        decrease = velocity - absDx;
     if (Dx < 0)
     {
         direction = RIGHT;
-        start->x += velocity;
+        start->x += velocity - decrease;
     }
     else if (Dx > 0)
     {
         direction = LEFT;
-        start->x -= velocity;
+        start->x -= velocity - decrease;
     }
 
     return direction;
