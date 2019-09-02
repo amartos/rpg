@@ -41,8 +41,12 @@ enum Deployment {LINE, SQUARE, TRIANGLE, CIRCLE};
 
 // prototypes
 void init_coord(Coord *coord);
-Coord offsetting(Coord const center, Coord const offset);
-void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deployment);
+Coord offsetting(Coord const position);
+void get_formation_offset(
+        Coord *position,
+        unsigned int const char_number,
+        Deployment const deployment
+        );
 Bool is_same_coord(Coord const a, Coord const b);
 unsigned int find_path(
         Coord *(*path),

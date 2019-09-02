@@ -18,7 +18,9 @@ void init_direction_vector(DirectionVector *direction)
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
-    if (a.x == b.x && a.y == b.y)
+    Coord oa = offsetting(a);
+    Coord ob = offsetting(b);
+    if (oa.x == ob.x && oa.y == ob.y)
         same = TRUE;
     return same;
 }
@@ -31,18 +33,19 @@ static Bool is_colliding(
 {
     unsigned int x, y;
     Bool collide = FALSE;
+    Coord goal_offset = offsetting(goal);
 
     if (pixel)
     {
         // As the collision box is located on the feet, add the x and y coord to
         // obtain the true (0,0) corner of the image, then check
-        x = (goal.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
-        y = (goal.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
+        x = (goal_offset.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
+        y = (goal_offset.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
     }
     else
     {
-        x = goal.x;
-        y = goal.y;
+        x = goal_offset.x;
+        y = goal_offset.y;
     }
 
     collide = collision_map[x][y];
@@ -52,9 +55,10 @@ static Bool is_colliding(
 static Bool is_out_of_map(Coord const goal, Coord const max_coord)
 {
     Bool is_out = FALSE;
-    unsigned int x = goal.x, y = goal.y;
+    Coord goal_offset = offsetting(goal);
+    int x = goal_offset.x, y = goal_offset.y, mx = max_coord.x, my = max_coord.y;
 
-    if (goal.x < 0 || goal.y < 0 || x >= max_coord.x || y >= max_coord.y)
+    if (x < 0 || y < 0 || x >= mx || y >= my)
         is_out = TRUE;
 
     return is_out;
@@ -70,14 +74,16 @@ static DirectionVector determine_direction(Coord const start, Coord const goal)
 {
     DirectionVector direction; init_direction_vector(&direction);
     int Dx, Dy;
+    Coord start_offset = offsetting(start);
+    Coord goal_offset = offsetting(goal);
 
-    Dy = start.y - goal.y;
+    Dy = start_offset.y - goal_offset.y;
     if (Dy < 0)
         direction.y = DOWN;
     else if (Dy > 0)
         direction.y = UP;
 
-    Dx = start.x - goal.x;
+    Dx = start_offset.x - goal_offset.x;
     if (Dx < 0)
         direction.x = RIGHT;
     else if (Dx > 0)
@@ -88,7 +94,10 @@ static DirectionVector determine_direction(Coord const start, Coord const goal)
 
 static Coord determine_decrease(Coord const start, Coord const goal, unsigned int const velocity)
 {
-    unsigned int Dx = abs(start.x - goal.x), Dy = abs(start.y - goal.y);
+    Coord start_offset = offsetting(start);
+    Coord goal_offset = offsetting(goal);
+    unsigned int Dx = abs(start_offset.x - goal_offset.x);
+    unsigned int Dy = abs(start_offset.y - goal_offset.y);
     Coord decrease; init_coord(&decrease);
 
     if (Dy < velocity)
@@ -200,18 +209,27 @@ static void order_queue(unsigned int const max_array, unsigned int queue[], unsi
 
 static unsigned int convert_coord_to_number(Coord const coord, Coord const max_coord)
 {
-    unsigned int number = max_coord.x * coord.y + coord.x;
+    Coord coord_offset = offsetting(coord);
+    unsigned int number = max_coord.x * coord_offset.y + coord_offset.x;
     return number;
 }
 
 static void get_neighbours(Coord next[8], Coord const current, Coord const max_coord)
 {
+    Coord current_offset = offsetting(current);
+    unsigned int i;
+
     next[N].x = current.x;
     next[S].x = current.x;
     next[E].y = current.y;
     next[W].y = current.y;
+    for (i=W;i<=SW;i++)
+    {
+        next[i].ox = current.ox;
+        next[i].oy = current.oy;
+    }
 
-    if (current.y <= 0) //edge
+    if (current_offset.y <= 0) //edge
     {
         next[N].y = current.y;
         next[NE].y = current.y;
@@ -224,7 +242,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[NW].y = current.y - 1;
     }
 
-    if (current.y == max_coord.y-1) // edge
+    if (current_offset.y == max_coord.y-1) // edge
     {
         next[S].y = current.y;
         next[SE].y = current.y;
@@ -237,7 +255,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[SW].y = current.y + 1;
     }
 
-    if (current.x == (max_coord.x-1)) // edge
+    if (current_offset.x == (max_coord.x-1)) // edge
     {
         next[E].x = current.x;
         next[NE].x = current.x;
@@ -250,7 +268,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[SE].x = current.x + 1;
     }
 
-    if (current.x <= 0) // edge
+    if (current_offset.x <= 0) // edge
     {
         next[W].x = current.x;
         next[NW].x = current.x;
@@ -271,9 +289,11 @@ static unsigned int calculate_cost(
         unsigned int** const cost_map
         )
 {
+    Coord next_coord_offset = offsetting(next_coord);
+    Coord goal_offset = offsetting(goal);
     unsigned int next_cost = 0;
-    unsigned int x = next_coord.x, y = next_coord.y;
-    int distance = abs(goal.x - next_coord.x) + abs(goal.y - next_coord.y);
+    unsigned int x = next_coord_offset.x, y = next_coord_offset.y;
+    int distance = abs(goal_offset.x - x) + abs(goal_offset.y - y);
 
     next_cost = current_cost + distance + cost_map[x][y];
     return next_cost;
@@ -296,11 +316,19 @@ unsigned int find_path(
     Coord start; init_coord(&start);
     Coord goal; init_coord(&goal);
     Coord max_coord; init_coord(&max_coord);
+    
+    start = start_pixels;
+    start.x /= TILES_WIDTH;
+    start.y /= TILES_HEIGHT;
+    start.ox /= TILES_WIDTH;
+    start.oy /= TILES_HEIGHT;
 
-    start.x = start_pixels.x / TILES_WIDTH;
-    start.y = start_pixels.y / TILES_HEIGHT;
-    goal.x = goal_pixels.x / TILES_WIDTH;
-    goal.y = goal_pixels.y / TILES_HEIGHT;
+    goal = goal_pixels;
+    goal.x /= TILES_WIDTH;
+    goal.y /= TILES_HEIGHT;
+    goal.ox /= TILES_WIDTH;
+    goal.oy /= TILES_HEIGHT;
+
     max_coord.x = max_coord_pixels.x / TILES_WIDTH;
     max_coord.y = max_coord_pixels.y / TILES_HEIGHT;
 
@@ -417,6 +445,10 @@ unsigned int find_path(
         ETRY;
 
         ncurrent = ngoal;
+        current.ox = goal.ox;
+        current.oy = goal.oy;
+        next.ox = goal.ox;
+        next.oy = goal.oy;
         for (i=0;i<nodes;i++)
         {
             nnext = came_from[ncurrent];
@@ -430,8 +462,7 @@ unsigned int find_path(
             if (abs(current.y - next.y) % velocity)
                 current.y += abs(current.y - next.y) % velocity;
 
-            (*path)[i].x = current.x;
-            (*path)[i].y = current.y;
+            (*path)[i] = current;
             ncurrent = nnext;
         }
 
@@ -441,83 +472,105 @@ unsigned int find_path(
     return nodes;
 }
 
-Coord offsetting(Coord const center, Coord const offset)
+Coord offsetting(Coord const position)
 {
     Coord sum; init_coord(&sum);
     Coord absoffset; init_coord(&absoffset);
 
-    absoffset.x = abs(offset.ox);
-    absoffset.y = abs(offset.oy);
+    absoffset.x = abs(position.ox);
+    absoffset.y = abs(position.oy);
 
-    if (absoffset.x > center.x && offset.ox < 0)
+    if (absoffset.x > position.x && position.ox < 0)
         sum.x = 0;
     else
-        sum.x = center.x + offset.ox;
+        sum.x = position.x + position.ox;
 
 
-    if (absoffset.y > center.y && offset.oy < 0)
+    if (absoffset.y > position.y && position.oy < 0)
         sum.y = 0;
     else
-        sum.y = center.y + offset.oy;
+        sum.y = position.y + position.oy;
 
 
     return sum;
 }
 
-void get_formation_offset(Coord offset[MAX_CHARACTERS], Deployment const deployment)
+void get_formation_offset(Coord *position, unsigned int const char_number, Deployment const deployment)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
-    unsigned int i, space = TILES_WIDTH/4;
-    switch(deployment)
-    {
-        case LINE:
-            for (i=0;i<MAX_CHARACTERS;i++)
-            {
-                offset[i].ox = 0;
-                offset[i].oy = i * TILES_HEIGHT + space;
-            }
-            break;
-        case SQUARE:
-            offset[0].ox = -1 * TILES_WIDTH;
-            offset[0].oy = TILES_HEIGHT;
-
-            offset[1].ox = -1 * TILES_WIDTH;
-            offset[1].oy = -1 * TILES_HEIGHT;
-
-            offset[2].ox = TILES_WIDTH;
-            offset[2].oy = -1 * TILES_HEIGHT;
-
-            offset[3].ox = TILES_WIDTH;
-            offset[3].oy = TILES_HEIGHT;
-            break;
-        case TRIANGLE:
-            offset[0].ox = 0;
-            offset[0].oy = 0;
-
-            offset[1].ox = 0;
-            offset[1].oy = -1 * (TILES_HEIGHT + space);
-
-            offset[2].ox = -1 * TILES_WIDTH;
-            offset[2].oy = TILES_HEIGHT;
-
-            offset[3].ox = TILES_WIDTH;
-            offset[3].oy = TILES_HEIGHT;
-            break;
-        case CIRCLE:
-            offset[0].ox = -2 * TILES_WIDTH;
-            offset[0].oy = TILES_HEIGHT;
-
-            offset[1].ox = -1 * TILES_WIDTH;
-            offset[1].oy = 0;
-
-            offset[2].ox = 0;
-            offset[2].oy = 0;
-
-            offset[3].ox = TILES_WIDTH;
-            offset[3].oy = TILES_HEIGHT;
-            break;
-    }
+    unsigned space = TILES_WIDTH/4;
+    if (char_number < MAX_CHARACTERS)
+        switch(deployment)
+        {
+            case LINE:
+                position->ox = 0;
+                position->oy = char_number * TILES_HEIGHT + space;
+                break;
+            case SQUARE:
+                switch(char_number)
+                {
+                    case 0:
+                        position->ox = -1 * TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                    case 1:
+                        position->ox = -1 * TILES_WIDTH;
+                        position->oy = -1 * TILES_HEIGHT;
+                        break;
+                    case 2:
+                        position->ox = TILES_WIDTH;
+                        position->oy = -1 * TILES_HEIGHT;
+                        break;
+                    case 3:
+                        position->ox = TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                }
+                break;
+            case TRIANGLE:
+                switch(char_number)
+                {
+                    case 0:
+                        position->ox = 0;
+                        position->oy = 0;
+                        break;
+                    case 1:
+                        position->ox = 0;
+                        position->oy = -1 * (TILES_HEIGHT + space);
+                        break;
+                    case 2:
+                        position->ox = -1 * TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                    case 3:
+                        position->ox = TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                }
+                break;
+            case CIRCLE:
+                switch(char_number)
+                {
+                    case 0:
+                        position->ox = -2 * TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                    case 1:
+                        position->ox = -1 * TILES_WIDTH;
+                        position->oy = 0;
+                        break;
+                    case 2:
+                        position->ox = 0;
+                        position->oy = 0;
+                        break;
+                    case 3:
+                        position->ox = TILES_WIDTH;
+                        position->oy = TILES_HEIGHT;
+                        break;
+                }
+                break;
+        }
 }
 
 Direction move(

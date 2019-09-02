@@ -3,15 +3,12 @@
 
 static void handle_movement(
         Character *character,
-        Coord center,
-        Coord const offset,
         Coord const max_coord,
         Map const map
         )
 {
     unsigned int current_node = 0, nodes = 0;
 
-    character->goal = offsetting(center, offset);
     switch (character->movement_type)
     {
         case PATH:
@@ -112,9 +109,11 @@ static void fire_movement(Character characters[MAX_CHARACTERS], MovementType con
     }
 }
 
-static void change_formation(Character characters[MAX_CHARACTERS], Coord offset[MAX_CHARACTERS], Deployment formation)
+static void change_formation(Character characters[MAX_CHARACTERS], Deployment formation)
 {
-    get_formation_offset(offset, formation);
+    unsigned int i;
+    for (i=0;i<MAX_CHARACTERS;i++)
+        get_formation_offset(&(characters[i].position), i, formation);
     fire_movement(characters, PATH);
 }
 
@@ -144,9 +143,10 @@ int main(int argc, char *argv[])
 
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
-    Coord offset[MAX_CHARACTERS];
+    Coord position; init_coord(&position);
+    Coord start_position[MAX_CHARACTERS];
     for (i=0;i<MAX_CHARACTERS;i++)
-        init_coord(offset+i);
+        init_coord(start_position+i);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
 
@@ -169,17 +169,18 @@ int main(int argc, char *argv[])
     palette[YELLOW][2].r = 0x18, palette[YELLOW][2].g = 0x80, palette[YELLOW][2].b = 0xF8;
 
     // load characters
-    get_formation_offset(offset, SQUARE);
     center.x = TILES_WIDTH * 4;
     center.y = TILES_HEIGHT * 4;
     for (i=0;i<MAX_CHARACTERS;i++)
     {
+        start_position[i] = center;
+        get_formation_offset(&start_position[i], i, SQUARE);
         init_character(
                 &all_characters[i],
                 palette[i],
                 "assets/sprites/characters/test_character_grey.png",
                 2, 12, 4, // N frames, FPS, velocity
-                offsetting(center, offset[i]) // start position
+                start_position[i]
                 );
         // double size of sprites as the images are really small
         // 16 pixels w/h is too small for recent screens but
@@ -222,16 +223,16 @@ int main(int argc, char *argv[])
                     switch (event.key.keysym.sym)
                     {
                         case SDLK_a:
-                            change_formation(all_characters, offset, LINE);
+                            change_formation(all_characters, LINE);
                             break;
                         case SDLK_z:
-                            change_formation(all_characters, offset, SQUARE);
+                            change_formation(all_characters, SQUARE);
                             break;
                         case SDLK_e:
-                            change_formation(all_characters, offset, TRIANGLE);
+                            change_formation(all_characters, TRIANGLE);
                             break;
                         case SDLK_r:
-                            change_formation(all_characters, offset, CIRCLE);
+                            change_formation(all_characters, CIRCLE);
                             break;
                         case SDLK_UP:
                             break;
@@ -251,11 +252,16 @@ int main(int argc, char *argv[])
             {
                 if (all_characters[i].moving)
                 {
-                    handle_movement(&all_characters[i], center, offset[i], max_coord, test_map);
+                    // add offset to center
+                    center.ox = all_characters[i].position.ox;
+                    center.oy = all_characters[i].position.oy;
+                    all_characters[i].goal = center;
+                    handle_movement(&all_characters[i], max_coord, test_map);
                     check_character_frame(&all_characters[i], time);
                 }
-                infos.x = all_characters[i].position.x;
-                infos.y = all_characters[i].position.y;
+                position = offsetting(all_characters[i].position);
+                infos.x = position.x;
+                infos.y = position.y;
                 state = MOVE;
                 direction = all_characters[i].direction;
                 current_frame = all_characters[i].current_frame;

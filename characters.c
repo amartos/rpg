@@ -38,10 +38,14 @@ void init_character(
     // Coord position
     character->position.x = start_position.x;
     character->position.y = start_position.y;
+    character->position.ox = start_position.ox;
+    character->position.oy = start_position.oy;
 
     // Coord goal
     character->goal.x = 0;
     character->goal.y = 0;
+    character->goal.ox = 0;
+    character->goal.oy = 0;
 
     // Coord *path
     character->path = NULL;
