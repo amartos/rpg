@@ -11,8 +11,7 @@
 // Coding stuff
 // ------------------------------------
 
-// get var name
-#define get_name(var)  #var
+#define get_name(var)  #var // get var name
 #define MAX_SIZE_LINE 1000
 
 typedef enum Bool Bool;
@@ -37,6 +36,8 @@ enum Bool
 typedef enum ColorChannels ColorChannels;
 enum ColorChannels {R, G, B};
 
+// This is the struct used to define the game color palette to be applied to
+// greys sprites
 typedef enum ColorPalette ColorPalette;
 enum ColorPalette 
 {
@@ -64,6 +65,8 @@ struct Tile
 typedef enum Cardinals Cardinals;
 enum Cardinals {W, S, N, E, NE, NW, SE, SW};
 
+// This struct is used to describe different formations that the characters'
+// team can apply. Circle is actually a half-circle, given the MAX_CHAR value
 typedef enum Deployment Deployment;
 enum Deployment {
     LINE,
@@ -72,15 +75,20 @@ enum Deployment {
     CIRCLE
 };
 
+// This structure describes coordinates on the map
+// The ox and oy represent an offset to be applied to the x and y points, which
+// can be done with the offsetting function in the movement module.
 typedef struct Coord Coord;
 struct Coord
 {
     unsigned int x;
     unsigned int y;
-    int ox; // offset
+    int ox;
     int oy;
 };
 
+// This structure is used by the movement module to manage different ways of
+// moving the characters
 typedef enum MovementType MovementType;
 enum MovementType {WALK, PATH, TELEPORT};
 
@@ -88,14 +96,17 @@ enum MovementType {WALK, PATH, TELEPORT};
 // Characters
 // ------------------------------------
 
+// This describes the character's image on screen
 #define SPRITES_WIDTH 32
 #define SPRITES_HEIGHT 32
 #define COLLISION_BOX_OFFSET_X 4
 #define COLLISION_BOX_OFFSET_Y 28
 #define COLLISION_BOX_WIDTH (SPRITES_WIDTH - 2 * COLLISION_BOX_OFFSET_X) // left & right
 #define COLLISION_BOX_HEIGHT (SPRITES_HEIGHT - COLLISION_BOX_OFFSET_Y)
-#define MAX_CHARACTERS 4
+#define MAX_CHARACTERS 4 // max of team
 
+// This structure describes the different states a character object can be
+// found in, mainly related to the sprites.
 typedef enum State State;
 enum State 
 {
@@ -151,6 +162,7 @@ struct Character
 #define TILES_WIDTH 32
 #define TILES_HEIGHT 32
 
+// The different types of maps found in a map file
 // Background always fist, weather always last
 typedef enum MapType MapType;
 enum MapType {
@@ -161,6 +173,7 @@ enum MapType {
     WEATHER
 };
 
+// Maps structures
 typedef struct Map Map;
 struct Map
 {
