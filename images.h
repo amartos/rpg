@@ -1,8 +1,8 @@
 #ifndef RPG_IMAGES
 #define RPG_IMAGES
 
-#define COLOR_PALETTE 3
-
+#include "errors.h"
+#include "try_throw_catch.h"
 #include "macros.h"
 
 #include <stdio.h>

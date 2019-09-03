@@ -7,27 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-
-// structures
-typedef struct Coord Coord;
-struct Coord
-{
-    unsigned int x;
-    unsigned int y;
-    int ox; // offset
-    int oy;
-};
-
-typedef enum MovementType MovementType;
-enum MovementType {WALK, PATH, TELEPORT};
-
-typedef enum Cardinals Cardinals;
-// this order depends on the sprite order
-enum Cardinals {W, S, N, E, NE, NW, SE, SW};
-
-typedef enum Deployment Deployment;
-enum Deployment {LINE, SQUARE, TRIANGLE, CIRCLE};
 
 // prototypes
 void init_coord(Coord *coord);
@@ -38,6 +19,8 @@ void get_formation_offset(
         Deployment const deployment
         );
 Bool is_same_coord(Coord const a, Coord const b);
+Bool is_colliding(Coord const goal, unsigned int** const collision_map, Bool const pixel);
+Bool is_out_of_map(Coord const goal, Coord const max_coord);
 unsigned int find_path(
         Coord *(*path),
         Coord const start,

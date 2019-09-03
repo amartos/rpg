@@ -17,8 +17,5 @@
 // this should be removed at some point
 #include <SDL/SDL_rotozoom.h>
 
-// structures
-enum {GREEN, RED, BLUE, YELLOW};
-
 
 #endif // define RPG_MAIN
