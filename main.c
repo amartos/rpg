@@ -1,101 +1,45 @@
 #include "main.h"
 
 
-static void handle_movement(
-        Character *character,
-        Coord const max_coord,
-        Map const map
-        )
+static void handle_movement(Movement *movement, Map const map)
 {
-    unsigned int current_node = 0, nodes = 0;
+    unsigned int nodes = 0;
+    Coord max_coord; init_coord(&max_coord);
+    max_coord.x = map.x_tiles * TILES_WIDTH;
+    max_coord.y = map.y_tiles * TILES_HEIGHT;
 
-    switch (character->movement_type)
+    switch (movement->movement_type)
     {
         case PATH:
-            character->movement_type = WALK;
-            if (character->path != NULL)
-            {
-                free_path(character);
-                character->nodes = 0;
-            }
-
-            nodes = find_path(
-                    &character->path,
-                    character->position,
-                    character->goal,
-                    character->velocity,
-                    max_coord,
-                    map.schematics[COLLISIONS],
-                    map.schematics[COST]
-                    );
-
-            if (nodes && character->path != NULL)
-            {
-                character->nodes = nodes;
-                current_node = character->nodes;
-                character->goal = character->path[current_node];
-                goto make_a_move;
-            }
-            else
+            movement->movement_type = WALK;
+            nodes = find_path(movement, map);
+            if (!nodes)
                 goto end_move;
-        case TELEPORT:
-            if (character->path != NULL)
-            {
-                free_path(character);
-                character->nodes = 0;
-            }
             goto make_a_move;
-        case WALK:
-            current_node = character->nodes;
-            if (is_same_coord(character->path[current_node], character->position))
-            {
-                if (current_node)
-                {
-                    character->nodes--;
-                    current_node = character->nodes;
-                    character->goal = character->path[current_node];
-                }
-                else
-                {
-                    free_path(character);
-                    goto end_move;
-                }
-            }
-            else
-                character->goal = character->path[current_node];
+        default:
             goto make_a_move;
         make_a_move:
-            character->direction = move(
-                    &character->position,
-                    character->goal,
-                    character->movement_type,
-                    max_coord,
-                    map.schematics[COLLISIONS],
-                    character->velocity
-                    );
-            if (is_same_coord(character->goal, character->position))
+            move(movement, max_coord, map.schematics[COLLISIONS]);
+            if (is_same_coord(movement->path[0], movement->position))
                 goto end_move;
             else
                 break;
         end_move:
-            if (character->path == NULL)
-            {
-                character->goal.x = 0;
-                character->goal.y = 0;
-                character->moving = FALSE;
-            }
+            movement->path[0].x = 0;
+            movement->path[0].y = 0;
+            movement->moving = FALSE;
             break;
     }
 }
 
-static void check_character_frame(Character *character, unsigned int const time)
+static void check_character_frame(OnScreen *on_screen, unsigned int const time)
 {
-    if (time - character->previous_time > character->framerate)
+    if (time - on_screen->time > on_screen->framerate)
     {
-        character->current_frame++;
-        if (character->current_frame >= character->number_of_frames)
-            character->current_frame = 0;
-        character->previous_time = time;
+        on_screen->current_frame++;
+        if (on_screen->current_frame >= on_screen->total_frames)
+            on_screen->current_frame = 0;
+        on_screen->time = time;
     }
 }
 
@@ -104,8 +48,8 @@ static void fire_movement(Character characters[MAX_CHARACTERS], MovementType con
     unsigned int i;
     for (i=0;i<MAX_CHARACTERS;i++)
     {
-        characters[i].moving = TRUE;
-        characters[i].movement_type = movement;
+        characters[i].movement.moving = TRUE;
+        characters[i].movement.movement_type = movement;
     }
 }
 
@@ -113,7 +57,7 @@ static void change_formation(Character characters[MAX_CHARACTERS], Deployment fo
 {
     unsigned int i;
     for (i=0;i<MAX_CHARACTERS;i++)
-        get_formation_offset(&(characters[i].position), i, formation);
+        get_formation_offset(&(characters[i].movement.position), i, formation);
     fire_movement(characters, PATH);
 }
 
@@ -126,7 +70,6 @@ int main(int argc, char *argv[])
     // SDL vars init
     SDL_Surface *screen = NULL; init_screen(&screen);
     SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
-    SDL_Color palette[MAX_CHARACTERS][COLOR_PALETTE];
     SDL_Rect infos;
     infos.x = 0; infos.y = 0;
     infos.w = SPRITES_WIDTH; infos.h = SPRITES_HEIGHT;
@@ -150,24 +93,6 @@ int main(int argc, char *argv[])
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
 
-    // load characters palette : 0 green, 1 red, 2 blue, 3 yellow
-    palette[GREEN][0].r = 0x10, palette[GREEN][0].g = 0xA8, palette[GREEN][0].b = 0x40;
-    palette[RED][0].r = 0xF8, palette[RED][0].g = 0x00, palette[RED][0].b = 0x00;
-    palette[BLUE][0].r = 0x18, palette[BLUE][0].g = 0x80, palette[BLUE][0].b = 0xf8;
-    palette[YELLOW][0].r = 0xf0, palette[YELLOW][0].g = 0xe8, palette[YELLOW][0].b = 0x18;
-
-    palette[GREEN][1].r = 0xF8, palette[GREEN][1].g = 0xB8, palette[GREEN][1].b = 0x88;
-    palette[GREEN][2].r = 0x18, palette[GREEN][2].g = 0x80, palette[GREEN][2].b = 0xF8;
-
-    palette[RED][1].r = 0xF8, palette[RED][1].g = 0xB8, palette[RED][1].b = 0x88;
-    palette[RED][2].r = 0x18, palette[RED][2].g = 0x80, palette[RED][2].b = 0xF8;
-
-    palette[BLUE][1].r = 0xF8, palette[BLUE][1].g = 0xB8, palette[BLUE][1].b = 0x88;
-    palette[BLUE][2].r = 0x18, palette[BLUE][2].g = 0x80, palette[BLUE][2].b = 0xF8;
-
-    palette[YELLOW][1].r = 0xF8, palette[YELLOW][1].g = 0xB8, palette[YELLOW][1].b = 0x88;
-    palette[YELLOW][2].r = 0x18, palette[YELLOW][2].g = 0x80, palette[YELLOW][2].b = 0xF8;
-
     // load characters
     center.x = TILES_WIDTH * 4;
     center.y = TILES_HEIGHT * 4;
@@ -175,18 +100,7 @@ int main(int argc, char *argv[])
     {
         start_position[i] = center;
         get_formation_offset(&start_position[i], i, SQUARE);
-        init_character(
-                &all_characters[i],
-                palette[i],
-                "assets/sprites/characters/test_character_grey.png",
-                2, 12, 4, // N frames, FPS, velocity
-                start_position[i]
-                );
-        // double size of sprites as the images are really small
-        // 16 pixels w/h is too small for recent screens but
-        // good for GBC, and the test sprites are from this console
-        // this will be delete when real sprites are done
-        all_characters[i].sprite = rotozoomSurface(all_characters[i].sprite, 0.0, 2.0, 0.0);
+        init_character(&all_characters[i], i, start_position[i]);
     }
 
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
@@ -209,6 +123,13 @@ int main(int argc, char *argv[])
                 case SDL_MOUSEBUTTONDOWN:
                     center.x = event.button.x;
                     center.y = event.button.y;
+                    for (i=0;i<MAX_CHARACTERS;i++)
+                    {
+                        // add offset to center
+                        center.ox = all_characters[i].movement.position.ox;
+                        center.oy = all_characters[i].movement.position.oy;
+                        all_characters[i].movement.path[0] = center;
+                    }
                     switch(event.button.button)
                     {
                         case SDL_BUTTON_LEFT:
@@ -250,24 +171,20 @@ int main(int argc, char *argv[])
             apply_tiles(&screen, BACKGROUND, test_map, test_tile);
             for (i=0;i<MAX_CHARACTERS;i++)
             {
-                if (all_characters[i].moving)
+                if (all_characters[i].movement.moving)
                 {
-                    // add offset to center
-                    center.ox = all_characters[i].position.ox;
-                    center.oy = all_characters[i].position.oy;
-                    all_characters[i].goal = center;
-                    handle_movement(&all_characters[i], max_coord, test_map);
-                    check_character_frame(&all_characters[i], time);
+                    handle_movement(&all_characters[i].movement, test_map);
+                    check_character_frame(&(all_characters[i].on_screen), time);
                 }
-                position = offsetting(all_characters[i].position);
+                position = offsetting(all_characters[i].movement.position);
                 infos.x = position.x;
                 infos.y = position.y;
                 state = MOVE;
-                direction = all_characters[i].direction;
-                current_frame = all_characters[i].current_frame;
+                direction = all_characters[i].movement.direction;
+                current_frame = all_characters[i].on_screen.current_frame;
                 SDL_BlitSurface(
-                        all_characters[i].sprite,
-                        &all_characters[i].frames[direction][state][current_frame],
+                        all_characters[i].on_screen.sprite,
+                        &(all_characters[i].on_screen.frames[direction][state][current_frame]),
                         screen, &infos
                         );
             }

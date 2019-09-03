@@ -58,8 +58,10 @@ struct Tile
 // Movement
 // ------------------------------------
 
-typedef enum Cardinals Cardinals;
+#define MAX_PATH_NODES 100
+
 // this order depends on the sprite order
+typedef enum Cardinals Cardinals;
 enum Cardinals {W, S, N, E, NE, NW, SE, SW};
 
 typedef enum Deployment Deployment;
@@ -102,28 +104,44 @@ enum State
     PUSH,
     PULL,
     PUSH_SHIELD,
-    MOVE_SHIELD
+    MOVE_SHIELD,
+    STILL
 };
 
+typedef struct OnScreen OnScreen;
+struct OnScreen 
+{
+    SDL_Surface *sprite;
+    State state;
+    Bool animated;
+    // possible positions, State, max number of frames
+    SDL_Rect frames[SW+1][MOVE_SHIELD+1][FPS];
+    unsigned int total_frames; // total
+    unsigned int current_frame;
+    unsigned int framerate;
+    unsigned int time; // previous tick (for changing frame)
+};
+
+typedef struct Movement Movement;
+struct Movement 
+{
+    Coord position; // current position and offset
+    Bool moving;
+    Cardinals direction;
+    Coord path[MAX_PATH_NODES]; // array of nodes
+    unsigned int current_node;
+    MovementType movement_type;
+    unsigned int velocity; // in pixels
+};
+
+// This describes a Character type object, aka all what can be described as a
+// living being
 typedef struct Character Character;
 struct Character
 {
-    SDL_Surface *sprite;
-    Coord position;
-    Cardinals direction;
-    Coord goal;
-    Coord *path;
-    unsigned int nodes;
-    State state;
-    Bool animated;
-    MovementType movement_type;
-    Bool moving;
-    unsigned int number_of_frames;
-    unsigned int velocity;
-    SDL_Rect frames[4][6][30]; // possible positions, State, max number of frames
-    unsigned int current_frame;
-    unsigned int framerate;
-    unsigned int previous_time;
+    unsigned int id;
+    OnScreen on_screen;
+    Movement movement;
 };
 
 // ------------------------------------

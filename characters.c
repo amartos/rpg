@@ -1,61 +1,25 @@
 #include "characters.h"
 
 
-void init_character(
-        Character *character,
-        SDL_Color const colors[],
-        char const sprite_path[],
-        unsigned int const number_of_frames,
-        unsigned int const fps,
-        unsigned int const velocity,
-        Coord const start_position
-        )
+static void init_on_screen(OnScreen *on_screen, unsigned int const id)
 {
     unsigned int i, j, f;
+    SDL_Surface *sprite = NULL;
 
-    character->state = MOVE;
-    character->direction = S;
-    character->nodes = 0;
-    character->current_frame = 0;
-    character->previous_time = 0;
+    //-------------------------------------------------------------------------
+    // Sprites loading & colorization
+    //-------------------------------------------------------------------------
 
-    character->movement_type = WALK;
-    character->moving = FALSE;
-    character->number_of_frames = number_of_frames;
-    if (number_of_frames > 1)
-    {
-        character->animated = TRUE;
-        character->framerate = 1000/fps;
-        character->velocity = velocity;
-    }
-    else
-    {
-        character->animated = FALSE;
-        character->framerate = 0;
-        character->velocity = 0;
-    }
-
-    // Coord position
-    character->position.x = start_position.x;
-    character->position.y = start_position.y;
-    character->position.ox = start_position.ox;
-    character->position.oy = start_position.oy;
-
-    // Coord goal
-    character->goal.x = 0;
-    character->goal.y = 0;
-    character->goal.ox = 0;
-    character->goal.oy = 0;
-
-    // Coord *path
-    character->path = NULL;
-
-    // SDL_Surface *sprite
     TRY
     {
-        character->sprite = IMG_Load(sprite_path);
-        if (character->sprite == NULL)
+        sprite = IMG_Load("assets/sprites/characters/test_character_grey.png");
+        if (sprite == NULL)
             THROW(SPRITE_LOAD_FAILURE);
+        // double size of sprites as the images are really small
+        // 16 pixels w/h is too small for recent screens but
+        // good for GBC, and the test sprites are from this console
+        // this will be delete when real sprites are done
+        on_screen->sprite = rotozoomSurface(sprite, 0.0, 2.0, 0.0);
     }
     CATCH(SPRITE_LOAD_FAILURE)
     {
@@ -73,32 +37,99 @@ void init_character(
     greys[1].r = 0xC6, greys[1].g = 0xC6, greys[1].b = 0xC6;
     greys[2].r = 0x7f, greys[2].g = 0x7f, greys[2].b = 0x7f;
 
-    for (i=0;i<COLOR_PALETTE;i++)
-        set_color(character->sprite, greys[i], colors[i]);
+    // load characters palette : 0 green, 1 red, 2 blue, 3 yellow
+    SDL_Color palette[COLOR_PALETTE];
+    palette[1].r = 0xF8, palette[1].g = 0xB8, palette[1].b = 0x88;
+    palette[2].r = 0x18, palette[2].g = 0x80, palette[2].b = 0xF8;
+    switch (id)
+    {
+        case GREEN:
+            palette[0].r = 0x10, palette[0].g = 0xA8, palette[0].b = 0x40;
+            break;
+        case RED:
+            palette[0].r = 0xF8, palette[0].g = 0x00, palette[0].b = 0x00;
+            break;
+        case BLUE:
+            palette[0].r = 0x18, palette[0].g = 0x80, palette[0].b = 0xf8;
+            break;
+        case YELLOW:
+            palette[0].r = 0xf0, palette[0].g = 0xe8, palette[0].b = 0x18;
+            break;
+    }
 
-    // SDL_Rect ***frames
+    for (i=0;i<COLOR_PALETTE;i++)
+        set_color(on_screen->sprite, greys[i], palette[i]);
+
+    //-------------------------------------------------------------------------
+    // Frames
+    //-------------------------------------------------------------------------
+
+    on_screen->total_frames = 2;
+
     // This depends on the sprite order
     // TODO: if(sprite changes), reorder
-    for (i=W;i<=E;i++)
-        for (j=MOVE;j<=MOVE_SHIELD;j++)
-            for (f=0;f<number_of_frames;f++)
+    for (i=W;i<=E;i++) // directions
+        for (j=MOVE;j<=MOVE_SHIELD;j++) // States
+            for (f=0;f<on_screen->total_frames;f++)
             {
-                character->frames[i][j][f].x = (i * 2 + f) * SPRITES_WIDTH;
-                character->frames[i][j][f].y = j * SPRITES_HEIGHT;
-                character->frames[i][j][f].w = SPRITES_WIDTH;
-                character->frames[i][j][f].h = SPRITES_HEIGHT;
+                on_screen->frames[i][j][f].x = (i * 2 + f) * SPRITES_WIDTH;
+                on_screen->frames[i][j][f].y = j * SPRITES_HEIGHT;
+                on_screen->frames[i][j][f].w = SPRITES_WIDTH;
+                on_screen->frames[i][j][f].h = SPRITES_HEIGHT;
             }
+
+    on_screen->current_frame = 0;
+
+    //-------------------------------------------------------------------------
+    // Constants
+    //-------------------------------------------------------------------------
+
+    on_screen->animated = FALSE;
+    on_screen->framerate = 0;
+    if (on_screen->total_frames > 1)
+    {
+        on_screen->animated = TRUE;
+        on_screen->framerate = 1000/12; // 1000/character FPS
+    }
+
+    on_screen->state = MOVE;
+    on_screen->time = 0;
 }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+static void init_movement(Movement *movement, Coord const start_position)
+{
+    unsigned int i;
+    init_coord(&movement->position);
+    movement->position = start_position;
+    for (i=0;i<MAX_PATH_NODES;i++)
+        init_coord(&movement->path[i]);
+    movement->moving = FALSE;
+    movement->velocity = 4;
+    movement->direction = S;
+    movement->current_node = 0;
+    movement->movement_type = WALK;
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+void init_character(Character *character, unsigned int const id, Coord const start_position)
+{
+    character->id = id;
+    init_movement(&character->movement, start_position);
+    init_on_screen(&character->on_screen, id);
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 void free_character(Character *character)
 {
-    SDL_FreeSurface(character->sprite);
-    if (character->path != NULL)
-        free_path(character);
-}
-
-void free_path(Character *character)
-{
-    free(character->path);
-    character->path = NULL;
+    SDL_FreeSurface(character->on_screen.sprite);
 }

@@ -164,38 +164,29 @@ static unsigned int calculate_cost(
     return next_cost;
 }
 
-unsigned int find_path(
-        Coord *(*path),
-        Coord const start_pixels,
-        Coord goal_pixels,
-        unsigned int const velocity,
-        Coord const max_coord_pixels,
-        unsigned int** const collision_map,
-        unsigned int** const movement_cost_map
-        )
+unsigned int find_path(Movement *movement, Map const map)
 {
     // vars init
     unsigned int nodes = 0;
 
-    Coord *tmp = NULL;
     Coord start; init_coord(&start);
     Coord goal; init_coord(&goal);
     Coord max_coord; init_coord(&max_coord);
-    
-    start = start_pixels;
+
+    start = offsetting(movement->position);
     start.x /= TILES_WIDTH;
     start.y /= TILES_HEIGHT;
     start.ox /= TILES_WIDTH;
     start.oy /= TILES_HEIGHT;
 
-    goal = goal_pixels;
+    goal = offsetting(movement->path[0]);
     goal.x /= TILES_WIDTH;
     goal.y /= TILES_HEIGHT;
     goal.ox /= TILES_WIDTH;
     goal.oy /= TILES_HEIGHT;
 
-    max_coord.x = max_coord_pixels.x / TILES_WIDTH;
-    max_coord.y = max_coord_pixels.y / TILES_HEIGHT;
+    max_coord.x = map.x_tiles;
+    max_coord.y = map.y_tiles;
 
     // all this can be put in the first if statement for optimisation
     unsigned int i = 0, j = 0, n = 0, nnext = 0, ncurrent = 0;
@@ -237,7 +228,7 @@ unsigned int find_path(
     // A* starts here
     if (
             !is_same_coord(start, goal) &&
-            !is_colliding(goal, collision_map, FALSE) &&
+            !is_colliding(goal, map.schematics[COLLISIONS], FALSE) &&
             !is_out_of_map(goal, max_coord)
         )
     {
@@ -253,11 +244,12 @@ unsigned int find_path(
                 {
                     if (
                         !is_same_coord(start, all_next[i]) &&
-                        !is_colliding(all_next[i], collision_map, FALSE)
+                        !is_colliding(all_next[i], map.schematics[COLLISIONS], FALSE) &&
+                        !is_out_of_map(all_next[i], max_coord)
                         )
                     {
                         nnext = convert_coord_to_number(all_next[i], max_coord);
-                        new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, movement_cost_map);
+                        new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, map.schematics[COST]);
                         if (!came_from[nnext] || new_cost < cost[nnext])
                         {
                             came_from[nnext] = ncurrent;
@@ -285,53 +277,32 @@ unsigned int find_path(
                 done = TRUE;
         }
 
-        ncurrent = ngoal;
-        while (ncurrent != nstart)
-        {
-            nodes++;
-            ncurrent = came_from[ncurrent]; // came_from[goal] = previous
-            if (nodes > max_array || ncurrent == 0)
-                return 0; // if no nodes found, return 0 nodes
-        }
-
-        TRY
-        {
-            tmp = (Coord *)realloc(*path, sizeof(Coord) * nodes);
-            if (tmp == NULL)
-                THROW(PATHFIND_MALLOC_FAILURE);
-            else
-                *path = tmp;
-        }
-        CATCH(PATHFIND_MALLOC_FAILURE)
-        {
-            logger(PATHFIND_MALLOC_FAILURE, "oups");
-            exit(EXIT_FAILURE);
-        }
-        ETRY;
-
+        nodes = 0;
         ncurrent = ngoal;
         current.ox = goal.ox;
         current.oy = goal.oy;
         next.ox = goal.ox;
         next.oy = goal.oy;
-        for (i=0;i<nodes;i++)
+
+        for (i=0;i<MAX_PATH_NODES;i++)
         {
-            nnext = came_from[ncurrent];
+            nodes++;
+            nnext = came_from[ncurrent]; // came_from[goal] = previous
             current.x = conversion[ncurrent].x * TILES_WIDTH;
             current.y = conversion[ncurrent].y * TILES_HEIGHT;
             next.x = conversion[nnext].x * TILES_WIDTH;
             next.y = conversion[nnext].y * TILES_HEIGHT;
 
-            if (abs(current.x - next.x) % velocity)
-                current.x += abs(current.x - next.x) % velocity;
-            if (abs(current.y - next.y) % velocity)
-                current.y += abs(current.y - next.y) % velocity;
+            if (abs(current.x - next.x) % movement->velocity)
+                current.x += abs(current.x - next.x) % movement->velocity;
+            if (abs(current.y - next.y) % movement->velocity)
+                current.y += abs(current.y - next.y) % movement->velocity;
 
-            (*path)[i] = current;
+            movement->path[i] = current;
             ncurrent = nnext;
+            if (ncurrent == nstart)
+                break;
         }
-
-        nodes--;
     }
 
     return nodes;

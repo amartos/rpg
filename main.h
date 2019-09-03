@@ -8,14 +8,13 @@
 #include "screen.h"
 #include "characters.h"
 #include "movement.h"
+#include "pathfinding.h"
 #include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-// this should be removed at some point
-#include <SDL/SDL_rotozoom.h>
 
 
 #endif // define RPG_MAIN

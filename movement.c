@@ -231,18 +231,16 @@ void get_formation_offset(Coord *position, unsigned int const char_number, Deplo
         }
 }
 
-Cardinals move(
-        Coord *start,
-        Coord const goal,
-        MovementType const type,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int const velocity
-        )
+void move(Movement *movement, Coord const max_coord, unsigned int** const collision_map)
 {
-    Cardinals direction = S;
+    Coord start = movement->position;
+    unsigned int current_node = movement->current_node;
+    Coord goal = movement->path[current_node];
+    MovementType type = movement->movement_type;
+    unsigned int velocity = movement->velocity;
+
     if (
-            !is_same_coord(*start, goal) &&
+            !is_same_coord(start, goal) &&
             !is_colliding(goal, collision_map, TRUE) &&
             !is_out_of_map(goal, max_coord)
         )
@@ -251,13 +249,13 @@ Cardinals move(
         {
             case PATH:
             case WALK:
-                direction = walk(start, goal, velocity);
+                movement->direction = walk(&movement->position, goal, velocity);
                 break;
             case TELEPORT:
-                teleport(start, goal);
+                teleport(&movement->position, goal);
                 break;
         }
+        if (movement->current_node)
+            movement->current_node--;
     }
-
-    return direction;
 }

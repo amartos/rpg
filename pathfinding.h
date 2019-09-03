@@ -12,14 +12,8 @@
 #include <math.h>
 
 // A* pathfinding
-unsigned int find_path(
-        Coord *(*path),
-        Coord const start_pixels,
-        Coord goal_pixels,
-        unsigned int const velocity,
-        Coord const max_coord_pixels,
-        unsigned int** const collision_map,
-        unsigned int** const movement_cost_map
-        );
+// returns the number of nodes it has found for the path, and modifies the
+// Character structure's path pointer to point to the corresponding Coord array
+unsigned int find_path(Movement *movement, Map const map);
 
 #endif // define RPG_PATHFINDING

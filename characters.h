@@ -5,24 +5,20 @@
 #include "try_throw_catch.h"
 #include "macros.h"
 #include "images.h"
+#include "movement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+// this should be removed at some point
+#include <SDL/SDL_rotozoom.h>
 
 
 // prototypes
-void init_character(
-        Character *character,
-        SDL_Color const colors[],
-        char const sprite_path[],
-        unsigned int const number_of_frames,
-        unsigned int const fps,
-        unsigned int const velocity,
-        Coord const start_position
-        );
+// Character initialization. For now the values are manually set, but in the
+// future all will depend on the id
+void init_character(Character *character, unsigned int const id, Coord const start_position);
 void free_character(Character *character);
-void free_path(Character *character);
 
 #endif // define RPG_CHARACTERS
