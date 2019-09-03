@@ -12,6 +12,8 @@
 
 // prototypes
 void init_coord(Coord *coord);
+void reset_coord(Coord *coord);
+void copy_offset_from(Coord const original, Coord *copy);
 Coord offsetting(Coord const position);
 void get_formation_offset(
         Coord *position,

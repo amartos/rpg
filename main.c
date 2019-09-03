@@ -25,8 +25,7 @@ static void handle_movement(Movement *movement, Map const map)
             else
                 break;
         end_move:
-            movement->path[0].x = 0;
-            movement->path[0].y = 0;
+            reset_coord(&movement->path[0]);
             movement->moving = FALSE;
             break;
     }

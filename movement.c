@@ -9,6 +9,11 @@ void init_coord(Coord *coord)
     coord->oy = 0;
 }
 
+void reset_coord(Coord *coord)
+{
+    init_coord(coord);
+}
+
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
@@ -128,6 +133,12 @@ static Cardinals walk(Coord *start, Coord const goal, unsigned int const velocit
             break;
     }
     return direction;
+}
+
+void copy_offset_from(Coord const original, Coord *copy)
+{
+    copy->ox = original.ox;
+    copy->oy = original.oy;
 }
 
 Coord offsetting(Coord const position)
