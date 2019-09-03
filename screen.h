@@ -13,7 +13,8 @@
 
 // prototypes
 void init_screen(SDL_Surface *(*screen));
-void set_BG_color(SDL_Surface *(*screen), unsigned int* const rgb);
+void set_BG_color(SDL_Surface *(*screen), SDL_Rect* const tile, unsigned int* const rgb);
+void make_check_board(SDL_Surface *(*screen), unsigned int const x, unsigned int const y);
 
 // SDL_Surface tile will change for an array once more tiles are included
 void apply_tiles(SDL_Surface *(*screen), MapType const type, Map const map, SDL_Surface* const tile);

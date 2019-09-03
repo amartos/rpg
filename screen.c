@@ -27,9 +27,9 @@ void init_screen(SDL_Surface *(*screen))
     ETRY;
 }
 
-void set_BG_color(SDL_Surface *(*screen), unsigned int* const rgb)
+void set_BG_color(SDL_Surface *(*screen), SDL_Rect* const tile, unsigned int* const rgb)
 {
-    SDL_FillRect(*screen, NULL, SDL_MapRGB((*screen)->format, rgb[R], rgb[G], rgb[B])); 
+    SDL_FillRect(*screen, tile, SDL_MapRGB((*screen)->format, rgb[R], rgb[G], rgb[B])); 
 }
 
 void apply_tiles(SDL_Surface *(*screen), MapType const type, Map const map, SDL_Surface* const tile)
@@ -43,5 +43,23 @@ void apply_tiles(SDL_Surface *(*screen), MapType const type, Map const map, SDL_
             tiles_positions.y = j * TILES_HEIGHT;
             if (map.schematics[type][i][j])
                 SDL_BlitSurface(tile, NULL, *screen, &tiles_positions);
+        }
+}
+
+void make_check_board(SDL_Surface *(*screen), unsigned int const x, unsigned int const y) // max tiles
+{
+    unsigned int i, j;
+    unsigned int screen_black_color[3] = {0xD3, 0xD3, 0xD3};
+    SDL_Rect infos;
+    infos.w = TILES_WIDTH; infos.h = TILES_HEIGHT;
+    for (i=0;i<x;i++)
+        for (j=0;j<y;j++)
+        {
+            if ((i-(j%2))%2)
+            {
+                infos.x = i * TILES_WIDTH;
+                infos.y = j * TILES_HEIGHT;
+                set_BG_color(screen, &infos, screen_black_color);
+            }
         }
 }
