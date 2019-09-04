@@ -185,6 +185,8 @@ int main(int argc, char *argv[])
                 SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, score, 0, 255 - score));
             }
             nodes = 0;
+            for (i=0;i<MAX_PATH_NODES;i++)
+                scores[i] = 0;
         }
 
         TRY
