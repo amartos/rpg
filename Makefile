@@ -16,3 +16,13 @@ clean:
 
 nuke: clean
 	@rm -rf exec
+
+#################
+# Test units
+#################
+
+PATHFINDING=pathfinding.c coord.c errors.c
+PFEXEC=pathfinding_test
+
+pathfinding: init
+	@${CPP} $(CFLAGS) -o $(PFEXEC) $(PATHFINDING) ${LDFLAGS}
