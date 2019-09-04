@@ -100,11 +100,18 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-static void init_movement(Movement *movement, Coord const start_position)
+static void init_movement(
+        Movement *movement,
+        Coord const start_position,
+        Deployment const formation,
+        unsigned int const id
+        )
 {
     unsigned int i;
     init_coord(&movement->position);
     movement->position = start_position;
+    formation_offsetting(&movement->position, id, formation);
+    movement->formation = formation;
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&movement->path[i]);
     movement->moving = FALSE;
@@ -118,10 +125,10 @@ static void init_movement(Movement *movement, Coord const start_position)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-void init_character(Character *character, unsigned int const id, Coord const start_position)
+void init_character(Character *character, unsigned int const id, Coord const start_position, Deployment const formation)
 {
     character->id = id;
-    init_movement(&character->movement, start_position);
+    init_movement(&character->movement, start_position, formation, id);
     init_on_screen(&character->on_screen, id);
 }
 

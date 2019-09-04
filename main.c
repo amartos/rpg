@@ -56,7 +56,7 @@ static void change_formation(Character characters[MAX_CHARACTERS], Deployment fo
 {
     unsigned int i;
     for (i=0;i<MAX_CHARACTERS;i++)
-        get_formation_offset(&(characters[i].movement.position), i, formation);
+        characters[i].movement.formation = formation;
     fire_movement(characters, PATH);
 }
 
@@ -85,10 +85,6 @@ int main(int argc, char *argv[])
 
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
-    Coord position; init_coord(&position);
-    Coord start_position[MAX_CHARACTERS];
-    for (i=0;i<MAX_CHARACTERS;i++)
-        init_coord(start_position+i);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
 
@@ -96,11 +92,7 @@ int main(int argc, char *argv[])
     center.x = TILES_WIDTH * 4;
     center.y = TILES_HEIGHT * 4;
     for (i=0;i<MAX_CHARACTERS;i++)
-    {
-        start_position[i] = center;
-        get_formation_offset(&start_position[i], i, SQUARE);
-        init_character(&all_characters[i], i, start_position[i]);
-    }
+        init_character(&all_characters[i], i, center, SQUARE);
 
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
     max_coord.x = test_map.w;
@@ -124,10 +116,12 @@ int main(int argc, char *argv[])
                     center.y = event.button.y;
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
-                        // add offset to center
-                        center.ox = all_characters[i].movement.position.ox;
-                        center.oy = all_characters[i].movement.position.oy;
                         all_characters[i].movement.path[0] = center;
+                        formation_offsetting(
+                                &all_characters[i].movement.path[0],
+                                i,
+                                all_characters[i].movement.formation
+                                );
                     }
                     switch(event.button.button)
                     {
@@ -176,9 +170,8 @@ int main(int argc, char *argv[])
                     handle_movement(&all_characters[i].movement, test_map);
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
-                position = offsetting(all_characters[i].movement.position);
-                infos.x = position.x;
-                infos.y = position.y;
+                infos.x = all_characters[i].movement.position.x;
+                infos.y = all_characters[i].movement.position.y;
                 state = MOVE;
                 direction = all_characters[i].movement.direction;
                 current_frame = all_characters[i].on_screen.current_frame;

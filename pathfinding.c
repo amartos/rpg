@@ -74,27 +74,18 @@ static void order_queue(unsigned int const max_array, unsigned int queue[], unsi
 
 static unsigned int convert_coord_to_number(Coord const coord, Coord const max_coord)
 {
-    Coord coord_offset = offsetting(coord);
-    unsigned int number = max_coord.x * coord_offset.y + coord_offset.x;
+    unsigned int number = max_coord.x * coord.y + coord.x;
     return number;
 }
 
 static void get_neighbours(Coord next[8], Coord const current, Coord const max_coord)
 {
-    Coord current_offset = offsetting(current);
-    unsigned int i;
-
     next[N].x = current.x;
     next[S].x = current.x;
     next[E].y = current.y;
     next[W].y = current.y;
-    for (i=W;i<=SW;i++)
-    {
-        next[i].ox = current.ox;
-        next[i].oy = current.oy;
-    }
 
-    if (current_offset.y <= 0) //edge
+    if (current.y <= 0) //edge
     {
         next[N].y = current.y;
         next[NE].y = current.y;
@@ -107,7 +98,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[NW].y = current.y - 1;
     }
 
-    if (current_offset.y == max_coord.y-1) // edge
+    if (current.y == max_coord.y-1) // edge
     {
         next[S].y = current.y;
         next[SE].y = current.y;
@@ -120,7 +111,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[SW].y = current.y + 1;
     }
 
-    if (current_offset.x == (max_coord.x-1)) // edge
+    if (current.x == (max_coord.x-1)) // edge
     {
         next[E].x = current.x;
         next[NE].x = current.x;
@@ -133,7 +124,7 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
         next[SE].x = current.x + 1;
     }
 
-    if (current_offset.x <= 0) // edge
+    if (current.x <= 0) // edge
     {
         next[W].x = current.x;
         next[NW].x = current.x;
@@ -154,11 +145,9 @@ static unsigned int calculate_cost(
         unsigned int** const cost_map
         )
 {
-    Coord next_coord_offset = offsetting(next_coord);
-    Coord goal_offset = offsetting(goal);
     unsigned int next_cost = 0;
-    unsigned int x = next_coord_offset.x, y = next_coord_offset.y;
-    int distance = abs(goal_offset.x - x) + abs(goal_offset.y - y);
+    unsigned int x = next_coord.x, y = next_coord.y;
+    int distance = abs(goal.x - x) + abs(goal.y - y);
 
     next_cost = current_cost + distance + cost_map[x][y];
     return next_cost;
@@ -173,17 +162,13 @@ unsigned int find_path(Movement *movement, Map const map)
     Coord goal; init_coord(&goal);
     Coord max_coord; init_coord(&max_coord);
 
-    start = offsetting(movement->position);
+    start = movement->position;
     start.x /= TILES_WIDTH;
     start.y /= TILES_HEIGHT;
-    start.ox /= TILES_WIDTH;
-    start.oy /= TILES_HEIGHT;
 
-    goal = offsetting(movement->path[0]);
+    goal = movement->path[0];
     goal.x /= TILES_WIDTH;
     goal.y /= TILES_HEIGHT;
-    goal.ox /= TILES_WIDTH;
-    goal.oy /= TILES_HEIGHT;
 
     max_coord.x = map.x_tiles;
     max_coord.y = map.y_tiles;
@@ -279,10 +264,6 @@ unsigned int find_path(Movement *movement, Map const map)
 
         nodes = 0;
         ncurrent = ngoal;
-        current.ox = goal.ox;
-        current.oy = goal.oy;
-        next.ox = goal.ox;
-        next.oy = goal.oy;
 
         for (i=0;i<MAX_PATH_NODES;i++)
         {

@@ -69,6 +69,7 @@ enum Cardinals {W, S, N, E, NE, NW, SE, SW};
 // team can apply. Circle is actually a half-circle, given the MAX_CHAR value
 typedef enum Deployment Deployment;
 enum Deployment {
+    NONE,
     LINE,
     SQUARE,
     TRIANGLE,
@@ -76,15 +77,11 @@ enum Deployment {
 };
 
 // This structure describes coordinates on the map
-// The ox and oy represent an offset to be applied to the x and y points, which
-// can be done with the offsetting function in the movement module.
 typedef struct Coord Coord;
 struct Coord
 {
     unsigned int x;
     unsigned int y;
-    int ox;
-    int oy;
 };
 
 // This structure is used by the movement module to manage different ways of
@@ -136,7 +133,8 @@ struct OnScreen
 typedef struct Movement Movement;
 struct Movement 
 {
-    Coord position; // current position and offset
+    Coord position;
+    Deployment formation;
     Bool moving;
     Cardinals direction;
     Coord path[MAX_PATH_NODES]; // array of nodes

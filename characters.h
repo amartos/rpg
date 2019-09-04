@@ -18,7 +18,7 @@
 // prototypes
 // Character initialization. For now the values are manually set, but in the
 // future all will depend on the id
-void init_character(Character *character, unsigned int const id, Coord const start_position);
+void init_character(Character *character, unsigned int const id, Coord const start_position, Deployment const formation);
 void free_character(Character *character);
 
 #endif // define RPG_CHARACTERS
