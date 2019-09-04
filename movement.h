@@ -1,8 +1,6 @@
 #ifndef RPG_MOVEMENT
 #define RPG_MOVEMENT
 
-#define MAX_PATH_NODES 100
-
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"

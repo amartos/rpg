@@ -153,25 +153,21 @@ static unsigned int calculate_cost(
     return next_cost;
 }
 
-unsigned int find_path(Movement *movement, Map const map)
+unsigned int find_path(
+        Coord path[MAX_PATH_NODES],
+        Coord const start, Coord const goal,
+        unsigned int const max_x, unsigned int const max_y,
+        unsigned int** const collision_map,
+        unsigned int** const cost_map
+        )
 {
     // vars init
     unsigned int nodes = 0;
 
-    Coord start; init_coord(&start);
-    Coord goal; init_coord(&goal);
     Coord max_coord; init_coord(&max_coord);
 
-    start = movement->position;
-    start.x /= TILES_WIDTH;
-    start.y /= TILES_HEIGHT;
-
-    goal = movement->path[0];
-    goal.x /= TILES_WIDTH;
-    goal.y /= TILES_HEIGHT;
-
-    max_coord.x = map.x_tiles;
-    max_coord.y = map.y_tiles;
+    max_coord.x = max_x;
+    max_coord.y = max_y;
 
     // all this can be put in the first if statement for optimisation
     unsigned int i = 0, j = 0, n = 0, nnext = 0, ncurrent = 0;
@@ -213,7 +209,7 @@ unsigned int find_path(Movement *movement, Map const map)
     // A* starts here
     if (
             !is_same_coord(start, goal) &&
-            !is_colliding(goal, map.schematics[COLLISIONS], FALSE) &&
+            !is_colliding(goal, collision_map, FALSE) &&
             !is_out_of_map(goal, max_coord)
         )
     {
@@ -229,12 +225,12 @@ unsigned int find_path(Movement *movement, Map const map)
                 {
                     if (
                         !is_same_coord(start, all_next[i]) &&
-                        !is_colliding(all_next[i], map.schematics[COLLISIONS], FALSE) &&
+                        !is_colliding(all_next[i], collision_map, FALSE) &&
                         !is_out_of_map(all_next[i], max_coord)
                         )
                     {
                         nnext = convert_coord_to_number(all_next[i], max_coord);
-                        new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, map.schematics[COST]);
+                        new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, cost_map);
                         if (!came_from[nnext] || new_cost < cost[nnext])
                         {
                             came_from[nnext] = ncurrent;
@@ -268,19 +264,8 @@ unsigned int find_path(Movement *movement, Map const map)
         for (i=0;i<MAX_PATH_NODES;i++)
         {
             nodes++;
-            nnext = came_from[ncurrent]; // came_from[goal] = previous
-            current.x = conversion[ncurrent].x * TILES_WIDTH;
-            current.y = conversion[ncurrent].y * TILES_HEIGHT;
-            next.x = conversion[nnext].x * TILES_WIDTH;
-            next.y = conversion[nnext].y * TILES_HEIGHT;
-
-            if (abs(current.x - next.x) % movement->velocity)
-                current.x += abs(current.x - next.x) % movement->velocity;
-            if (abs(current.y - next.y) % movement->velocity)
-                current.y += abs(current.y - next.y) % movement->velocity;
-
-            movement->path[i] = current;
-            ncurrent = nnext;
+            path[i] = conversion[ncurrent]; // came_from[goal] = previous
+            ncurrent = came_from[ncurrent];
             if (ncurrent == nstart)
                 break;
         }
