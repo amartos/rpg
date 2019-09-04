@@ -9,7 +9,6 @@
 #include "characters.h"
 #include "coord.h"
 #include "movement.h"
-#include "pathfinding.h"
 #include "map.h"
 
 #include <stdio.h>

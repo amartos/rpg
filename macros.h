@@ -56,28 +56,6 @@ struct Tile
 };
 
 // ------------------------------------
-// Movement
-// ------------------------------------
-
-#define MAX_PATH_NODES 100
-
-// This struct is used to describe different formations that the characters'
-// team can apply. Circle is actually a half-circle, given the MAX_CHAR value
-typedef enum Deployment Deployment;
-enum Deployment {
-    NONE,
-    LINE,
-    SQUARE,
-    TRIANGLE,
-    CIRCLE
-};
-
-// This structure is used by the movement module to manage different ways of
-// moving the characters
-typedef enum MovementType MovementType;
-enum MovementType {WALK, PATH, TELEPORT};
-
-// ------------------------------------
 // Characters
 // ------------------------------------
 

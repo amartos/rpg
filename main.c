@@ -1,36 +1,6 @@
 #include "main.h"
 
 
-static void handle_movement(Movement *movement, Map const map)
-{
-    unsigned int nodes = 0;
-    Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.x_tiles * TILES_WIDTH;
-    max_coord.y = map.y_tiles * TILES_HEIGHT;
-
-    switch (movement->movement_type)
-    {
-        case PATH:
-            movement->movement_type = WALK;
-            nodes = find_path(movement, map);
-            if (!nodes)
-                goto end_move;
-            goto make_a_move;
-        default:
-            goto make_a_move;
-        make_a_move:
-            move(movement, max_coord, map.schematics[COLLISIONS]);
-            if (is_same_coord(movement->path[0], movement->position))
-                goto end_move;
-            else
-                break;
-        end_move:
-            reset_coord(&movement->path[0]);
-            movement->moving = FALSE;
-            break;
-    }
-}
-
 static void check_character_frame(OnScreen *on_screen, unsigned int const time)
 {
     if (time - on_screen->time > on_screen->framerate)
@@ -87,6 +57,8 @@ int main(int argc, char *argv[])
     Coord center; init_coord(&center);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
+    max_coord.x = test_map.x_tiles;
+    max_coord.y = test_map.y_tiles;
 
     // load characters
     center.x = TILES_WIDTH * 4;
@@ -95,8 +67,6 @@ int main(int argc, char *argv[])
         init_character(&all_characters[i], i, center, SQUARE);
 
     test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
-    max_coord.x = test_map.w;
-    max_coord.y = test_map.h;
 
     // main loop
     while (!done)
@@ -112,12 +82,11 @@ int main(int argc, char *argv[])
                     done = TRUE;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    // This operation, apparently doing nothing, in fact round the coordinates
-                    // up to the indicated tile, if the goal is given in pixels.
-                    center.x = (event.button.x / TILES_WIDTH) * TILES_WIDTH;
-                    center.y = (event.button.y / TILES_HEIGHT) * TILES_HEIGHT;
+                    center.x = event.button.x;
+                    center.y = event.button.y;
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
+                        all_characters[i].movement.current_node = 0;
                         all_characters[i].movement.path[0] = center;
                         formation_offsetting(
                                 &all_characters[i].movement.path[0],
@@ -169,7 +138,12 @@ int main(int argc, char *argv[])
             {
                 if (all_characters[i].movement.moving)
                 {
-                    handle_movement(&all_characters[i].movement, test_map);
+                    move(
+                            &all_characters[i].movement,
+                            max_coord,
+                            test_map.schematics[COLLISIONS],
+                            test_map.schematics[COST]
+                            );
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
                 infos.x = all_characters[i].movement.position.x;

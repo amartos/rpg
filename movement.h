@@ -6,6 +6,7 @@
 #include "macros.h"
 
 #include "coord.h"
+#include "pathfinding.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,11 +44,22 @@ struct Movement
 };
 
 // prototypes
+void init_movement(
+        Movement *movement,
+        Coord const start_position,
+        Deployment const formation,
+        unsigned int const id
+        );
 void formation_offsetting(
         Coord *position,
         unsigned int const char_number,
         Deployment const deployment
         );
-void move(Movement *movement, Coord const max_coord, unsigned int** const collision_map);
+void move(
+        Movement *movement,
+        Coord const max_coord,
+        unsigned int** const collision_map,
+        unsigned int** const cost_map
+        );
 
 #endif // define RPG_MOVEMENT
