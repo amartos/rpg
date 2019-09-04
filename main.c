@@ -179,5 +179,6 @@ int main(int argc, char *argv[])
         free_character(&all_characters[i]);
     free_map(&test_map);
     SDL_FreeSurface(test_tile);
+    SDL_Quit();
     return 0;
 }
