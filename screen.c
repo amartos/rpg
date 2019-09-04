@@ -52,6 +52,7 @@ void make_check_board(SDL_Surface *(*screen), unsigned int const x, unsigned int
     unsigned int screen_black_color[3] = {0xD3, 0xD3, 0xD3};
     SDL_Rect infos;
     infos.w = TILES_WIDTH; infos.h = TILES_HEIGHT;
+    SDL_FillRect(*screen, NULL, SDL_MapRGB((*screen)->format, 0xff, 0xff, 0xff));
     for (i=0;i<x;i++)
         for (j=0;j<y;j++)
         {
