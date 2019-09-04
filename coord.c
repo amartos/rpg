@@ -12,6 +12,26 @@ void reset_coord(Coord *coord)
     init_coord(coord);
 }
 
+void unit_to_pixels(Coord *coord)
+{
+    coord->x *= TILES_WIDTH;
+    coord->y *= TILES_HEIGHT;
+}
+
+void pixels_to_unit(Coord *coord)
+{
+    coord->x /= TILES_WIDTH;
+    coord->y /= TILES_HEIGHT;
+}
+
+void round_coord(Coord *coord)
+{
+    // This operation, apparently doing nothing, in fact round the coordinates
+    // up to the corresponding tile. The coord is given in pixels.
+    pixels_to_unit(coord);
+    unit_to_pixels(coord);
+}
+
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
