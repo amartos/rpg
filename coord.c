@@ -40,41 +40,23 @@ Bool is_same_coord(Coord const a, Coord const b)
     return same;
 }
 
-Bool is_colliding(
-        Coord goal,
-        unsigned int** const collision_map,
-        Bool const pixel
-        )
+Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pixels)
 {
-    unsigned int xl, yu, xr, yd;
-
-    if (!pixel)
+    unsigned int x = 0, y = 0;
+    if (pixels)
     {
-        goal.x *= TILES_WIDTH;
-        goal.y *= TILES_HEIGHT;
-    }
-
-    // As the collision box is located on the feet, add the x and y collision
-    // coord to obtain the true (0,0) corner of the image.
-    // check also the right side by adding the collision box w/h
-    xl = (goal.x + COLLISION_BOX_OFFSET_X) / TILES_WIDTH;
-    yu = (goal.y + COLLISION_BOX_OFFSET_Y) / TILES_HEIGHT;
-
-    xr = (goal.x + COLLISION_BOX_OFFSET_X + COLLISION_BOX_WIDTH) / TILES_WIDTH;
-    yd = (goal.y + COLLISION_BOX_OFFSET_Y + COLLISION_BOX_HEIGHT) / TILES_HEIGHT;
-    printf("(%d, %d), (%d, %d), ", xl, yu, xr, yd);
-
-    printf("(%d, %d), ", collision_map[xl][yu], collision_map[xr][yd]);
-    if (collision_map[xl][yu] || collision_map[xr][yd]) // up left || down right corners
-    {
-        printf("1\n");
-        return TRUE;
+        Coord goal_units = goal;
+        pixels_to_unit(&goal_units);
+        x = goal_units.x;
+        y = goal_units.y;
     }
     else
     {
-        printf("0\n");
-        return FALSE;
+        x = goal.x;
+        y = goal.y;
     }
+
+    return collision_map[x][y];
 }
 
 Bool is_out_of_map(Coord goal, Coord const max_coord)

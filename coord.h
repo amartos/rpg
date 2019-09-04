@@ -28,7 +28,7 @@ void pixels_to_unit(Coord *coord);
 void unit_to_pixels(Coord *coord);
 void round_coord(Coord *coord);
 Bool is_same_coord(Coord const a, Coord const b);
-Bool is_colliding(Coord const goal, unsigned int** const collision_map, Bool const pixel);
+Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pixels);
 Bool is_out_of_map(Coord const goal, Coord const max_coord);
 
 #endif // define RPG_COORD
