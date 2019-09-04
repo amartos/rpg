@@ -72,17 +72,26 @@ static Cardinals determine_direction(Coord const start, Coord const goal)
     Cardinals direction = S;
     int Dx, Dy;
 
-    Dy = start.y - goal.y;
-    if (Dy < 0)
-        direction = S;
-    else if (Dy > 0)
-        direction = N;
-
     Dx = start.x - goal.x;
-    if (Dx < 0)
+    Dy = start.y - goal.y;
+
+    if (Dx < 0 && Dy < 0)
+        direction = SE;
+    else if (Dx < 0 && Dy == 0)
         direction = E;
-    else if (Dx > 0)
+    else if (Dx < 0 && Dy > 0)
+        direction = NE;
+    else if (Dx == 0 && Dy < 0)
+        direction = S;
+    else if (Dx == 0 && Dy > 0)
+        direction = N;
+    else if (Dx > 0 && Dy < 0)
+        direction = SW;
+    else if (Dx > 0 && Dy == 0)
         direction = W;
+    else if (Dx > 0 && Dy > 0)
+        direction = NW;
+
 
     return direction;
 }
@@ -108,19 +117,33 @@ static Cardinals walk(Coord *start, Coord const goal, unsigned int const velocit
 
     switch(direction)
     {
-        case W:
-            start->x -= velocity - decrease.x;
+        case N:
+            start->y -= velocity - decrease.y;
+            break;
+        case NE:
+            start->x += velocity - decrease.x;
+            start->y -= velocity - decrease.y;
             break;
         case E:
             start->x += velocity - decrease.x;
             break;
+        case SE:
+            start->x += velocity - decrease.x;
+            start->y += velocity - decrease.y;
+            break;
         case S:
             start->y += velocity - decrease.y;
             break;
-        case N:
-            start->y -= velocity - decrease.y;
+        case SW:
+            start->x -= velocity - decrease.x;
+            start->y += velocity - decrease.y;
             break;
-        default:
+        case W:
+            start->x -= velocity - decrease.x;
+            break;
+        case NW:
+            start->x -= velocity - decrease.x;
+            start->y -= velocity - decrease.y;
             break;
     }
     return direction;

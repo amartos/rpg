@@ -68,7 +68,7 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
 
     // This depends on the sprite order
     // TODO: if(sprite changes), reorder
-    for (i=W;i<=E;i++) // directions
+    for (i=N;i<=NW;i++) // directions
         for (j=MOVE;j<=MOVE_SHIELD;j++) // States
             for (f=0;f<on_screen->total_frames;f++)
             {

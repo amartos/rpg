@@ -61,9 +61,9 @@ struct Tile
 
 #define MAX_PATH_NODES 100
 
-// this order depends on the sprite order
+// the order of the sprites on the asset img depends on this
 typedef enum Cardinals Cardinals;
-enum Cardinals {W, S, N, E, NE, NW, SE, SW};
+enum Cardinals {N, NE, E, SE, S, SW, W, NW};
 
 // This struct is used to describe different formations that the characters'
 // team can apply. Circle is actually a half-circle, given the MAX_CHAR value
@@ -123,7 +123,7 @@ struct OnScreen
     State state;
     Bool animated;
     // possible positions, State, max number of frames
-    SDL_Rect frames[SW+1][MOVE_SHIELD+1][FPS];
+    SDL_Rect frames[NW+1][MOVE_SHIELD+1][FPS];
     unsigned int total_frames; // total
     unsigned int current_frame;
     unsigned int framerate;

@@ -188,7 +188,7 @@ unsigned int find_path(Movement *movement, Map const map)
     Coord all_next[8];
     Coord conversion[max_array+1];
 
-    for (i=W;i<=SW;i++)
+    for (i=N;i<=NW;i++)
         init_coord(&all_next[i]);
     for (i=0;i<max_array;i++)
         queue[i] = 0;
@@ -225,7 +225,7 @@ unsigned int find_path(Movement *movement, Map const map)
                 delete_from_queue(max_array, queue, ncurrent);
                 current = conversion[ncurrent]; // get coord from number
                 get_neighbours(all_next, current, max_coord);
-                for (i=W;i<=SW;i++)
+                for (i=N;i<=NW;i++)
                 {
                     if (
                         !is_same_coord(start, all_next[i]) &&
