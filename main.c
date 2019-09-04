@@ -112,8 +112,10 @@ int main(int argc, char *argv[])
                     done = TRUE;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    center.x = event.button.x;
-                    center.y = event.button.y;
+                    // This operation, apparently doing nothing, in fact round the coordinates
+                    // up to the indicated tile, if the goal is given in pixels.
+                    center.x = (event.button.x / TILES_WIDTH) * TILES_WIDTH;
+                    center.y = (event.button.y / TILES_HEIGHT) * TILES_HEIGHT;
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
                         all_characters[i].movement.path[0] = center;
