@@ -88,58 +88,6 @@ enum MovementType {WALK, PATH, TELEPORT};
 #define COLLISION_BOX_OFFSET_Y 28
 #define COLLISION_BOX_WIDTH (SPRITES_WIDTH - 2 * COLLISION_BOX_OFFSET_X) // left & right
 #define COLLISION_BOX_HEIGHT (SPRITES_HEIGHT - COLLISION_BOX_OFFSET_Y)
-#define MAX_CHARACTERS 4 // max of team
-
-// This structure describes the different states a character object can be
-// found in, mainly related to the sprites.
-typedef enum State State;
-enum State 
-{
-    MOVE,
-    LIFT,
-    PUSH,
-    PULL,
-    PUSH_SHIELD,
-    MOVE_SHIELD,
-    STILL
-};
-
-typedef struct OnScreen OnScreen;
-struct OnScreen 
-{
-    SDL_Surface *sprite;
-    State state;
-    Bool animated;
-    // possible positions, State, max number of frames
-    SDL_Rect frames[NW+1][MOVE_SHIELD+1][FPS];
-    unsigned int total_frames; // total
-    unsigned int current_frame;
-    unsigned int framerate;
-    unsigned int time; // previous tick (for changing frame)
-};
-
-typedef struct Movement Movement;
-struct Movement 
-{
-    Coord position;
-    Deployment formation;
-    Bool moving;
-    Cardinals direction;
-    Coord path[MAX_PATH_NODES]; // array of nodes
-    unsigned int current_node;
-    MovementType movement_type;
-    unsigned int velocity; // in pixels
-};
-
-// This describes a Character type object, aka all what can be described as a
-// living being
-typedef struct Character Character;
-struct Character
-{
-    unsigned int id;
-    OnScreen on_screen;
-    Movement movement;
-};
 
 // ------------------------------------
 // Maps
