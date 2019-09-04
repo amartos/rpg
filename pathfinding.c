@@ -267,11 +267,11 @@ unsigned int find_path(
             nodes++;
             path[i] = conversion[ncurrent]; // came_from[goal] = previous
             ncurrent = came_from[ncurrent];
+            if (scores != NULL)
+                scores[i] = cost[ncurrent];
             if (ncurrent == nstart)
                 break;
         }
-        if (scores != NULL)
-            scores = cost;
     }
 
     return nodes;
