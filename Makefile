@@ -25,9 +25,9 @@ nuke: clean
 #################
 # Test units
 #################
-
-PATHFINDING=pathfinding.c coord.c errors.c
+TEST=test
+PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c
 PFEXEC=$(BIN)/pathfinding_test
 
-pathfinding: init
-	@${CPP} $(CFLAGS) -o $(PFEXEC) $(PATHFINDING) ${LDFLAGS}
+pathfinding: init clean
+	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(PFEXEC) $(PATHFINDING)
