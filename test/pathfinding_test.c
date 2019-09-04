@@ -14,7 +14,7 @@
 
 int main(int argc, char *argv[])
 {
-    unsigned int i = 0, j = 0, nodes = 0, ncurrent = 0, score = 0;
+    unsigned int i = 0, j = 0, nodes = 0, ncurrent = 0, score = 0, max = 0;
     Bool done = FALSE;
 
     // SDL vars init
@@ -122,9 +122,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    unsigned int max_array = max_coord.x * max_coord.y;
-    unsigned int scores[max_array+1];
-    for (i=0;i<max_array+1;i++)
+    unsigned int scores[MAX_PATH_NODES];
+    for (i=0;i<MAX_PATH_NODES;i++)
         scores[i] = 0;
     Coord path[MAX_PATH_NODES];
     for (i=0;i<MAX_PATH_NODES;i++)
@@ -176,12 +175,13 @@ int main(int argc, char *argv[])
         if (nodes)
         {
             for (i=0;i<nodes;i++)
+                if (max < scores[i])
+                    max = scores[i];
+            for (i=0;i<nodes;i++)
             {
                 infos.x = path[i].x * 32; infos.y = path[i].y * 32;
                 ncurrent = max_coord.x * path[i].y + path[i].x;
-                score = 25.5 * scores[ncurrent];
-                if (score > 255)
-                    score = 255;
+                score = 255 * scores[i] / max;
                 SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, score, 0, 255 - score));
             }
             nodes = 0;
