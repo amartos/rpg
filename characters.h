@@ -5,6 +5,7 @@
 #include "try_throw_catch.h"
 #include "macros.h"
 #include "images.h"
+#include "coord.h"
 #include "movement.h"
 
 #include <stdio.h>

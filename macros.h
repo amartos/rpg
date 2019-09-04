@@ -61,10 +61,6 @@ struct Tile
 
 #define MAX_PATH_NODES 100
 
-// the order of the sprites on the asset img depends on this
-typedef enum Cardinals Cardinals;
-enum Cardinals {N, NE, E, SE, S, SW, W, NW};
-
 // This struct is used to describe different formations that the characters'
 // team can apply. Circle is actually a half-circle, given the MAX_CHAR value
 typedef enum Deployment Deployment;
@@ -74,14 +70,6 @@ enum Deployment {
     SQUARE,
     TRIANGLE,
     CIRCLE
-};
-
-// This structure describes coordinates on the map
-typedef struct Coord Coord;
-struct Coord
-{
-    unsigned int x;
-    unsigned int y;
 };
 
 // This structure is used by the movement module to manage different ways of

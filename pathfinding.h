@@ -1,11 +1,11 @@
 #ifndef RPG_PATHFINDING
 #define RPG_PATHFINDING
 
-#include "movement.h"
-
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
+
+#include "coord.h"
 
 #include <stdio.h>
 #include <stdlib.h>

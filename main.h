@@ -7,6 +7,7 @@
 
 #include "screen.h"
 #include "characters.h"
+#include "coord.h"
 #include "movement.h"
 #include "pathfinding.h"
 #include "map.h"
