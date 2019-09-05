@@ -27,6 +27,8 @@ void reset_coord(Coord *coord);
 void pixels_to_unit(Coord *coord);
 void unit_to_pixels(Coord *coord);
 void round_coord(Coord *coord);
+Coord isometric_to_cartesian(Coord const isometric);
+Coord cartesian_to_isometric(Coord const cartesian);
 Bool is_same_coord(Coord const a, Coord const b);
 Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pixels);
 Bool is_out_of_map(Coord const goal, Coord const max_coord);
