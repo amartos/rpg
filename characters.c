@@ -19,6 +19,7 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
         // 16 pixels w/h is too small for recent screens but
         // good for GBC, and the test sprites are from this console
         // this will be delete when real sprites are done
+        on_screen->sprite = SDL_DisplayFormatAlpha(sprite);
         on_screen->sprite = rotozoomSurface(sprite, 0.0, 2.0, 0.0);
     }
     CATCH(SPRITE_LOAD_FAILURE)

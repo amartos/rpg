@@ -79,6 +79,11 @@ int main(int argc, char *argv[])
     floor = rotozoomSurface(floor, 0.0, 0.5, 0.0);
     wall = rotozoomSurface(wall, 0.0, 0.5, 0.0);
     wall1 = rotozoomSurface(wall1, 0.0, 0.5, 0.0);
+
+    floor = SDL_DisplayFormatAlpha(floor);
+    wall = SDL_DisplayFormatAlpha(wall);
+    wall1 = SDL_DisplayFormatAlpha(wall1);
+
     tiles[0x0100] = floor;
     tiles[0x0101] = wall;
     tiles[0x0102] = wall1;
