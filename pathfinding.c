@@ -239,7 +239,7 @@ unsigned int find_path(
                             set_in_queue(max_array, queue, nnext);
                         }
                         else
-                            delete_from_queue(max_array, queue, nnext);
+                            delete_from_queue(max_array, queue, ncurrent);
 
                         if (nnext == ngoal)
                         {
