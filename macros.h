@@ -25,7 +25,7 @@ enum Bool
 // Images
 // ------------------------------------
 
-#define SCREEN_WIDTH 640
+#define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 640
 #define SCREEN_BPP 32
 #define FPS 60

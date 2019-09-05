@@ -38,7 +38,14 @@ int main(int argc, char *argv[])
 
     // SDL vars init
     SDL_Surface *screen = NULL; init_screen(&screen);
-    SDL_Surface *test_tile = IMG_Load("assets/tiles/test_tile.png");
+
+    SDL_Surface* tiles[0xFFFF];
+    for (i=0;i<0xFFFF;i++)
+        tiles[i] = NULL;
+    SDL_Surface *floor = IMG_Load("assets/tiles/tile.png");
+    SDL_Surface *wall = IMG_Load("assets/tiles/wall.png");
+    SDL_Surface *wall1 = IMG_Load("assets/tiles/wall1.png");
+
     SDL_Rect infos;
     infos.x = 0; infos.y = 0;
     infos.w = SPRITES_WIDTH; infos.h = SPRITES_HEIGHT;
@@ -56,6 +63,7 @@ int main(int argc, char *argv[])
 
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
+    Coord isometrified; init_coord(&isometrified);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
     max_coord.x = test_map.x_tiles;
@@ -67,7 +75,14 @@ int main(int argc, char *argv[])
     for (i=0;i<MAX_CHARACTERS;i++)
         init_character(&all_characters[i], i, center, SQUARE);
 
-    test_tile = rotozoomSurface(test_tile, 0.0, 2.0, 0.0);
+    // Make it double the TILE_WIDTH/HEIGHT to stick tiles between them
+    floor = rotozoomSurface(floor, 0.0, 0.5, 0.0);
+    wall = rotozoomSurface(wall, 0.0, 0.5, 0.0);
+    wall1 = rotozoomSurface(wall1, 0.0, 0.5, 0.0);
+    tiles[0x0100] = floor;
+    tiles[0x0101] = wall;
+    tiles[0x0102] = wall1;
+
 
     // main loop
     while (!done)
@@ -85,6 +100,7 @@ int main(int argc, char *argv[])
                 case SDL_MOUSEBUTTONDOWN:
                     center.x = event.button.x;
                     center.y = event.button.y;
+                    center = isometric_to_cartesian(center);
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
                         all_characters[i].movement.current_node = 0;
@@ -137,7 +153,7 @@ int main(int argc, char *argv[])
 
             // set_BG_color(&screen, NULL, screen_bg_color);
             make_check_board(&screen, test_map.x_tiles, test_map.y_tiles);
-            apply_tiles(&screen, BACKGROUND, test_map, test_tile);
+            apply_tiles(&screen, BACKGROUND, test_map, tiles);
             for (i=0;i<MAX_CHARACTERS;i++)
             {
                 if (all_characters[i].movement.moving && !paused)
@@ -150,8 +166,9 @@ int main(int argc, char *argv[])
                             );
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
-                infos.x = all_characters[i].movement.position.x;
-                infos.y = all_characters[i].movement.position.y;
+                isometrified = cartesian_to_isometric(all_characters[i].movement.position);
+                infos.x = isometrified.x;
+                infos.y = isometrified.y;
                 state = MOVE;
                 direction = all_characters[i].movement.direction;
                 current_frame = all_characters[i].on_screen.current_frame;
@@ -161,7 +178,7 @@ int main(int argc, char *argv[])
                         screen, &infos
                         );
             }
-            apply_tiles(&screen, FOREGROUND, test_map, test_tile);
+            apply_tiles(&screen, FOREGROUND, test_map, tiles);
             if (paused)
             {
                 infos.x = 0; infos.y = 0;
@@ -187,7 +204,9 @@ int main(int argc, char *argv[])
     for (i=0;i<MAX_CHARACTERS;i++)
         free_character(&all_characters[i]);
     free_map(&test_map);
-    SDL_FreeSurface(test_tile);
+    for (i=0;i<0xFFFF;i++)
+        if (tiles[i] != NULL)
+            SDL_FreeSurface(tiles[i]);
     SDL_Quit();
     return 0;
 }

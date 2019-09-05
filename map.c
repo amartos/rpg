@@ -93,9 +93,15 @@ void init_map(Map *map, char const map_path[])
     MapType map_type = 0;
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
-        if (!strcmp(line, "# tiles\n"))
+        if (!strcmp(line, "# background\n"))
         {
             map_type = BACKGROUND;
+            j = 0;
+            offset = 5;
+        }
+        else if (!strcmp(line, "# foreground\n"))
+        {
+            map_type = FOREGROUND;
             j = 0;
             offset = 5;
         }
@@ -124,17 +130,17 @@ void init_map(Map *map, char const map_path[])
             data = line;
             switch (map_type)
             {
-                case FOREGROUND: // this is not use in map files
+                case FOREGROUND:
+                    for (i=0;i<column_count;i++)
+                    {
+                        sscanf(data, "%X ", &map->schematics[FOREGROUND][i][j]);
+                        data += offset;
+                    }
                     break;
                 case BACKGROUND:
                     for (i=0;i<column_count;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[BACKGROUND][i][j]);
-                        if (map->schematics[BACKGROUND][i][j] == 0x0101)
-                        {
-                            map->schematics[FOREGROUND][i][j] = map->schematics[BACKGROUND][i][j];
-                            map->schematics[BACKGROUND][i][j] = 0;
-                        }
                         data += offset;
                     }
                     break;
