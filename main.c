@@ -151,8 +151,7 @@ int main(int argc, char *argv[])
                     break;
             }
 
-            // set_BG_color(&screen, NULL, screen_bg_color);
-            make_check_board(&screen, test_map.x_tiles, test_map.y_tiles);
+            set_BG_color(&screen, NULL, screen_bg_color);
             apply_tiles(&screen, BACKGROUND, test_map, tiles);
             for (i=0;i<MAX_CHARACTERS;i++)
             {
