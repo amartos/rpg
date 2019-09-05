@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 
     // custom structs init
     Bool done = FALSE;
+    Bool paused = FALSE;
 
     MovementType movement_type = WALK;
     Cardinals direction = S;
@@ -107,6 +108,9 @@ int main(int argc, char *argv[])
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
                     {
+                        case SDLK_SPACE:
+                            paused = !paused;
+                            break;
                         case SDLK_a:
                             change_formation(all_characters, LINE);
                             break;
@@ -136,7 +140,7 @@ int main(int argc, char *argv[])
             apply_tiles(&screen, BACKGROUND, test_map, test_tile);
             for (i=0;i<MAX_CHARACTERS;i++)
             {
-                if (all_characters[i].movement.moving)
+                if (all_characters[i].movement.moving && !paused)
                 {
                     move(
                             &all_characters[i].movement,
@@ -158,6 +162,11 @@ int main(int argc, char *argv[])
                         );
             }
             apply_tiles(&screen, FOREGROUND, test_map, test_tile);
+            if (paused)
+            {
+                infos.x = 0; infos.y = 0;
+                SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 255, 0, 0));
+            }
 
             TRY
             {
