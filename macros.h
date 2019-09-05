@@ -28,7 +28,7 @@ enum Bool
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 640
 #define SCREEN_BPP 32
-#define FPS 60
+#define FPS 120
 #define FRAMERATE 1000/FPS
 #define COLOR_PALETTE 3
 #define BG_COLOR 0xFF, 0xFF, 0xFF
