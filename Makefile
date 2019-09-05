@@ -1,5 +1,5 @@
 CPP=gcc
-CFLAGS=-O3
+CFLAGS=-O3 -no-pie
 LDFLAGS=-lSDL -lSDL_mixer -lSDL_image -lSDL_gfx
 BIN=bin
 FILES=*
