@@ -32,7 +32,7 @@ static void change_formation(Character characters[MAX_CHARACTERS], Deployment fo
 
 int main(int argc, char *argv[])
 {
-    unsigned int i = 0, current_frame = 0;
+    unsigned int i = 0, j = 0, c = 0, id = 0, current_frame = 0;
     unsigned int screen_bg_color[3] = {0xFF, 0xFF, 0xFF};
     unsigned int time = 0, prev_time = 0;
 
@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     Character all_characters[MAX_CHARACTERS];
     State state = MOVE;
 
+    Coord coord2; init_coord(&coord2);
+    Coord coord; init_coord(&coord);
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
     Coord isometrified; init_coord(&isometrified);
@@ -156,8 +158,7 @@ int main(int argc, char *argv[])
                     break;
             }
 
-            set_BG_color(&screen, NULL, screen_bg_color);
-            apply_tiles(&screen, BACKGROUND, test_map, tiles);
+            // Check char actions
             for (i=0;i<MAX_CHARACTERS;i++)
             {
                 if (all_characters[i].movement.moving && !paused)
@@ -170,19 +171,49 @@ int main(int argc, char *argv[])
                             );
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
-                isometrified = cartesian_to_isometric(all_characters[i].movement.position);
-                infos.x = isometrified.x;
-                infos.y = isometrified.y;
-                state = MOVE;
-                direction = all_characters[i].movement.direction;
-                current_frame = all_characters[i].on_screen.current_frame;
-                SDL_BlitSurface(
-                        all_characters[i].on_screen.sprite,
-                        &(all_characters[i].on_screen.frames[direction][state][current_frame]),
-                        screen, &infos
-                        );
             }
-            apply_tiles(&screen, FOREGROUND, test_map, tiles);
+
+            // Blitting
+            set_BG_color(&screen, NULL, screen_bg_color);
+            apply_tiles(&screen, BACKGROUND, test_map, tiles);
+            // inverted to draw isometric properly
+            for (j=0;j<max_coord.y;j++)
+                for (i=0;i<max_coord.x;i++)
+                {
+                    id = test_map.schematics[FOREGROUND][i][j];
+                    if (id)
+                    {
+                        coord.x = i * TILES_WIDTH;
+                        coord.y = j * TILES_HEIGHT;
+                        coord = cartesian_to_isometric(coord);
+                        infos.x = coord.x;
+                        infos.y = coord.y - TILES_HEIGHT; // offset
+                        SDL_BlitSurface(tiles[id], NULL, screen, &infos);
+                    }
+
+                    for (c=0;c<MAX_CHARACTERS;c++)
+                    {
+                        coord = all_characters[c].movement.position;
+                        pixels_to_unit(&coord);
+                        coord2.x = i; coord2.y = j;
+                        if (is_same_coord(coord, coord2))
+                        {
+                            isometrified = cartesian_to_isometric(all_characters[c].movement.position);
+                            infos.x = isometrified.x;
+                            infos.y = isometrified.y;
+                            state = MOVE;
+                            direction = all_characters[c].movement.direction;
+                            current_frame = all_characters[c].on_screen.current_frame;
+                            SDL_BlitSurface(
+                                    all_characters[c].on_screen.sprite,
+                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
+                                    screen, &infos
+                                    );
+                        }
+
+                    }
+                }
+
             if (paused)
             {
                 infos.x = 0; infos.y = 0;
