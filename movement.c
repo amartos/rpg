@@ -256,14 +256,18 @@ void move(
                 goto end_move;
             walking:
                 movement->direction = walk(&movement->position, goal, movement->velocity);
-                if (!movement->current_node && is_same_coord(start, goal))
-                    goto end_move;
-                else
+                if (is_same_coord(movement->position, goal))
                 {
-                    if (movement->current_node)
+                    if (!movement->current_node)
+                        goto end_move;
+                    else
+                    {
                         movement->current_node--;
-                    break;
+                        break;
+                    }
                 }
+                else
+                    break;
             end_move:
                 movement->current_node = 0;
                 reset_coord(&movement->path[0]);
@@ -274,6 +278,7 @@ void move(
     }
     else
     {
+        movement->current_node = 0;
         reset_coord(&movement->path[0]);
         movement->movement_type = WALK;
         movement->moving = FALSE;
