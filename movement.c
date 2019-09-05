@@ -24,8 +24,7 @@ void init_movement(
 
 static void teleport(Coord *start, Coord const goal)
 {
-    start->x = goal.x;
-    start->y = goal.y;
+    *start = goal;
 }
 
 static Cardinals determine_direction(Coord const start, Coord const goal)
