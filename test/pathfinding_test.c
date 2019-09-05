@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     infos.x = 0; infos.y = 0;
     infos.w = 32; infos.h = 32;
 
+    Coord coord; init_coord(&coord);
     Coord max_coord; init_coord(&max_coord);
     max_coord.x = 20; max_coord.y = 20;
 
@@ -174,17 +175,29 @@ int main(int argc, char *argv[])
             }
         if (nodes)
         {
-            for (i=0;i<nodes;i++)
+            for (i=0;i<MAX_PATH_NODES;i++)
                 if (max < scores[i])
                     max = scores[i];
+            for (i=0;i<max_coord.x;i++)
+                for (j=0;j<max_coord.x;j++)
+                {
+                    ncurrent = max_coord.x * j + i;
+                    if (scores[ncurrent])
+                    {
+                        infos.x = i * 32; infos.y = j * 32;
+                        coord.x = infos.x; coord.y = infos.y;
+                        score = 255 * scores[ncurrent] / max;
+                        SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, score, 0, 255 - score));
+                    }
+                }
+            infos.w = 16; infos.h = 16;
             for (i=0;i<nodes;i++)
             {
-                infos.x = path[i].x * 32; infos.y = path[i].y * 32;
-                ncurrent = max_coord.x * path[i].y + path[i].x;
-                score = 255 * scores[i] / max;
-                SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, score, 0, 255 - score));
+                infos.x = path[i].x * 32 + 8; infos.y = path[i].y * 32 + 8;
+                SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 0, 128, 0));
             }
             nodes = 0;
+            infos.w = 32; infos.h = 32;
             for (i=0;i<MAX_PATH_NODES;i++)
                 scores[i] = 0;
         }
