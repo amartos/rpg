@@ -227,7 +227,8 @@ unsigned int find_path(
                     if (
                         !is_same_coord(start, all_next[i]) &&
                         !is_colliding(all_next[i], collision_map, FALSE) &&
-                        !is_out_of_map(all_next[i], max_coord)
+                        !is_out_of_map(all_next[i], max_coord) &&
+                        !are_corners_colliding(current, all_next[i], collision_map, FALSE)
                         )
                     {
                         nnext = convert_coord_to_number(all_next[i], max_coord);

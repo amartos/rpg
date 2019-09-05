@@ -31,6 +31,8 @@ Coord isometric_to_cartesian(Coord const isometric);
 Coord cartesian_to_isometric(Coord const cartesian);
 Bool is_same_coord(Coord const a, Coord const b);
 Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pixels);
+Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Bool const pixels);
 Bool is_out_of_map(Coord const goal, Coord const max_coord);
+Cardinals determine_direction(Coord const start, Coord const goal);
 
 #endif // define RPG_COORD

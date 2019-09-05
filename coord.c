@@ -75,6 +75,75 @@ Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pix
     return collision_map[x][y];
 }
 
+Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Bool const pixels)
+{
+    Coord start_units = start; Coord goal_units = goal;
+    Coord edge_coord; init_coord(&edge_coord);
+    Cardinals direction = determine_direction(start, goal);
+    Bool edge1 = FALSE, edge2 = FALSE;
+
+    if (pixels)
+    {
+        pixels_to_unit(&start_units);
+        pixels_to_unit(&goal_units);
+    }
+
+    switch (direction)
+    {
+        case NW:
+            // North
+            edge_coord.x = start.x;
+            edge_coord.y = start.y - 1;
+            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+
+            // West
+            edge_coord.x = start.x - 1;
+            edge_coord.y = start.y;
+            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            break;
+        case NE:
+            // North
+            edge_coord.x = start.x;
+            edge_coord.y = start.y - 1;
+            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+
+            // East
+            edge_coord.x = start.x + 1;
+            edge_coord.y = start.y;
+            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            break;
+        case SW:
+            // South
+            edge_coord.x = start.x;
+            edge_coord.y = start.y + 1;
+            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+
+            // West
+            edge_coord.x = start.x - 1;
+            edge_coord.y = start.y;
+            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            break;
+        case SE:
+            // North
+            edge_coord.x = start.x;
+            edge_coord.y = start.y + 1;
+            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+
+            // East
+            edge_coord.x = start.x + 1;
+            edge_coord.y = start.y;
+            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            break;
+        default:
+            return FALSE;
+    }
+
+    if (edge1 || edge2)
+        return TRUE;
+    else
+        return FALSE;
+}
+
 Bool is_out_of_map(Coord goal, Coord const max_coord)
 {
     Bool is_out = FALSE;
@@ -85,4 +154,33 @@ Bool is_out_of_map(Coord goal, Coord const max_coord)
         is_out = TRUE;
 
     return is_out;
+}
+
+Cardinals determine_direction(Coord const start, Coord const goal)
+{
+    Cardinals direction = S;
+    int Dx, Dy;
+
+    Dx = start.x - goal.x;
+    Dy = start.y - goal.y;
+
+    if (Dx < 0 && Dy < 0)
+        direction = SE;
+    else if (Dx < 0 && Dy == 0)
+        direction = E;
+    else if (Dx < 0 && Dy > 0)
+        direction = NE;
+    else if (Dx == 0 && Dy < 0)
+        direction = S;
+    else if (Dx == 0 && Dy > 0)
+        direction = N;
+    else if (Dx > 0 && Dy < 0)
+        direction = SW;
+    else if (Dx > 0 && Dy == 0)
+        direction = W;
+    else if (Dx > 0 && Dy > 0)
+        direction = NW;
+
+
+    return direction;
 }

@@ -27,35 +27,6 @@ static void teleport(Coord *start, Coord const goal)
     *start = goal;
 }
 
-static Cardinals determine_direction(Coord const start, Coord const goal)
-{
-    Cardinals direction = S;
-    int Dx, Dy;
-
-    Dx = start.x - goal.x;
-    Dy = start.y - goal.y;
-
-    if (Dx < 0 && Dy < 0)
-        direction = SE;
-    else if (Dx < 0 && Dy == 0)
-        direction = E;
-    else if (Dx < 0 && Dy > 0)
-        direction = NE;
-    else if (Dx == 0 && Dy < 0)
-        direction = S;
-    else if (Dx == 0 && Dy > 0)
-        direction = N;
-    else if (Dx > 0 && Dy < 0)
-        direction = SW;
-    else if (Dx > 0 && Dy == 0)
-        direction = W;
-    else if (Dx > 0 && Dy > 0)
-        direction = NW;
-
-
-    return direction;
-}
-
 static Coord determine_decrease(Coord const start, Coord const goal, unsigned int const velocity)
 {
     unsigned int Dx = abs(start.x - goal.x);
