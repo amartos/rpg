@@ -28,7 +28,7 @@ void init_movement(
     movement->movement_type = WALK;
 
     movement->formation = formation;
-    formation_offsetting(movement, id);
+    deploy(movement, id);
     teleport(movement); // place character in start_position
 }
 
@@ -106,7 +106,7 @@ static float cosd(unsigned int angle)
     return cos(angle*M_PI/180);
 }
 
-void formation_offsetting(Movement *movement, unsigned int const char_number)
+void deploy(Movement *movement, unsigned int const char_number)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined

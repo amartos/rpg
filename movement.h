@@ -50,7 +50,7 @@ void init_movement(
         Deployment const formation,
         unsigned int const id
         );
-void formation_offsetting(Movement *movement, unsigned int const char_number);
+void deploy(Movement *movement, unsigned int const char_number);
 void move(
         Movement *movement,
         Coord const max_coord,

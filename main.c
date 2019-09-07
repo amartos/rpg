@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
                     {
                         all_characters[i].movement.current_node = 0;
                         all_characters[i].movement.path[0] = center;
-                        formation_offsetting(&all_characters[i].movement, i);
+                        deploy(&all_characters[i].movement, i);
                     }
                     switch(event.button.button)
                     {
