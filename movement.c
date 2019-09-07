@@ -121,27 +121,28 @@ void deploy(Movement *movement, unsigned int const char_number)
     unsigned space = TILES_WIDTH/4, absox, absoy;
     int ox = 0, oy = 0;
     unsigned int half_cn = char_number/2, third_cn = char_number/3;
+    Cardinals direction = movement->direction;
 
     switch(movement->formation)
     {
         case LINE:
-            ox = 0;
-            oy = round_angle(sind(270)) * (3 - char_number);
+            ox = round_angle(cosd(270 + 45*direction)) * (3 - char_number);
+            oy = round_angle(sind(270 + 45*direction)) * (3 - char_number);
             break;
         case SQUARE:
-            ox = round_angle(cosd(135+90*char_number));
-            oy = round_angle(sind(135+90*char_number));
+            ox = round_angle(cosd(135+90*char_number + 45*direction));
+            oy = round_angle(sind(135+90*char_number + 45*direction));
             break;
         case TRIANGLE:
             if (char_number)
             {
-                ox = round_angle(cosd(270 - half_cn * 135 - third_cn * 90));
-                oy = round_angle(sind(270 - half_cn * 135 - third_cn * 90));
+                ox = round_angle(cosd(270 - half_cn * 135 - third_cn * 90 + 45*direction));
+                oy = round_angle(sind(270 - half_cn * 135 - third_cn * 90 + 45*direction));
             }
             break;
         case CIRCLE:
-            ox = round_angle(cosd(180 + 45 * char_number + half_cn * 45));
-            oy = round_angle(sind(180 + 45 * char_number + half_cn * 45));
+            ox = round_angle(cosd(180 + 45 * char_number + half_cn * 45 + 45*direction));
+            oy = round_angle(sind(180 + 45 * char_number + half_cn * 45 + 45*direction));
             if (char_number == 0)
                 ox -= 1;
             else if (char_number == 3)
