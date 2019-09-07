@@ -52,6 +52,10 @@ static Coord determine_decrease(Movement const movement)
 
 static void walk(Movement *movement)
 {
+    movement->direction = determine_direction(
+            movement->position,
+            movement->path[movement->current_node]
+            );
     Coord decrease = determine_decrease(*movement);
 
     switch(movement->direction)
@@ -213,10 +217,6 @@ void move(
                 teleport(movement);
                 goto end_move;
             walking:
-                movement->direction = determine_direction(
-                        movement->position,
-                        movement->path[movement->current_node]
-                        );
                 walk(movement);
                 if (is_same_coord(movement->position, movement->path[movement->current_node]))
                 {
