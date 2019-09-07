@@ -1,6 +1,14 @@
 #include "movement.h"
 
 
+static void teleport(Movement *movement)
+{
+    // round coord to current tile, not *exact* click position
+    round_coord(&movement->path[0]);
+    movement->position = movement->path[movement->current_node];
+    reset_coord(&movement->path[movement->current_node]);
+}
+
 void init_movement(
         Movement *movement,
         Coord const start_position,
@@ -10,84 +18,79 @@ void init_movement(
 {
     unsigned int i;
     init_coord(&movement->position);
-    movement->position = start_position;
-    formation_offsetting(&movement->position, id, formation);
-    movement->formation = formation;
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&movement->path[i]);
+    movement->path[0] = start_position;
     movement->moving = FALSE;
     movement->velocity = 4;
     movement->direction = S;
     movement->current_node = 0;
     movement->movement_type = WALK;
+
+    movement->formation = formation;
+    formation_offsetting(movement, id);
+    teleport(movement); // place character in start_position
 }
 
-static void teleport(Coord *start, Coord const goal)
+static Coord determine_decrease(Movement const movement)
 {
-    *start = goal;
-}
-
-static Coord determine_decrease(Coord const start, Coord const goal, unsigned int const velocity)
-{
-    unsigned int Dx = abs(start.x - goal.x);
-    unsigned int Dy = abs(start.y - goal.y);
+    unsigned int Dx = abs(movement.position.x - movement.path[movement.current_node].x);
+    unsigned int Dy = abs(movement.position.y - movement.path[movement.current_node].y);
     Coord decrease; init_coord(&decrease);
 
-    if (Dy < velocity)
-        decrease.y = velocity - Dy;
-    if (Dx < velocity)
-        decrease.x = velocity - Dx;
+    if (Dy < movement.velocity)
+        decrease.y = movement.velocity - Dy;
+    if (Dx < movement.velocity)
+        decrease.x = movement.velocity - Dx;
 
     return decrease;
 }
 
-static Cardinals walk(Coord *start, Coord const goal, unsigned int const velocity)
+static void walk(Movement *movement)
 {
-    Cardinals direction = determine_direction(*start, goal);
-    Coord decrease = determine_decrease(*start, goal, velocity);
+    Coord decrease = determine_decrease(*movement);
 
-    switch(direction)
+    switch(movement->direction)
     {
         case N:
-            start->y -= velocity - decrease.y;
+            movement->position.y -= movement->velocity - decrease.y;
             break;
         case NE:
-            start->x += velocity - decrease.x;
-            start->y -= velocity - decrease.y;
+            movement->position.x += movement->velocity - decrease.x;
+            movement->position.y -= movement->velocity - decrease.y;
             break;
         case E:
-            start->x += velocity - decrease.x;
+            movement->position.x += movement->velocity - decrease.x;
             break;
         case SE:
-            start->x += velocity - decrease.x;
-            start->y += velocity - decrease.y;
+            movement->position.x += movement->velocity - decrease.x;
+            movement->position.y += movement->velocity - decrease.y;
             break;
         case S:
-            start->y += velocity - decrease.y;
+            movement->position.y += movement->velocity - decrease.y;
             break;
         case SW:
-            start->x -= velocity - decrease.x;
-            start->y += velocity - decrease.y;
+            movement->position.x -= movement->velocity - decrease.x;
+            movement->position.y += movement->velocity - decrease.y;
             break;
         case W:
-            start->x -= velocity - decrease.x;
+            movement->position.x -= movement->velocity - decrease.x;
             break;
         case NW:
-            start->x -= velocity - decrease.x;
-            start->y -= velocity - decrease.y;
+            movement->position.x -= movement->velocity - decrease.x;
+            movement->position.y -= movement->velocity - decrease.y;
             break;
     }
-    return direction;
 }
 
-void formation_offsetting(Coord *position, unsigned int const char_number, Deployment const deployment)
+void formation_offsetting(Movement *movement, unsigned int const char_number)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
     unsigned space = TILES_WIDTH/4, absox, absoy;
     int ox = 0, oy = 0;
 
-    switch(deployment)
+    switch(movement->formation)
     {
         case LINE:
             ox = 0;
@@ -164,15 +167,15 @@ void formation_offsetting(Coord *position, unsigned int const char_number, Deplo
 
     absox = abs(ox); absoy = abs(oy);
 
-    if (absox > position->x && ox < 0)
-        position->x = 0;
+    if (absox > movement->path[movement->current_node].x && ox < 0)
+        movement->path[movement->current_node].x = 0;
     else
-        position->x += ox;
+        movement->path[movement->current_node].x += ox;
 
-    if (absoy > position->y && oy < 0)
-        position->y = 0;
+    if (absoy > movement->path[movement->current_node].y && oy < 0)
+        movement->path[movement->current_node].y = 0;
     else
-        position->y += oy;
+        movement->path[movement->current_node].y += oy;
 }
 
 void move(
@@ -182,26 +185,28 @@ void move(
         unsigned int** const cost_map
         )
 {
-    unsigned int i;
-    Coord start = movement->position;
-    Coord goal = movement->path[movement->current_node];
-    unsigned int nodes = 0;
+    unsigned int i, nodes = 0;
+    Coord start; init_coord(&start);
 
     if (
-            !is_same_coord(start, goal) &&
-            !is_colliding(goal, collision_map, TRUE) &&
-            !is_out_of_map(goal, max_coord)
+            !is_same_coord(movement->position, movement->path[movement->current_node]) &&
+            !is_colliding(movement->path[movement->current_node], collision_map, TRUE) &&
+            !is_out_of_map(movement->path[movement->current_node], max_coord)
         )
     {
         switch (movement->movement_type)
         {
             case PATH:
+                // these 2 lines avoid the conversion of the pixels position
+                start = movement->position;
                 pixels_to_unit(&start);
-                pixels_to_unit(&goal);
+
+                pixels_to_unit(&movement->path[movement->current_node]);
                 movement->movement_type = WALK;
                 nodes = find_path(
                         movement->path,
-                        start, goal,
+                        start,
+                        movement->path[movement->current_node],
                         max_coord.x, max_coord.y,
                         collision_map,
                         cost_map,
@@ -212,7 +217,6 @@ void move(
                     movement->current_node = nodes - 1;
                     for (i=0;i<nodes;i++)
                         unit_to_pixels(&movement->path[i]);
-                    goal = movement->path[movement->current_node];
                     goto walking;
                 }
                 else
@@ -220,13 +224,15 @@ void move(
             case WALK:
                 goto walking;
             case TELEPORT:
-                // ensure that its not TP to a different node than the click
-                goal = movement->path[0]; round_coord(&goal);
-                teleport(&movement->position, goal);
+                teleport(movement);
                 goto end_move;
             walking:
-                movement->direction = walk(&movement->position, goal, movement->velocity);
-                if (is_same_coord(movement->position, goal))
+                movement->direction = determine_direction(
+                        movement->position,
+                        movement->path[movement->current_node]
+                        );
+                walk(movement);
+                if (is_same_coord(movement->position, movement->path[movement->current_node]))
                 {
                     if (!movement->current_node)
                         goto end_move;
