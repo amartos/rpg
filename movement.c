@@ -4,7 +4,11 @@
 static void teleport(Movement *movement)
 {
     // round coord to current tile, not *exact* click position
-    round_coord(&movement->path[0]);
+    round_coord(&movement->path[movement->current_node]);
+    movement->direction = determine_direction(
+            movement->position,
+            movement->path[movement->current_node]
+            );
     movement->position = movement->path[movement->current_node];
     reset_coord(&movement->path[movement->current_node]);
 }
