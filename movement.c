@@ -83,87 +83,69 @@ static void walk(Movement *movement)
     }
 }
 
+static int round_angle(float n)
+{
+    int x = 0;
+    if (n <= -0.5)
+        x = floor(n);
+    else if (n >= 0.5)
+        x = ceil(n);
+    else
+        x = 0;
+
+    return x;
+}
+
+static float sind(unsigned int angle)
+{
+    return sin(angle*M_PI/180);
+}
+
+static float cosd(unsigned int angle)
+{
+    return cos(angle*M_PI/180);
+}
+
 void formation_offsetting(Movement *movement, unsigned int const char_number)
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
     unsigned space = TILES_WIDTH/4, absox, absoy;
     int ox = 0, oy = 0;
+    unsigned int half_cn = char_number/2, third_cn = char_number/3;
 
     switch(movement->formation)
     {
         case LINE:
             ox = 0;
-            oy = char_number * TILES_HEIGHT + space;
+            oy = round_angle(sind(270)) * (3 - char_number);
             break;
         case SQUARE:
-            switch(char_number)
-            {
-                case 0:
-                    ox = -1 * TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
-                case 1:
-                    ox = -1 * TILES_WIDTH;
-                    oy = -1 * TILES_HEIGHT;
-                    break;
-                case 2:
-                    ox = TILES_WIDTH;
-                    oy = -1 * TILES_HEIGHT;
-                    break;
-                case 3:
-                    ox = TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
-            }
+            ox = round_angle(cosd(135+90*char_number));
+            oy = round_angle(sind(135+90*char_number));
             break;
         case TRIANGLE:
-            switch(char_number)
+            if (char_number)
             {
-                case 0:
-                    ox = 0;
-                    oy = 0;
-                    break;
-                case 1:
-                    ox = 0;
-                    oy = -1 * (TILES_HEIGHT + space);
-                    break;
-                case 2:
-                    ox = -1 * TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
-                case 3:
-                    ox = TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
+                ox = round_angle(cosd(270 - half_cn * 135 - third_cn * 90));
+                oy = round_angle(sind(270 - half_cn * 135 - third_cn * 90));
             }
             break;
         case CIRCLE:
-            switch(char_number)
-            {
-                case 0:
-                    ox = -2 * TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
-                case 1:
-                    ox = -1 * TILES_WIDTH;
-                    oy = 0;
-                    break;
-                case 2:
-                    ox = 0;
-                    oy = 0;
-                    break;
-                case 3:
-                    ox = TILES_WIDTH;
-                    oy = TILES_HEIGHT;
-                    break;
-            }
+            ox = round_angle(cosd(180 + 45 * char_number + half_cn * 45));
+            oy = round_angle(sind(180 + 45 * char_number + half_cn * 45));
+            if (char_number == 0)
+                ox -= 1;
+            else if (char_number == 3)
+                ox += 1;
             break;
         default:
             ox = 0;
             oy = 0;
             break;
         }
+    ox *= TILES_WIDTH;
+    oy *= TILES_HEIGHT;
 
     absox = abs(ox); absoy = abs(oy);
 
