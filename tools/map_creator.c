@@ -224,6 +224,7 @@ int main(int argc, char *argv[])
     ETRY;
 
     char line[MAX_SIZE_LINE] = {0};
+    fprintf(map_file, "# infos\n\nx: %d\ny: %d\n", maxx, maxy);
     for (t=0;t<=WEATHER;t++)
     {
         switch(t)
