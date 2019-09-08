@@ -159,156 +159,156 @@ int main(int argc, char *argv[])
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
             }
-
-            // Rendering
-            SDL_RenderClear(renderer); 
-
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
-            SDL_RenderDrawRect(renderer, NULL);
-
-            apply_tiles(&renderer, BACKGROUND, test_map, tiles);
-            // inverted to draw isometric properly
-            for (j=0;j<max_coord.y;j++)
-                for (i=0;i<max_coord.x;i++)
-                {
-                    id = test_map.schematics[FOREGROUND][i][j];
-                    if (id)
-                    {
-                        coord.x = i * TILES_WIDTH;
-                        coord.y = j * TILES_HEIGHT;
-                        coord = cartesian_to_isometric(coord);
-                        tiles_infos.x = coord.x;
-                        tiles_infos.y = coord.y - TILES_HEIGHT; // offset
-                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
-                    }
-
-                    for (c=0;c<MAX_CHARACTERS;c++)
-                    {
-                        coord = all_characters[c].movement.position;
-                        pixels_to_unit(&coord);
-                        coord2.x = i; coord2.y = j;
-                        if (is_same_coord(coord, coord2))
-                        {
-                            isometrified = cartesian_to_isometric(all_characters[c].movement.position);
-                            sprites_infos.x = isometrified.x;
-                            sprites_infos.y = isometrified.y;
-                            state = MOVE;
-                            direction = all_characters[c].movement.direction;
-                            current_frame = all_characters[c].on_screen.current_frame;
-                            SDL_RenderCopy(
-                                    renderer,
-                                    all_characters[c].on_screen.sprite,
-                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
-                                    &sprites_infos
-                                    );
-                        }
-
-                    }
-                }
-
-            if (paused)
-            {
-                tiles_infos.x = 0; tiles_infos.y = 0;
-                SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
-            }
-
-            SDL_PollEvent(&event);
-            switch(event.type)
-            {
-                case SDL_QUIT:
-                    done = TRUE;
-                    break;
-
-                case SDL_MOUSEMOTION:
-                    center.x = event.motion.x;
-                    center.y = event.motion.y;
-                    center = isometric_to_cartesian(center);
-                    // round coord to current tile, not *exact* click position
-                    round_coord(&center);
-                    if (!is_out_of_map(center, max_coord))
-                    {
-                        isometrified = cartesian_to_isometric(center);
-                        mouse_hover_rect.x = isometrified.x;
-                        mouse_hover_rect.y = isometrified.y;
-                        SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
-                    }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    center.x = event.button.x;
-                    center.y = event.button.y;
-                    center = isometric_to_cartesian(center);
-                    // round coord to current tile, not *exact* click position
-                    round_coord(&center);
-                    for (i=0;i<MAX_CHARACTERS;i++)
-                    {
-                        coord = center;
-                        deploy(
-                                &coord,
-                                determine_direction(all_characters[i].movement.position, center),
-                                all_characters[i].movement.formation, i
-                                );
-                        if (
-                                !is_same_coord(coord, all_characters[i].movement.position) &&
-                                !is_out_of_map(coord, max_coord) &&
-                                !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE)
-                            )
-                        {
-                            all_characters[i].movement.current_node = 0;
-                            all_characters[i].movement.path[0] = coord;
-                            switch(event.button.button)
-                            {
-                                case SDL_BUTTON_LEFT:
-                                    fire_movement(&all_characters[i].movement, PATH);
-                                    break;
-                                case SDL_BUTTON_RIGHT:
-                                    fire_movement(&all_characters[i].movement, TELEPORT);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            all_characters[i].movement.current_node = 0;
-                            reset_coord(&all_characters[i].movement.path[0]);
-                            all_characters[i].movement.movement_type = WALK;
-                            all_characters[i].movement.moving = FALSE;
-                        }
-                    }
-                    break;
-                case SDL_KEYDOWN:
-                    switch (event.key.keysym.sym)
-                    {
-                        case SDLK_SPACE:
-                            paused = !paused;
-                            break;
-                        case SDLK_a:
-                            change_formation(all_characters, LINE);
-                            break;
-                        case SDLK_z:
-                            change_formation(all_characters, SQUARE);
-                            break;
-                        case SDLK_e:
-                            change_formation(all_characters, TRIANGLE);
-                            break;
-                        case SDLK_r:
-                            change_formation(all_characters, CIRCLE);
-                            break;
-                        case SDLK_UP:
-                            break;
-                        case SDLK_DOWN:
-                            break;
-                        case SDLK_LEFT:
-                            break;
-                        case SDLK_RIGHT:
-                            break;
-                    }
-                    break;
-            }
-
-
-            SDL_RenderPresent(renderer);
         }
         else // do not overuse CPU
             SDL_Delay(FRAMERATE - (time - prev_time));
+
+        // Rendering
+        SDL_RenderClear(renderer); 
+
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+        SDL_RenderDrawRect(renderer, NULL);
+
+        apply_tiles(&renderer, BACKGROUND, test_map, tiles);
+        // inverted to draw isometric properly
+        for (j=0;j<max_coord.y;j++)
+            for (i=0;i<max_coord.x;i++)
+            {
+                id = test_map.schematics[FOREGROUND][i][j];
+                if (id)
+                {
+                    coord.x = i * TILES_WIDTH;
+                    coord.y = j * TILES_HEIGHT;
+                    coord = cartesian_to_isometric(coord);
+                    tiles_infos.x = coord.x;
+                    tiles_infos.y = coord.y - TILES_HEIGHT; // offset
+                    SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
+                }
+
+                for (c=0;c<MAX_CHARACTERS;c++)
+                {
+                    coord = all_characters[c].movement.position;
+                    pixels_to_unit(&coord);
+                    coord2.x = i; coord2.y = j;
+                    if (is_same_coord(coord, coord2))
+                    {
+                        isometrified = cartesian_to_isometric(all_characters[c].movement.position);
+                        sprites_infos.x = isometrified.x;
+                        sprites_infos.y = isometrified.y;
+                        state = MOVE;
+                        direction = all_characters[c].movement.direction;
+                        current_frame = all_characters[c].on_screen.current_frame;
+                        SDL_RenderCopy(
+                                renderer,
+                                all_characters[c].on_screen.sprite,
+                                &(all_characters[c].on_screen.frames[direction][state][current_frame]),
+                                &sprites_infos
+                                );
+                    }
+
+                }
+            }
+
+        if (paused)
+        {
+            tiles_infos.x = 0; tiles_infos.y = 0;
+            SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
+        }
+
+        SDL_PollEvent(&event);
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                done = TRUE;
+                break;
+
+            case SDL_MOUSEMOTION:
+                center.x = event.motion.x;
+                center.y = event.motion.y;
+                center = isometric_to_cartesian(center);
+                // round coord to current tile, not *exact* click position
+                round_coord(&center);
+                if (!is_out_of_map(center, max_coord))
+                {
+                    isometrified = cartesian_to_isometric(center);
+                    mouse_hover_rect.x = isometrified.x;
+                    mouse_hover_rect.y = isometrified.y;
+                    SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
+                }
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                center.x = event.button.x;
+                center.y = event.button.y;
+                center = isometric_to_cartesian(center);
+                // round coord to current tile, not *exact* click position
+                round_coord(&center);
+                for (i=0;i<MAX_CHARACTERS;i++)
+                {
+                    coord = center;
+                    deploy(
+                            &coord,
+                            determine_direction(all_characters[i].movement.position, center),
+                            all_characters[i].movement.formation, i
+                            );
+                    if (
+                            !is_same_coord(coord, all_characters[i].movement.position) &&
+                            !is_out_of_map(coord, max_coord) &&
+                            !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE)
+                        )
+                    {
+                        all_characters[i].movement.current_node = 0;
+                        all_characters[i].movement.path[0] = coord;
+                        switch(event.button.button)
+                        {
+                            case SDL_BUTTON_LEFT:
+                                fire_movement(&all_characters[i].movement, PATH);
+                                break;
+                            case SDL_BUTTON_RIGHT:
+                                fire_movement(&all_characters[i].movement, TELEPORT);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        all_characters[i].movement.current_node = 0;
+                        reset_coord(&all_characters[i].movement.path[0]);
+                        all_characters[i].movement.movement_type = WALK;
+                        all_characters[i].movement.moving = FALSE;
+                    }
+                }
+                break;
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_SPACE:
+                        paused = !paused;
+                        break;
+                    case SDLK_a:
+                        change_formation(all_characters, LINE);
+                        break;
+                    case SDLK_z:
+                        change_formation(all_characters, SQUARE);
+                        break;
+                    case SDLK_e:
+                        change_formation(all_characters, TRIANGLE);
+                        break;
+                    case SDLK_r:
+                        change_formation(all_characters, CIRCLE);
+                        break;
+                    case SDLK_UP:
+                        break;
+                    case SDLK_DOWN:
+                        break;
+                    case SDLK_LEFT:
+                        break;
+                    case SDLK_RIGHT:
+                        break;
+                }
+                break;
+        }
+
+
+        SDL_RenderPresent(renderer);
     }
 
     free_map(&test_map);
