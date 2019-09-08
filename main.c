@@ -122,6 +122,8 @@ int main(int argc, char *argv[])
                     center.x = event.button.x;
                     center.y = event.button.y;
                     center = isometric_to_cartesian(center);
+                    // round coord to current tile, not *exact* click position
+                    round_coord(&center);
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
                         all_characters[i].movement.current_node = 0;
