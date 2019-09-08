@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
     Coord isometrified; init_coord(&isometrified);
 
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
-    max_coord.x = test_map.x_tiles;
-    max_coord.y = test_map.y_tiles;
+    max_coord.x = test_map.maxx;
+    max_coord.y = test_map.maxy;
 
     // load characters
     center.x = TILES_WIDTH * 4;

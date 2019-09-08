@@ -37,12 +37,12 @@ int main(int argc, char *argv[])
     Coord isometrified; init_coord(&isometrified);
 
     char map_name[MAX_SIZE_LINE] = {0};
-    unsigned int x_tiles = 20, y_tiles = 20;
+    unsigned int maxx = 20, maxy = 20;
     printf("map name (no spaces, %d max characters): ", MAX_SIZE_LINE); scanf("%s", map_name);
-    printf("max tiles [x y]: "); scanf("%d %d", &x_tiles, &y_tiles);
-    Map map; init_empty_map(&map, x_tiles, y_tiles);
-    max_coord.x = map.x_tiles;
-    max_coord.y = map.y_tiles;
+    printf("max tiles [x y]: "); scanf("%d %d", &maxx, &maxy);
+    Map map; init_empty_map(&map, maxx, maxy);
+    max_coord.x = map.maxx;
+    max_coord.y = map.maxy;
 
     floor_surface = SDL_ConvertSurfaceFormat(floor_surface, SDL_PIXELFORMAT_RGBA8888, 0);
     wall_surface = SDL_ConvertSurfaceFormat(wall_surface, SDL_PIXELFORMAT_RGBA8888, 0);
@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
                     case SDLK_F5:
                         tile_id = 0;
                         for (t=BACKGROUND;t<=WEATHER;t++)
-                            for (i=0;i<x_tiles;i++)
-                                for (j=0;j<y_tiles;j++)
+                            for (i=0;i<maxx;i++)
+                                for (j=0;j<maxy;j++)
                                     map.schematics[t][i][j] = 0;
                         break;
                 }
@@ -183,8 +183,8 @@ int main(int argc, char *argv[])
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (i=0;i<=x_tiles;i++)
-            for (j=0;j<=y_tiles;j++)
+        for (i=0;i<=maxx;i++)
+            for (j=0;j<=maxy;j++)
             {
                 center.x = i * TILES_WIDTH + TILES_WIDTH; center.y = j * TILES_HEIGHT;
 
@@ -196,9 +196,9 @@ int main(int argc, char *argv[])
                 horizontal.x = center.x + TILES_WIDTH; horizontal.y = center.y;
                 horizontal = cartesian_to_isometric(horizontal);
 
-                if (i < x_tiles)
+                if (i < maxx)
                     SDL_RenderDrawLine(renderer, origin.x, origin.y, horizontal.x, horizontal.y);
-                if (j<y_tiles)
+                if (j<maxy)
                     SDL_RenderDrawLine(renderer, origin.x, origin.y, vertical.x, vertical.y);
 
             }
@@ -244,9 +244,9 @@ int main(int argc, char *argv[])
                 fprintf(map_file, "# %s\n\n", "weather");
                 break;
         }
-        for (j=0;j<y_tiles;j++)
+        for (j=0;j<maxy;j++)
         {
-            for (i=0;i<x_tiles;i++) // inverted to get per line
+            for (i=0;i<maxx;i++) // inverted to get per line
             {
                 switch(t)
                 {

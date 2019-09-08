@@ -4,19 +4,15 @@
 void init_map(Map *map, char const map_path[])
 {
     FILE *map_file = NULL;// FILE *converter_file = NULL;
-    unsigned int i = 0, j = 0, line_count = 0, column_count = 0, len = 0;
-    unsigned int t = 0, n_types = WEATHER + 1; // weather always last
-    char line[MAX_SIZE_LINE] = {0};
+    unsigned int i = 0, j = 0, t = 0, offset = 0;
+    char line[MAX_SIZE_LINE] = {0}, *data = NULL;
+    MapType map_type = 0;
 
     TRY
     {
         map_file = fopen(map_path, "r");
         if (map_file == NULL)
             THROW(MAP_FILE_LOADING_FAILURE);
-
-        // converter_file = fopen("assets/maps/converter", "r");
-        // if (converter_file == NULL)
-        //     THROW(CONVERTER_FILE_LOADING_FAILURE);
     }
     CATCH(MAP_FILE_LOADING_FAILURE)
     {
@@ -42,34 +38,30 @@ void init_map(Map *map, char const map_path[])
 
     // maxx and maxy
     fgets(line, MAX_SIZE_LINE, map_file);
-    data = line; sscanf(data, "x: %d", &map->x_tiles);
+    data = line; sscanf(data, "x: %d", &map->maxx);
     fgets(line, MAX_SIZE_LINE, map_file);
-    data = line; sscanf(data, "y: %d", &map->y_tiles);
-
-    map->total_tiles = map->x_tiles * map->y_tiles;
-    map->w = TILES_WIDTH * map->x_tiles, map->h = TILES_HEIGHT * map->y_tiles;
-    map->xscroll = map->yscroll = 0;
+    data = line; sscanf(data, "y: %d", &map->maxy);
 
     // TODO: malloc needs to be better checked
     TRY
     {
-        map->schematics = malloc(sizeof(unsigned int *) * n_types);
+        map->schematics = malloc(sizeof(unsigned int *) * (WEATHER+1));
         if (map->schematics == NULL)
             THROW(MAP_MALLOC_FAILURE);
 
-        for (t=BACKGROUND;t<n_types;t++)
+        for (t=BACKGROUND;t<=WEATHER;t++)
         {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * column_count);
+            map->schematics[t] = malloc(sizeof(unsigned int *) * map->maxx);
             if (map->schematics[t] == NULL)
                 THROW(MAP_MALLOC_FAILURE);
 
-            for(i=0;i<column_count;i++)
+            for(i=0;i<map->maxx;i++)
             {
-                map->schematics[t][i] = malloc(sizeof(unsigned int) * line_count);
+                map->schematics[t][i] = malloc(sizeof(unsigned int) * map->maxy);
                 if (map->schematics[t][i] == NULL)
                     THROW(MAP_MALLOC_FAILURE);
 
-                for (j=0;j<line_count;j++)
+                for (j=0;j<map->maxy;j++)
                     map->schematics[t][i][j] = 0;
             }
         }
@@ -88,9 +80,6 @@ void init_map(Map *map, char const map_path[])
     // same length (a multiple of 4 digits hex numbers + 1 space). It is too 
     // much constraint, but it's a start. If RLE compression is implemented, 
     // this code will definitely need to change
-    char *data = NULL;
-    unsigned int offset = 0;
-    MapType map_type = 0;
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
         if (!strcmp(line, "# background\n"))
@@ -131,35 +120,35 @@ void init_map(Map *map, char const map_path[])
             switch (map_type)
             {
                 case FOREGROUND:
-                    for (i=0;i<column_count;i++)
+                    for (i=0;i<map->maxx;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[FOREGROUND][i][j]);
                         data += offset;
                     }
                     break;
                 case BACKGROUND:
-                    for (i=0;i<column_count;i++)
+                    for (i=0;i<map->maxx;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[BACKGROUND][i][j]);
                         data += offset;
                     }
                     break;
                 case COLLISIONS:
-                    for (i=0;i<column_count;i++)
+                    for (i=0;i<map->maxx;i++)
                     {
                         sscanf(data, "%d ", &map->schematics[COLLISIONS][i][j]);
                         data += offset;
                     }
                     break;
                 case WEATHER:
-                    for (i=0;i<column_count;i++)
+                    for (i=0;i<map->maxx;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[WEATHER][i][j]);
                         data += offset;
                     }
                     break;
                 case COST:
-                    for (i=0;i<column_count;i++)
+                    for (i=0;i<map->maxx;i++)
                     {
                         sscanf(data, "%X ", &map->schematics[COST][i][j]);
                         data += offset;
@@ -171,7 +160,6 @@ void init_map(Map *map, char const map_path[])
     }
 
     fclose(map_file);
-    // fclose(converter_file);
 }
 
 void free_map(Map *map)
@@ -179,21 +167,18 @@ void free_map(Map *map)
     unsigned int t,i, n_types = WEATHER + 1;
     for (t=BACKGROUND;t<n_types;t++)
     {
-        for (i=0;i<map->x_tiles;i++)
+        for (i=0;i<map->maxx;i++)
             free(map->schematics[t][i]);
         free(map->schematics[t]);
     }
     free(map->schematics);
 }
 
-void init_empty_map(Map *map, unsigned int const x_tiles, unsigned int const y_tiles)
+void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
 {
     unsigned int i = 0, j = 0, t = 0;
 
-    map->x_tiles = x_tiles, map->y_tiles = y_tiles;
-    map->total_tiles = map->x_tiles * map->y_tiles;
-    map->w = TILES_WIDTH * x_tiles; map->h = TILES_HEIGHT * y_tiles;
-    map->xscroll = map->yscroll = 0;
+    map->maxx = maxx, map->maxy = maxy;
 
     // TODO: malloc needs to be better checked
     TRY
@@ -204,17 +189,17 @@ void init_empty_map(Map *map, unsigned int const x_tiles, unsigned int const y_t
 
         for (t=BACKGROUND;t<=WEATHER;t++)
         {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * x_tiles);
+            map->schematics[t] = malloc(sizeof(unsigned int *) * maxx);
             if (map->schematics[t] == NULL)
                 THROW(MAP_MALLOC_FAILURE);
 
-            for(i=0;i<x_tiles;i++)
+            for(i=0;i<maxx;i++)
             {
-                map->schematics[t][i] = malloc(sizeof(unsigned int) * y_tiles);
+                map->schematics[t][i] = malloc(sizeof(unsigned int) * maxy);
                 if (map->schematics[t][i] == NULL)
                     THROW(MAP_MALLOC_FAILURE);
 
-                for (j=0;j<y_tiles;j++)
+                for (j=0;j<maxy;j++)
                     map->schematics[t][i][j] = 0;
             }
         }

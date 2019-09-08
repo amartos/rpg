@@ -89,10 +89,7 @@ enum MapType {
 typedef struct Map Map;
 struct Map
 {
-    unsigned int w, h;
-    unsigned int x_tiles, y_tiles;
-    unsigned int total_tiles;
-    unsigned int xscroll, yscroll;
+    unsigned int maxx, maxy;
     unsigned int ***schematics;
 };
 
