@@ -32,22 +32,22 @@ void init_map(Map *map, char const map_path[])
     }
     ETRY;
 
-    // size of map
-    // len of line should always be a multiple of 5
-    // (4 hex digit + space/en of line)
+    // get map infos
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
-        len = strlen(line)/5;
-        if (len > column_count)
-            column_count = len;
-        if (line[0] != '#' && line[0] != '\n')
-            line_count++;
+        if (!strcmp(line, "# infos\n"))
+            break;
     }
+    fgets(line, MAX_SIZE_LINE, map_file); // empty line
 
-    line_count = line_count/(n_types-1); // BG and FG in same map
-    map->x_tiles = column_count, map->y_tiles = line_count;
+    // maxx and maxy
+    fgets(line, MAX_SIZE_LINE, map_file);
+    data = line; sscanf(data, "x: %d", &map->x_tiles);
+    fgets(line, MAX_SIZE_LINE, map_file);
+    data = line; sscanf(data, "y: %d", &map->y_tiles);
+
     map->total_tiles = map->x_tiles * map->y_tiles;
-    map->w = TILES_WIDTH * column_count, map->h = TILES_HEIGHT * line_count;
+    map->w = TILES_WIDTH * map->x_tiles, map->h = TILES_HEIGHT * map->y_tiles;
     map->xscroll = map->yscroll = 0;
 
     // TODO: malloc needs to be better checked
