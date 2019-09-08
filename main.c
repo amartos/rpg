@@ -215,6 +215,18 @@ int main(int argc, char *argv[])
             SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
         }
 
+
+        for (i=0;i<MAX_CHARACTERS;i++)
+        {
+            if (all_characters[i].movement.moving)
+            {
+                isometrified = cartesian_to_isometric(all_characters[i].movement.path[0]);
+                mouse_hover_rect.x = isometrified.x;
+                mouse_hover_rect.y = isometrified.y;
+                SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
+            }
+        }
+
         SDL_PollEvent(&event);
         switch(event.type)
         {
@@ -270,6 +282,11 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
+                        isometrified = cartesian_to_isometric(center);
+                        mouse_hover_rect.x = isometrified.x;
+                        mouse_hover_rect.y = isometrified.y;
+                        SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
+
                         all_characters[i].movement.current_node = 0;
                         reset_coord(&all_characters[i].movement.path[0]);
                         all_characters[i].movement.movement_type = WALK;
