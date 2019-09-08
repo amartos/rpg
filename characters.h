@@ -12,10 +12,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 // this should be removed at some point
-#include <SDL/SDL_rotozoom.h>
+#include <SDL2/SDL2_rotozoom.h>
 
 // structures
 // This structure describes the different states a character object can be
@@ -36,7 +36,7 @@ enum State
 typedef struct OnScreen OnScreen;
 struct OnScreen
 {
-    SDL_Surface *sprite;
+    SDL_Texture *sprite;
     State state;
     Bool animated;
     // possible positions, State, max number of frames
@@ -61,7 +61,12 @@ struct Character
 // prototypes
 // Character initialization. For now the values are manually set, but in the
 // future all will depend on the id
-void init_character(Character *character, unsigned int const id, Coord const start_position, Deployment const formation);
-void free_character(Character *character);
+void init_character(
+        SDL_Renderer **renderer,
+        Character *character,
+        unsigned int const id,
+        Coord const start_position,
+        Deployment const formation
+        );
 
 #endif // define RPG_CHARACTERS

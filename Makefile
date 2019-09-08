@@ -1,6 +1,6 @@
 CPP=gcc
 CFLAGS=-O3 -no-pie
-LDFLAGS=-lSDL -lSDL_mixer -lSDL_image -lSDL_gfx -lm
+LDFLAGS=-lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_gfx -lm
 BIN=bin
 FILES=*
 EXEC=$(BIN)/exec

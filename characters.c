@@ -1,10 +1,10 @@
 #include "characters.h"
 
 
-static void init_on_screen(OnScreen *on_screen, unsigned int const id)
+static void init_on_screen(SDL_Renderer **renderer, OnScreen *on_screen, unsigned int const id)
 {
     unsigned int i, j, f;
-    SDL_Surface *sprite = NULL;
+    SDL_Surface *sprite_surface = NULL;
 
     //-------------------------------------------------------------------------
     // Sprites loading & colorization
@@ -12,15 +12,15 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
 
     TRY
     {
-        sprite = IMG_Load("assets/sprites/characters/test_character_grey.png");
-        if (sprite == NULL)
+        sprite_surface = IMG_Load("assets/sprites/characters/test_character_grey.png");
+        if (sprite_surface == NULL)
             THROW(SPRITE_LOAD_FAILURE);
         // double size of sprites as the images are really small
         // 16 pixels w/h is too small for recent screens but
         // good for GBC, and the test sprites are from this console
         // this will be delete when real sprites are done
-        on_screen->sprite = SDL_DisplayFormatAlpha(sprite);
-        on_screen->sprite = rotozoomSurface(sprite, 0.0, 2.0, 0.0);
+        sprite_surface = SDL_ConvertSurfaceFormat(sprite_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+        sprite_surface = rotozoomSurface(sprite_surface, 0.0, 2.0, 0.0);
     }
     CATCH(SPRITE_LOAD_FAILURE)
     {
@@ -59,7 +59,13 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
     }
 
     for (i=0;i<COLOR_PALETTE;i++)
-        set_color(on_screen->sprite, greys[i], palette[i]);
+    {
+        palette[i].a = 0xFF;
+        set_color(sprite_surface, greys[i], palette[i]);
+    }
+
+    on_screen->sprite = SDL_CreateTextureFromSurface(*renderer, sprite_surface);
+    SDL_FreeSurface(sprite_surface);
 
     //-------------------------------------------------------------------------
     // Frames
@@ -101,18 +107,15 @@ static void init_on_screen(OnScreen *on_screen, unsigned int const id)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-void init_character(Character *character, unsigned int const id, Coord const start_position, Deployment const formation)
+void init_character(
+        SDL_Renderer **renderer,
+        Character *character,
+        unsigned int const id,
+        Coord const start_position,
+        Deployment const formation
+        )
 {
     character->id = id;
     init_movement(&character->movement, start_position, formation, id);
-    init_on_screen(&character->on_screen, id);
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-void free_character(Character *character)
-{
-    SDL_FreeSurface(character->on_screen.sprite);
+    init_on_screen(renderer, &character->on_screen, id);
 }

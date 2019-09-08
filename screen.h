@@ -9,16 +9,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 
 // prototypes
-void init_screen(SDL_Surface *(*screen));
-void set_BG_color(SDL_Surface *(*screen), SDL_Rect* const tile, unsigned int* const rgb);
-void make_check_board(SDL_Surface *(*screen), unsigned int const x, unsigned int const y);
+void init_screen(SDL_Window **window, SDL_Renderer **renderer);
+// void make_check_board(SDL_Renderer **renderer, unsigned int const x, unsigned int const y);
 
 // SDL_Surface tile will change for an array once more tiles are included
-void apply_tiles(SDL_Surface *(*screen), MapType const type, Map const map, SDL_Surface* tiles[0xFFFF]);
+void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, SDL_Texture* tiles[0xFFFF]);
 
 #endif // define RPG_SCREEN

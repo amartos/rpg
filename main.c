@@ -37,18 +37,24 @@ int main(int argc, char *argv[])
     unsigned int time = 0, prev_time = 0;
 
     // SDL vars init
-    SDL_Surface *screen = NULL; init_screen(&screen);
+    SDL_Window *window; SDL_Renderer *renderer;
+    init_screen(&window, &renderer);
 
-    SDL_Surface* tiles[0xFFFF];
+    SDL_Texture* tiles[0xFFFF];
     for (i=0;i<0xFFFF;i++)
         tiles[i] = NULL;
-    SDL_Surface *floor = IMG_Load("assets/tiles/tile.png");
-    SDL_Surface *wall = IMG_Load("assets/tiles/wall.png");
-    SDL_Surface *wall1 = IMG_Load("assets/tiles/wall1.png");
 
-    SDL_Rect infos;
-    infos.x = 0; infos.y = 0;
-    infos.w = SPRITES_WIDTH; infos.h = SPRITES_HEIGHT;
+    SDL_Surface *floor_surface = IMG_Load("assets/tiles/tile.png");
+    SDL_Surface *wall_surface = IMG_Load("assets/tiles/wall.png");
+    SDL_Surface *wall1_surface = IMG_Load("assets/tiles/wall1.png");
+
+    SDL_Rect sprites_infos;
+    sprites_infos.x = 0; sprites_infos.y = 0;
+    sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
+    SDL_Rect tiles_infos;
+    tiles_infos.x = 0; tiles_infos.y = 0;
+    tiles_infos.w = TILES_WIDTH*2; tiles_infos.h = TILES_HEIGHT*2;
+
     SDL_Event event;
 
     // custom structs init
@@ -75,21 +81,29 @@ int main(int argc, char *argv[])
     center.x = TILES_WIDTH * 4;
     center.y = TILES_HEIGHT * 4;
     for (i=0;i<MAX_CHARACTERS;i++)
-        init_character(&all_characters[i], i, center, SQUARE);
+        init_character(&renderer, &all_characters[i], i, center, SQUARE);
 
-    // Make it double the TILE_WIDTH/HEIGHT to stick tiles between them
-    floor = rotozoomSurface(floor, 0.0, 0.5, 0.0);
-    wall = rotozoomSurface(wall, 0.0, 0.5, 0.0);
-    wall1 = rotozoomSurface(wall1, 0.0, 0.5, 0.0);
+    floor_surface = SDL_ConvertSurfaceFormat(floor_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    wall_surface = SDL_ConvertSurfaceFormat(wall_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    wall1_surface = SDL_ConvertSurfaceFormat(wall1_surface, SDL_PIXELFORMAT_RGBA8888, 0);
 
-    floor = SDL_DisplayFormatAlpha(floor);
-    wall = SDL_DisplayFormatAlpha(wall);
-    wall1 = SDL_DisplayFormatAlpha(wall1);
+    SDL_Texture *floor = SDL_CreateTextureFromSurface(renderer, floor_surface);
+    SDL_Texture *wall = SDL_CreateTextureFromSurface(renderer, wall_surface);
+    SDL_Texture *wall1 = SDL_CreateTextureFromSurface(renderer, wall1_surface);
 
     tiles[0x0100] = floor;
     tiles[0x0101] = wall;
     tiles[0x0102] = wall1;
 
+    SDL_Surface *red_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0x0, 0, 0, 0x0);
+    SDL_FillRect(red_rect_surface, NULL, SDL_MapRGB(red_rect_surface->format, 255, 0, 0));
+    red_rect_surface = SDL_ConvertSurfaceFormat(red_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *red_rect = SDL_CreateTextureFromSurface(renderer, red_rect_surface);
+
+    SDL_FreeSurface(floor_surface);
+    SDL_FreeSurface(wall_surface);
+    SDL_FreeSurface(wall1_surface);
+    SDL_FreeSurface(red_rect_surface);
 
     // main loop
     while (!done)
@@ -169,9 +183,13 @@ int main(int argc, char *argv[])
                 }
             }
 
-            // Blitting
-            set_BG_color(&screen, NULL, screen_bg_color);
-            apply_tiles(&screen, BACKGROUND, test_map, tiles);
+            // Rendering
+            SDL_RenderClear(renderer); 
+
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+            SDL_RenderDrawRect(renderer, NULL);
+
+            apply_tiles(&renderer, BACKGROUND, test_map, tiles);
             // inverted to draw isometric properly
             for (j=0;j<max_coord.y;j++)
                 for (i=0;i<max_coord.x;i++)
@@ -182,9 +200,9 @@ int main(int argc, char *argv[])
                         coord.x = i * TILES_WIDTH;
                         coord.y = j * TILES_HEIGHT;
                         coord = cartesian_to_isometric(coord);
-                        infos.x = coord.x;
-                        infos.y = coord.y - TILES_HEIGHT; // offset
-                        SDL_BlitSurface(tiles[id], NULL, screen, &infos);
+                        tiles_infos.x = coord.x;
+                        tiles_infos.y = coord.y - TILES_HEIGHT; // offset
+                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
                     }
 
                     for (c=0;c<MAX_CHARACTERS;c++)
@@ -195,15 +213,16 @@ int main(int argc, char *argv[])
                         if (is_same_coord(coord, coord2))
                         {
                             isometrified = cartesian_to_isometric(all_characters[c].movement.position);
-                            infos.x = isometrified.x;
-                            infos.y = isometrified.y;
+                            sprites_infos.x = isometrified.x;
+                            sprites_infos.y = isometrified.y;
                             state = MOVE;
                             direction = all_characters[c].movement.direction;
                             current_frame = all_characters[c].on_screen.current_frame;
-                            SDL_BlitSurface(
+                            SDL_RenderCopy(
+                                    renderer,
                                     all_characters[c].on_screen.sprite,
                                     &(all_characters[c].on_screen.frames[direction][state][current_frame]),
-                                    screen, &infos
+                                    &sprites_infos
                                     );
                         }
 
@@ -212,32 +231,17 @@ int main(int argc, char *argv[])
 
             if (paused)
             {
-                infos.x = 0; infos.y = 0;
-                SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 255, 0, 0));
+                tiles_infos.x = 0; tiles_infos.y = 0;
+                SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
             }
 
-            TRY
-            {
-                if (SDL_Flip(screen))
-                    THROW(FLIP_SCREEN_FAILURE);
-            }
-            CATCH(FLIP_SCREEN_FAILURE)
-            {
-                logger(FLIP_SCREEN_FAILURE, SDL_GetError());
-                exit(EXIT_FAILURE);
-            }
-            ETRY;
+            SDL_RenderPresent(renderer);
         }
         else // do not overuse CPU
             SDL_Delay(FRAMERATE - (time - prev_time));
     }
 
-    for (i=0;i<MAX_CHARACTERS;i++)
-        free_character(&all_characters[i]);
     free_map(&test_map);
-    for (i=0;i<0xFFFF;i++)
-        if (tiles[i] != NULL)
-            SDL_FreeSurface(tiles[i]);
     SDL_Quit();
     return 0;
 }
