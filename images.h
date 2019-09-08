@@ -10,6 +10,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+
+// structures
+typedef enum Cursors Cursors;
+enum Cursors
+{
+    EMPTY,
+    HOVER,
+    VALID,
+    INVALID
+};
+
 // prototypes
 void set_color(SDL_Surface *image, SDL_Color const original_color, SDL_Color const new_color);
 

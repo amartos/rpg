@@ -98,10 +98,45 @@ int main(int argc, char *argv[])
     red_rect_surface = SDL_ConvertSurfaceFormat(red_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
     SDL_Texture *red_rect = SDL_CreateTextureFromSurface(renderer, red_rect_surface);
 
+    SDL_Surface* mouse_hover_surfaces[INVALID+1];
+    for (i=0;i<=INVALID;i++)
+    {
+        mouse_hover_surfaces[i] = IMG_Load("assets/mouse/cursors.png");
+        if (mouse_hover_surfaces[i] == NULL)
+            exit(EXIT_FAILURE);
+    }
+
+    SDL_Color cursors_border[INVALID+1];
+    cursors_border[EMPTY].r = 0x3d; cursors_border[EMPTY].g = 0x3d; cursors_border[EMPTY].b = 0x3d; cursors_border[EMPTY].a = 255;
+    cursors_border[HOVER].r = 0; cursors_border[HOVER].g = 255; cursors_border[HOVER].b = 0; cursors_border[HOVER].a = 255;
+    cursors_border[VALID].r = 0; cursors_border[VALID].g = 0; cursors_border[VALID].b = 255; cursors_border[VALID].a = 255;
+    cursors_border[INVALID].r = 255; cursors_border[INVALID].g = 0; cursors_border[INVALID].b = 0; cursors_border[INVALID].a = 255;
+
+    SDL_Color cursors_inside[INVALID+1];
+    cursors_inside[EMPTY].r = 0xe4; cursors_inside[EMPTY].g = 0xe4; cursors_inside[EMPTY].b = 0xe4; cursors_inside[EMPTY].a = 255;
+    cursors_inside[HOVER].r = 0; cursors_inside[HOVER].g = 255; cursors_inside[HOVER].b = 0; cursors_inside[HOVER].a = 76;
+    cursors_inside[VALID].r = 0; cursors_inside[VALID].g = 0; cursors_inside[VALID].b = 255; cursors_inside[VALID].a = 76;
+    cursors_inside[INVALID].r = 255; cursors_inside[INVALID].g = 0; cursors_inside[INVALID].b = 0; cursors_inside[INVALID].a = 76;
+
+    SDL_Texture* mouse[INVALID+1];
+    mouse[EMPTY] = NULL;
+    for (i=1;i<=INVALID;i++)
+    {
+        set_color(mouse_hover_surfaces[i], cursors_border[EMPTY], cursors_border[i]);
+        set_color(mouse_hover_surfaces[i], cursors_inside[EMPTY], cursors_inside[i]);
+        mouse_hover_surfaces[i] = SDL_ConvertSurfaceFormat(mouse_hover_surfaces[i], SDL_PIXELFORMAT_RGBA8888, 0);
+        mouse[i] = SDL_CreateTextureFromSurface(renderer, mouse_hover_surfaces[i]);
+    }
+    SDL_Rect mouse_hover_rect;
+    mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
+    mouse_hover_rect.w = TILES_WIDTH*2; mouse_hover_rect.h = TILES_HEIGHT*2;
+
     SDL_FreeSurface(floor_surface);
     SDL_FreeSurface(wall_surface);
     SDL_FreeSurface(wall1_surface);
     SDL_FreeSurface(red_rect_surface);
+    for (i=0;i<=INVALID;i++)
+        SDL_FreeSurface(mouse_hover_surfaces[i]);
 
     // main loop
     while (!done)
@@ -110,11 +145,93 @@ int main(int argc, char *argv[])
         if (time - prev_time > FRAMERATE)
         {
             prev_time = time;
+            // Check char actions
+            for (i=0;i<MAX_CHARACTERS;i++)
+            {
+                if (all_characters[i].movement.moving && !paused)
+                {
+                    move(
+                            &all_characters[i].movement,
+                            max_coord,
+                            test_map.schematics[COLLISIONS],
+                            test_map.schematics[COST]
+                            );
+                    check_character_frame(&(all_characters[i].on_screen), time);
+                }
+            }
+
+            // Rendering
+            SDL_RenderClear(renderer); 
+
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+            SDL_RenderDrawRect(renderer, NULL);
+
+            apply_tiles(&renderer, BACKGROUND, test_map, tiles);
+            // inverted to draw isometric properly
+            for (j=0;j<max_coord.y;j++)
+                for (i=0;i<max_coord.x;i++)
+                {
+                    id = test_map.schematics[FOREGROUND][i][j];
+                    if (id)
+                    {
+                        coord.x = i * TILES_WIDTH;
+                        coord.y = j * TILES_HEIGHT;
+                        coord = cartesian_to_isometric(coord);
+                        tiles_infos.x = coord.x;
+                        tiles_infos.y = coord.y - TILES_HEIGHT; // offset
+                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
+                    }
+
+                    for (c=0;c<MAX_CHARACTERS;c++)
+                    {
+                        coord = all_characters[c].movement.position;
+                        pixels_to_unit(&coord);
+                        coord2.x = i; coord2.y = j;
+                        if (is_same_coord(coord, coord2))
+                        {
+                            isometrified = cartesian_to_isometric(all_characters[c].movement.position);
+                            sprites_infos.x = isometrified.x;
+                            sprites_infos.y = isometrified.y;
+                            state = MOVE;
+                            direction = all_characters[c].movement.direction;
+                            current_frame = all_characters[c].on_screen.current_frame;
+                            SDL_RenderCopy(
+                                    renderer,
+                                    all_characters[c].on_screen.sprite,
+                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
+                                    &sprites_infos
+                                    );
+                        }
+
+                    }
+                }
+
+            if (paused)
+            {
+                tiles_infos.x = 0; tiles_infos.y = 0;
+                SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
+            }
+
             SDL_PollEvent(&event);
             switch(event.type)
             {
                 case SDL_QUIT:
                     done = TRUE;
+                    break;
+
+                case SDL_MOUSEMOTION:
+                    center.x = event.motion.x;
+                    center.y = event.motion.y;
+                    center = isometric_to_cartesian(center);
+                    // round coord to current tile, not *exact* click position
+                    round_coord(&center);
+                    if (!is_out_of_map(center, max_coord))
+                    {
+                        isometrified = cartesian_to_isometric(center);
+                        mouse_hover_rect.x = isometrified.x;
+                        mouse_hover_rect.y = isometrified.y;
+                        SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
+                    }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     center.x = event.button.x;
@@ -187,72 +304,6 @@ int main(int argc, char *argv[])
                     break;
             }
 
-            // Check char actions
-            for (i=0;i<MAX_CHARACTERS;i++)
-            {
-                if (all_characters[i].movement.moving && !paused)
-                {
-                    move(
-                            &all_characters[i].movement,
-                            max_coord,
-                            test_map.schematics[COLLISIONS],
-                            test_map.schematics[COST]
-                            );
-                    check_character_frame(&(all_characters[i].on_screen), time);
-                }
-            }
-
-            // Rendering
-            SDL_RenderClear(renderer); 
-
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
-            SDL_RenderDrawRect(renderer, NULL);
-
-            apply_tiles(&renderer, BACKGROUND, test_map, tiles);
-            // inverted to draw isometric properly
-            for (j=0;j<max_coord.y;j++)
-                for (i=0;i<max_coord.x;i++)
-                {
-                    id = test_map.schematics[FOREGROUND][i][j];
-                    if (id)
-                    {
-                        coord.x = i * TILES_WIDTH;
-                        coord.y = j * TILES_HEIGHT;
-                        coord = cartesian_to_isometric(coord);
-                        tiles_infos.x = coord.x;
-                        tiles_infos.y = coord.y - TILES_HEIGHT; // offset
-                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
-                    }
-
-                    for (c=0;c<MAX_CHARACTERS;c++)
-                    {
-                        coord = all_characters[c].movement.position;
-                        pixels_to_unit(&coord);
-                        coord2.x = i; coord2.y = j;
-                        if (is_same_coord(coord, coord2))
-                        {
-                            isometrified = cartesian_to_isometric(all_characters[c].movement.position);
-                            sprites_infos.x = isometrified.x;
-                            sprites_infos.y = isometrified.y;
-                            state = MOVE;
-                            direction = all_characters[c].movement.direction;
-                            current_frame = all_characters[c].on_screen.current_frame;
-                            SDL_RenderCopy(
-                                    renderer,
-                                    all_characters[c].on_screen.sprite,
-                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
-                                    &sprites_infos
-                                    );
-                        }
-
-                    }
-                }
-
-            if (paused)
-            {
-                tiles_infos.x = 0; tiles_infos.y = 0;
-                SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
-            }
 
             SDL_RenderPresent(renderer);
         }
