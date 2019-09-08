@@ -23,6 +23,16 @@ nuke: clean
 	@rm -rf bin
 
 #################
+# Tools
+#################
+TOOLS=tools
+MAP_CREATOR=$(TOOLS)/map_creator.c errors.c screen.c images.c coord.c map.c 
+MAP_CREATOR_EXEC=$(BIN)/map_creator
+
+map_creator: init clean
+	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAP_CREATOR_EXEC) $(MAP_CREATOR)
+
+#################
 # Test units
 #################
 TEST=test

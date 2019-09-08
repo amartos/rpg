@@ -12,5 +12,6 @@
 // prototypes
 void init_map(Map *map, char const map_path[]);
 void free_map(Map *map);
+void init_empty_map(Map *map, unsigned int const x_tiles, unsigned int const y_tiles);
 
 #endif // define RPG_MAP

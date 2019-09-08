@@ -185,3 +185,44 @@ void free_map(Map *map)
     }
     free(map->schematics);
 }
+
+void init_empty_map(Map *map, unsigned int const x_tiles, unsigned int const y_tiles)
+{
+    unsigned int i = 0, j = 0, t = 0;
+
+    map->x_tiles = x_tiles, map->y_tiles = y_tiles;
+    map->total_tiles = map->x_tiles * map->y_tiles;
+    map->w = TILES_WIDTH * x_tiles; map->h = TILES_HEIGHT * y_tiles;
+    map->xscroll = map->yscroll = 0;
+
+    // TODO: malloc needs to be better checked
+    TRY
+    {
+        map->schematics = malloc(sizeof(unsigned int *) * (WEATHER+1));
+        if (map->schematics == NULL)
+            THROW(MAP_MALLOC_FAILURE);
+
+        for (t=BACKGROUND;t<=WEATHER;t++)
+        {
+            map->schematics[t] = malloc(sizeof(unsigned int *) * x_tiles);
+            if (map->schematics[t] == NULL)
+                THROW(MAP_MALLOC_FAILURE);
+
+            for(i=0;i<x_tiles;i++)
+            {
+                map->schematics[t][i] = malloc(sizeof(unsigned int) * y_tiles);
+                if (map->schematics[t][i] == NULL)
+                    THROW(MAP_MALLOC_FAILURE);
+
+                for (j=0;j<y_tiles;j++)
+                    map->schematics[t][i][j] = 0;
+            }
+        }
+    }
+    CATCH(MAP_MALLOC_FAILURE)
+    {
+        logger(MAP_MALLOC_FAILURE, "oups");
+        exit(EXIT_FAILURE);
+    }
+    ETRY;
+}
