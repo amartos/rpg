@@ -12,22 +12,20 @@ static void check_character_frame(OnScreen *on_screen, unsigned int const time)
     }
 }
 
-static void fire_movement(Character characters[MAX_CHARACTERS], MovementType const movement)
+static void fire_movement(Movement *movement, MovementType const movement_type)
 {
-    unsigned int i;
-    for (i=0;i<MAX_CHARACTERS;i++)
-    {
-        characters[i].movement.moving = TRUE;
-        characters[i].movement.movement_type = movement;
-    }
+    movement->moving = TRUE;
+    movement->movement_type = movement_type;
 }
 
 static void change_formation(Character characters[MAX_CHARACTERS], Deployment formation)
 {
     unsigned int i;
     for (i=0;i<MAX_CHARACTERS;i++)
+    {
         characters[i].movement.formation = formation;
-    fire_movement(characters, PATH);
+        fire_movement(&characters[i].movement, PATH);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -126,18 +124,37 @@ int main(int argc, char *argv[])
                     round_coord(&center);
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
-                        all_characters[i].movement.current_node = 0;
-                        all_characters[i].movement.path[0] = center;
-                        deploy(&all_characters[i].movement, i);
-                    }
-                    switch(event.button.button)
-                    {
-                        case SDL_BUTTON_LEFT:
-                            fire_movement(all_characters, PATH);
-                            break;
-                        case SDL_BUTTON_RIGHT:
-                            fire_movement(all_characters, TELEPORT);
-                            break;
+                        coord = center;
+                        deploy(
+                                &coord,
+                                determine_direction(all_characters[i].movement.position, center),
+                                all_characters[i].movement.formation, i
+                                );
+                        if (
+                                !is_same_coord(coord, all_characters[i].movement.position) &&
+                                !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE) &&
+                                !is_out_of_map(coord, max_coord)
+                            )
+                        {
+                            all_characters[i].movement.current_node = 0;
+                            all_characters[i].movement.path[0] = coord;
+                            switch(event.button.button)
+                            {
+                                case SDL_BUTTON_LEFT:
+                                    fire_movement(&all_characters[i].movement, PATH);
+                                    break;
+                                case SDL_BUTTON_RIGHT:
+                                    fire_movement(&all_characters[i].movement, TELEPORT);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            all_characters[i].movement.current_node = 0;
+                            reset_coord(&all_characters[i].movement.path[0]);
+                            all_characters[i].movement.movement_type = WALK;
+                            all_characters[i].movement.moving = FALSE;
+                        }
                     }
                     break;
                 case SDL_KEYDOWN:

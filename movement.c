@@ -30,8 +30,7 @@ void init_movement(
     movement->movement_type = WALK;
 
     movement->formation = formation;
-    deploy(movement, id);
-    teleport(movement); // place character in start_position
+    deploy(&movement->position, movement->direction, movement->formation, id);
 }
 
 static Coord determine_decrease(Movement const movement)
@@ -112,16 +111,20 @@ static float cosd(unsigned int angle)
     return cos(angle*M_PI/180);
 }
 
-void deploy(Movement *movement, unsigned int const char_number)
+void deploy(
+        Coord *position,
+        Cardinals const direction,
+        Deployment const formation,
+        unsigned int const char_number
+        )
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
     unsigned space = TILES_WIDTH/4, absox, absoy;
     int ox = 0, oy = 0;
     unsigned int half_cn = char_number/2, third_cn = char_number/3;
-    Cardinals direction = movement->direction;
 
-    switch(movement->formation)
+    switch(formation)
     {
         case LINE:
             ox = round_angle(cosd(270 + 45*direction)) * (3 - char_number);
@@ -156,15 +159,15 @@ void deploy(Movement *movement, unsigned int const char_number)
 
     absox = abs(ox); absoy = abs(oy);
 
-    if (absox > movement->path[movement->current_node].x && ox < 0)
-        movement->path[movement->current_node].x = 0;
+    if (absox > position->x && ox < 0)
+        position->x = 0;
     else
-        movement->path[movement->current_node].x += ox;
+        position->x += ox;
 
-    if (absoy > movement->path[movement->current_node].y && oy < 0)
-        movement->path[movement->current_node].y = 0;
+    if (absoy > position->y && oy < 0)
+        position->y = 0;
     else
-        movement->path[movement->current_node].y += oy;
+        position->y += oy;
 }
 
 void move(
@@ -177,71 +180,57 @@ void move(
     unsigned int i, nodes = 0;
     Coord start; init_coord(&start);
 
-    if (
-            !is_same_coord(movement->position, movement->path[movement->current_node]) &&
-            !is_colliding(movement->path[movement->current_node], collision_map, TRUE) &&
-            !is_out_of_map(movement->path[movement->current_node], max_coord)
-        )
+    switch (movement->movement_type)
     {
-        switch (movement->movement_type)
-        {
-            case PATH:
-                // these 2 lines avoid the conversion of the pixels position
-                start = movement->position;
-                pixels_to_unit(&start);
+        case PATH:
+            // these 2 lines avoid the conversion of the pixels position
+            start = movement->position;
+            pixels_to_unit(&start);
 
-                pixels_to_unit(&movement->path[movement->current_node]);
-                movement->movement_type = WALK;
-                nodes = find_path(
-                        movement->path,
-                        start,
-                        movement->path[movement->current_node],
-                        max_coord.x, max_coord.y,
-                        collision_map,
-                        cost_map,
-                        NULL
-                        );
-                if (nodes)
-                {
-                    movement->current_node = nodes - 1;
-                    for (i=0;i<nodes;i++)
-                        unit_to_pixels(&movement->path[i]);
-                    goto walking;
-                }
-                else
-                    goto end_move;
-            case WALK:
+            pixels_to_unit(&movement->path[movement->current_node]);
+            movement->movement_type = WALK;
+            nodes = find_path(
+                    movement->path,
+                    start,
+                    movement->path[movement->current_node],
+                    max_coord.x, max_coord.y,
+                    collision_map,
+                    cost_map,
+                    NULL
+                    );
+            if (nodes)
+            {
+                movement->current_node = nodes - 1;
+                for (i=0;i<nodes;i++)
+                    unit_to_pixels(&movement->path[i]);
                 goto walking;
-            case TELEPORT:
-                teleport(movement);
+            }
+            else
                 goto end_move;
-            walking:
-                walk(movement);
-                if (is_same_coord(movement->position, movement->path[movement->current_node]))
-                {
-                    if (!movement->current_node)
-                        goto end_move;
-                    else
-                    {
-                        movement->current_node--;
-                        break;
-                    }
-                }
+        case WALK:
+            goto walking;
+        case TELEPORT:
+            teleport(movement);
+            goto end_move;
+        walking:
+            walk(movement);
+            if (is_same_coord(movement->position, movement->path[movement->current_node]))
+            {
+                if (!movement->current_node)
+                    goto end_move;
                 else
+                {
+                    movement->current_node--;
                     break;
-            end_move:
-                movement->current_node = 0;
-                reset_coord(&movement->path[0]);
-                movement->movement_type = WALK;
-                movement->moving = FALSE;
+                }
+            }
+            else
                 break;
-        }
-    }
-    else
-    {
-        movement->current_node = 0;
-        reset_coord(&movement->path[0]);
-        movement->movement_type = WALK;
-        movement->moving = FALSE;
+        end_move:
+            movement->current_node = 0;
+            reset_coord(&movement->path[0]);
+            movement->movement_type = WALK;
+            movement->moving = FALSE;
+            break;
     }
 }

@@ -50,7 +50,12 @@ void init_movement(
         Deployment const formation,
         unsigned int const id
         );
-void deploy(Movement *movement, unsigned int const char_number);
+void deploy(
+        Coord *position,
+        Cardinals const direction,
+        Deployment const formation,
+        unsigned int const char_number
+        );
 void move(
         Movement *movement,
         Coord const max_coord,
