@@ -1,5 +1,5 @@
 CPP=gcc
-CFLAGS=-O3 -no-pie
+CFLAGS=-O3 -no-pie -g
 LDFLAGS=-lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_gfx -lm
 BIN=bin
 FILES=*
@@ -11,7 +11,7 @@ compile: libs
 	@${CPP} $(CFLAGS) -o $(EXEC) *.o ${LDFLAGS}
 
 libs:
-	@${CPP} $(CFLAGS) -g -c $(FILES).c
+	@${CPP} $(CFLAGS) -c $(FILES).c
 
 init:
 	@mkdir -p bin
