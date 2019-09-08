@@ -208,73 +208,66 @@ unsigned int find_path(
     cost[nstart] = 0;
 
     // A* starts here
-    if (
-            !is_same_coord(start, goal) &&
-            !is_out_of_map(goal, max_coord) &&
-            !is_colliding(goal, collision_map, FALSE)
-        )
+    while (!done)
     {
-        while (!done)
+        ncurrent = queue[0];
+        if (ncurrent)
         {
-            ncurrent = queue[0];
-            if (ncurrent)
+            delete_from_queue(max_array, queue, ncurrent);
+            current = conversion[ncurrent]; // get coord from number
+            get_neighbours(all_next, current, max_coord);
+            for (i=N;i<=NW;i++)
             {
-                delete_from_queue(max_array, queue, ncurrent);
-                current = conversion[ncurrent]; // get coord from number
-                get_neighbours(all_next, current, max_coord);
-                for (i=N;i<=NW;i++)
+                if (
+                    !is_same_coord(start, all_next[i]) &&
+                    !is_out_of_map(all_next[i], max_coord) &&
+                    !is_colliding(all_next[i], collision_map, FALSE) &&
+                    !are_corners_colliding(current, all_next[i], collision_map, FALSE)
+                    )
                 {
-                    if (
-                        !is_same_coord(start, all_next[i]) &&
-                        !is_out_of_map(all_next[i], max_coord) &&
-                        !is_colliding(all_next[i], collision_map, FALSE) &&
-                        !are_corners_colliding(current, all_next[i], collision_map, FALSE)
-                        )
+                    nnext = convert_coord_to_number(all_next[i], max_coord);
+                    new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, cost_map);
+                    if (!came_from[nnext] || new_cost < cost[nnext])
                     {
-                        nnext = convert_coord_to_number(all_next[i], max_coord);
-                        new_cost = calculate_cost(cost[ncurrent], all_next[i], goal, cost_map);
-                        if (!came_from[nnext] || new_cost < cost[nnext])
-                        {
-                            came_from[nnext] = ncurrent;
-                            cost[nnext] = new_cost;
-                            set_in_queue(max_array, queue, nnext);
-                        }
-                        else
-                            delete_from_queue(max_array, queue, ncurrent);
+                        came_from[nnext] = ncurrent;
+                        cost[nnext] = new_cost;
+                        set_in_queue(max_array, queue, nnext);
+                    }
+                    else
+                        delete_from_queue(max_array, queue, ncurrent);
 
-                        if (nnext == ngoal)
-                        {
-                            done = TRUE;
-                            break;
-                        }
+                    if (nnext == ngoal)
+                    {
+                        done = TRUE;
+                        break;
                     }
                 }
-
-                if (!done)
-                {
-                    order_queue(max_array, queue, cost);
-                    done = check_queue(max_array, queue);
-                }
             }
-            else
-                done = TRUE;
-        }
 
-        nodes = 0;
-        ncurrent = ngoal;
-
-        for (i=0;i<MAX_PATH_NODES;i++)
-        {
-            nodes++;
-            path[i] = conversion[ncurrent]; // came_from[goal] = previous
-            ncurrent = came_from[ncurrent];
-            if (ncurrent == nstart)
-                break;
+            if (!done)
+            {
+                order_queue(max_array, queue, cost);
+                done = check_queue(max_array, queue);
+            }
         }
-        if (scores != NULL)
-            for (i=0;i<max_array+1;i++)
-                scores[i] = cost[i];
+        else
+            done = TRUE;
     }
+
+    nodes = 0;
+    ncurrent = ngoal;
+
+    for (i=0;i<MAX_PATH_NODES;i++)
+    {
+        nodes++;
+        path[i] = conversion[ncurrent]; // came_from[goal] = previous
+        ncurrent = came_from[ncurrent];
+        if (ncurrent == nstart)
+            break;
+    }
+    if (scores != NULL)
+        for (i=0;i<max_array+1;i++)
+            scores[i] = cost[i];
 
     return nodes;
 }
