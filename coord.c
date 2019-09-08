@@ -35,16 +35,16 @@ void round_coord(Coord *coord)
 Coord isometric_to_cartesian(Coord const isometric)
 {
 	Coord cartesian; init_coord(&cartesian);
-	cartesian.x = (isometric.y * 2 + (isometric.x - SCREEN_WIDTH/2))/2;
-	cartesian.y = (isometric.y * 2 - (isometric.x - SCREEN_WIDTH/2))/2;
+	cartesian.x = ((isometric.y - TILES_HEIGHT) * 2 + (isometric.x + TILES_WIDTH - SCREEN_WIDTH/2))/2;
+	cartesian.y = ((isometric.y - TILES_HEIGHT) * 2 - (isometric.x + TILES_WIDTH - SCREEN_WIDTH/2))/2;
     return cartesian;
 }
 
 Coord cartesian_to_isometric(Coord const cartesian)
 {
     Coord isometric; init_coord(&isometric);
-    isometric.x = cartesian.x - cartesian.y + SCREEN_WIDTH/2;
-    isometric.y = (cartesian.x + cartesian.y)/2;
+    isometric.x = cartesian.x - cartesian.y + SCREEN_WIDTH/2 - TILES_WIDTH;
+    isometric.y = (cartesian.x + cartesian.y)/2 + TILES_HEIGHT;
     return isometric;
 }
 
