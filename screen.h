@@ -6,6 +6,7 @@
 #include "macros.h"
 
 #include "coord.h"
+#include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>

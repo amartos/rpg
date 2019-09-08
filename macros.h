@@ -74,23 +74,4 @@ struct Tile
 #define TILES_WIDTH 32
 #define TILES_HEIGHT 32
 
-// The different types of maps found in a map file
-// Background always fist, weather always last
-typedef enum MapType MapType;
-enum MapType {
-    BACKGROUND,
-    FOREGROUND,
-    COLLISIONS,
-    COST,
-    WEATHER
-};
-
-// Maps structures
-typedef struct Map Map;
-struct Map
-{
-    unsigned int maxx, maxy;
-    unsigned int ***schematics;
-};
-
 #endif // define RPG_MACROS
