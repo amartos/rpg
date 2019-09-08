@@ -132,8 +132,8 @@ int main(int argc, char *argv[])
                                 );
                         if (
                                 !is_same_coord(coord, all_characters[i].movement.position) &&
-                                !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE) &&
-                                !is_out_of_map(coord, max_coord)
+                                !is_out_of_map(coord, max_coord) &&
+                                !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE)
                             )
                         {
                             all_characters[i].movement.current_node = 0;

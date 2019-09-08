@@ -210,8 +210,8 @@ unsigned int find_path(
     // A* starts here
     if (
             !is_same_coord(start, goal) &&
-            !is_colliding(goal, collision_map, FALSE) &&
-            !is_out_of_map(goal, max_coord)
+            !is_out_of_map(goal, max_coord) &&
+            !is_colliding(goal, collision_map, FALSE)
         )
     {
         while (!done)
@@ -226,8 +226,8 @@ unsigned int find_path(
                 {
                     if (
                         !is_same_coord(start, all_next[i]) &&
-                        !is_colliding(all_next[i], collision_map, FALSE) &&
                         !is_out_of_map(all_next[i], max_coord) &&
+                        !is_colliding(all_next[i], collision_map, FALSE) &&
                         !are_corners_colliding(current, all_next[i], collision_map, FALSE)
                         )
                     {
