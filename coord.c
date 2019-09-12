@@ -149,7 +149,7 @@ Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** c
         return FALSE;
 }
 
-Bool is_out_of_map(Coord goal, Coord const max_coord)
+Bool is_out_of_map(Coord const goal, Coord const max_coord)
 {
     Bool is_out = FALSE;
     int x = goal.x, y = goal.y;
