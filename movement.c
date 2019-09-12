@@ -124,50 +124,46 @@ void deploy(
     int ox = 0, oy = 0;
     unsigned int half_cn = char_number/2, third_cn = char_number/3;
 
-    switch(formation)
+    if (char_number)
     {
-        case LINE:
-            ox = round_angle(cosd(270 + 45*direction)) * (3 - char_number);
-            oy = round_angle(sind(270 + 45*direction)) * (3 - char_number);
-            break;
-        case SQUARE:
-            ox = round_angle(cosd(135+90*char_number + 45*direction));
-            oy = round_angle(sind(135+90*char_number + 45*direction));
-            break;
-        case TRIANGLE:
-            if (char_number)
-            {
+        switch(formation)
+        {
+            case LINE:
+                ox = round_angle(cosd(270 + 45*direction)) * (-1 * char_number);
+                oy = round_angle(sind(270 + 45*direction)) * (-1 * char_number);
+                break;
+            case SQUARE:
+                ox = round_angle(cosd(270 + 45*char_number + 45*direction));
+                oy = round_angle(sind(270 + 45*char_number + 45*direction));
+                break;
+            case TRIANGLE:
                 ox = round_angle(cosd(270 - half_cn * 135 - third_cn * 90 + 45*direction));
                 oy = round_angle(sind(270 - half_cn * 135 - third_cn * 90 + 45*direction));
+                break;
+            case CIRCLE:
+                ox = round_angle(cosd(270 + 45*char_number + 45*direction)) + 1 + third_cn;
+                oy = round_angle(sind(270 + 45*char_number + 45*direction));
+                break;
+            default:
+                ox = 0;
+                oy = 0;
+                break;
             }
-            break;
-        case CIRCLE:
-            ox = round_angle(cosd(180 + 45 * char_number + half_cn * 45 + 45*direction));
-            oy = round_angle(sind(180 + 45 * char_number + half_cn * 45 + 45*direction));
-            if (char_number == 0)
-                ox -= 1;
-            else if (char_number == 3)
-                ox += 1;
-            break;
-        default:
-            ox = 0;
-            oy = 0;
-            break;
-        }
-    ox *= TILES_WIDTH;
-    oy *= TILES_HEIGHT;
+        ox *= TILES_WIDTH;
+        oy *= TILES_HEIGHT;
 
-    absox = abs(ox); absoy = abs(oy);
+        absox = abs(ox); absoy = abs(oy);
 
-    if (absox > position->x && ox < 0)
-        position->x = 0;
-    else
-        position->x += ox;
+        if (absox > position->x && ox < 0)
+            position->x = 0;
+        else
+            position->x += ox;
 
-    if (absoy > position->y && oy < 0)
-        position->y = 0;
-    else
-        position->y += oy;
+        if (absoy > position->y && oy < 0)
+            position->y = 0;
+        else
+            position->y += oy;
+    }
 }
 
 void move(
