@@ -5,6 +5,7 @@ void init_coord(Coord *coord)
 {
     coord->x = 0;
     coord->y = 0;
+    coord->pixels = TRUE;
 }
 
 void reset_coord(Coord *coord)
@@ -16,19 +17,22 @@ void unit_to_pixels(Coord *coord)
 {
     coord->x *= TILES_WIDTH;
     coord->y *= TILES_HEIGHT;
+    coord->pixels = TRUE;
 }
 
 void pixels_to_unit(Coord *coord)
 {
     coord->x /= TILES_WIDTH;
     coord->y /= TILES_HEIGHT;
+    coord->pixels = FALSE;
 }
 
 void round_coord(Coord *coord)
 {
     // This operation, apparently doing nothing, in fact round the coordinates
     // up to the corresponding tile. The coord is given in pixels.
-    pixels_to_unit(coord);
+    if (coord->pixels)
+        pixels_to_unit(coord);
     unit_to_pixels(coord);
 }
 
@@ -37,6 +41,7 @@ Coord isometric_to_cartesian(Coord const isometric)
 	Coord cartesian; init_coord(&cartesian);
 	cartesian.x = ((isometric.y - TILES_HEIGHT) * 2 + (isometric.x + TILES_WIDTH - SCREEN_WIDTH/2))/2;
 	cartesian.y = ((isometric.y - TILES_HEIGHT) * 2 - (isometric.x + TILES_WIDTH - SCREEN_WIDTH/2))/2;
+    cartesian.pixels = TRUE;
     return cartesian;
 }
 
@@ -45,21 +50,22 @@ Coord cartesian_to_isometric(Coord const cartesian)
     Coord isometric; init_coord(&isometric);
     isometric.x = cartesian.x - cartesian.y + SCREEN_WIDTH/2 - TILES_WIDTH;
     isometric.y = (cartesian.x + cartesian.y)/2 + TILES_HEIGHT;
+    isometric.pixels = TRUE;
     return isometric;
 }
 
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
-    if (a.x == b.x && a.y == b.y)
+    if (a.x == b.x && a.y == b.y && a.pixels == b.pixels)
         same = TRUE;
     return same;
 }
 
-Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pixels)
+Bool is_colliding(Coord const goal, unsigned int** const collision_map)
 {
     unsigned int x = 0, y = 0;
-    if (pixels)
+    if (goal.pixels)
     {
         Coord goal_units = goal;
         pixels_to_unit(&goal_units);
@@ -75,18 +81,17 @@ Bool is_colliding(Coord goal, unsigned int** const collision_map, Bool const pix
     return collision_map[x][y];
 }
 
-Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Bool const pixels)
+Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map)
 {
     Coord start_units = start; Coord goal_units = goal;
-    Coord edge_coord; init_coord(&edge_coord);
+    Coord edge_coord; init_coord(&edge_coord); edge_coord.pixels = FALSE;
     Cardinals direction = determine_direction(start, goal);
     Bool edge1 = FALSE, edge2 = FALSE;
 
-    if (pixels)
-    {
+    if (start.pixels)
         pixels_to_unit(&start_units);
+    if (goal.pixels)
         pixels_to_unit(&goal_units);
-    }
 
     switch (direction)
     {
@@ -94,45 +99,45 @@ Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** c
             // North
             edge_coord.x = start.x;
             edge_coord.y = start.y - 1;
-            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+            edge1 = is_colliding(edge_coord, collision_map);
 
             // West
             edge_coord.x = start.x - 1;
             edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            edge2 = is_colliding(edge_coord, collision_map);
             break;
         case NE:
             // North
             edge_coord.x = start.x;
             edge_coord.y = start.y - 1;
-            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+            edge1 = is_colliding(edge_coord, collision_map);
 
             // East
             edge_coord.x = start.x + 1;
             edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            edge2 = is_colliding(edge_coord, collision_map);
             break;
         case SW:
             // South
             edge_coord.x = start.x;
             edge_coord.y = start.y + 1;
-            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+            edge1 = is_colliding(edge_coord, collision_map);
 
             // West
             edge_coord.x = start.x - 1;
             edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            edge2 = is_colliding(edge_coord, collision_map);
             break;
         case SE:
             // North
             edge_coord.x = start.x;
             edge_coord.y = start.y + 1;
-            edge1 = is_colliding(edge_coord, collision_map, FALSE);
+            edge1 = is_colliding(edge_coord, collision_map);
 
             // East
             edge_coord.x = start.x + 1;
             edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map, FALSE);
+            edge2 = is_colliding(edge_coord, collision_map);
             break;
         default:
             return FALSE;
@@ -147,8 +152,20 @@ Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** c
 Bool is_out_of_map(Coord goal, Coord const max_coord)
 {
     Bool is_out = FALSE;
-    int x = goal.x / TILES_WIDTH, y = goal.y / TILES_HEIGHT;
+    int x = goal.x, y = goal.y;
     int mx = max_coord.x, my = max_coord.y;
+
+    if (goal.pixels)
+    {
+        x /= TILES_WIDTH;
+        y /= TILES_HEIGHT;
+    }
+
+    if (max_coord.pixels)
+    {
+        mx /= TILES_WIDTH;
+        my /= TILES_HEIGHT;
+    }
 
     if (x < 0 || y < 0 || x >= mx || y >= my)
         is_out = TRUE;

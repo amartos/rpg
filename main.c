@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
     max_coord.x = test_map.maxx;
     max_coord.y = test_map.maxy;
+    max_coord.pixels = FALSE;
 
     // load characters
     center.x = TILES_WIDTH * 4;
@@ -179,6 +180,7 @@ int main(int argc, char *argv[])
                 {
                     coord.x = i * TILES_WIDTH;
                     coord.y = j * TILES_HEIGHT;
+                    coord.pixels = TRUE;
                     coord = cartesian_to_isometric(coord);
                     tiles_infos.x = coord.x;
                     tiles_infos.y = coord.y - TILES_HEIGHT; // offset
@@ -190,6 +192,7 @@ int main(int argc, char *argv[])
                     coord = all_characters[c].movement.position;
                     pixels_to_unit(&coord);
                     coord2.x = i; coord2.y = j;
+                    coord2.pixels = FALSE;
                     if (is_same_coord(coord, coord2))
                     {
                         isometrified = cartesian_to_isometric(all_characters[c].movement.position);
@@ -237,6 +240,7 @@ int main(int argc, char *argv[])
             case SDL_MOUSEMOTION:
                 center.x = event.motion.x;
                 center.y = event.motion.y;
+                center.pixels = TRUE;
                 center = isometric_to_cartesian(center);
                 // round coord to current tile, not *exact* click position
                 round_coord(&center);
@@ -251,6 +255,7 @@ int main(int argc, char *argv[])
             case SDL_MOUSEBUTTONDOWN:
                 center.x = event.button.x;
                 center.y = event.button.y;
+                center.pixels = TRUE;
                 center = isometric_to_cartesian(center);
                 // round coord to current tile, not *exact* click position
                 round_coord(&center);
@@ -265,7 +270,7 @@ int main(int argc, char *argv[])
                     if (
                             !is_same_coord(coord, all_characters[i].movement.position) &&
                             !is_out_of_map(coord, max_coord) &&
-                            !is_colliding(coord, test_map.schematics[COLLISIONS], TRUE)
+                            !is_colliding(coord, test_map.schematics[COLLISIONS])
                         )
                     {
                         all_characters[i].movement.current_node = 0;

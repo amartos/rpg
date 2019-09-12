@@ -193,7 +193,7 @@ void move(
                     movement->path,
                     start,
                     movement->path[movement->current_node],
-                    max_coord.x, max_coord.y,
+                    max_coord,
                     collision_map,
                     cost_map,
                     NULL

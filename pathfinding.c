@@ -155,8 +155,8 @@ static unsigned int calculate_cost(
 
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
-        Coord const start, Coord const goal,
-        unsigned int const max_x, unsigned int const max_y,
+        Coord const start_coord, Coord const goal_coord,
+        Coord const max_xy,
         unsigned int** const collision_map,
         unsigned int** const cost_map,
         unsigned int scores[]
@@ -165,10 +165,16 @@ unsigned int find_path(
     // vars init
     unsigned int nodes = 0;
 
-    Coord max_coord; init_coord(&max_coord);
+    Coord start = start_coord;
+    Coord goal = goal_coord;
+    Coord max_coord = max_xy;
 
-    max_coord.x = max_x;
-    max_coord.y = max_y;
+    if (start.pixels)
+        pixels_to_unit(&start);
+    if (goal.pixels)
+        pixels_to_unit(&goal);
+    if (max_coord.pixels)
+        pixels_to_unit(&max_coord);
 
     // all this can be put in the first if statement for optimisation
     unsigned int i = 0, j = 0, n = 0, nnext = 0, ncurrent = 0;
@@ -182,16 +188,21 @@ unsigned int find_path(
     Coord current; init_coord(&current);
     Coord next; init_coord(&next);
     Coord coord; init_coord(&coord);
+    current.pixels = next.pixels = coord.pixels = FALSE;
     Coord all_next[8];
     Coord conversion[max_array+1];
 
     for (i=N;i<=NW;i++)
+    {
         init_coord(&all_next[i]);
+        all_next[i].pixels = FALSE;
+    }
     for (i=0;i<max_array;i++)
         queue[i] = 0;
     for (i=0;i<max_array+1;i++)
     {
         init_coord(&conversion[i]);
+        conversion[i].pixels = FALSE;
         cost[i] = 0;
         came_from[i] = 0;
     }
@@ -221,8 +232,8 @@ unsigned int find_path(
                 if (
                     !is_same_coord(start, all_next[i]) &&
                     !is_out_of_map(all_next[i], max_coord) &&
-                    !is_colliding(all_next[i], collision_map, FALSE) &&
-                    !are_corners_colliding(current, all_next[i], collision_map, FALSE)
+                    !is_colliding(all_next[i], collision_map) &&
+                    !are_corners_colliding(current, all_next[i], collision_map)
                     )
                 {
                     nnext = convert_coord_to_number(all_next[i], max_coord);
