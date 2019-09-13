@@ -17,8 +17,8 @@ enum Cardinals {N, NE, E, SE, S, SW, W, NW};
 typedef struct Coord Coord;
 struct Coord
 {
-    unsigned int x;
-    unsigned int y;
+    double x;
+    double y;
     Bool pixels;
 };
 

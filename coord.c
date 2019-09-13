@@ -3,8 +3,8 @@
 
 void init_coord(Coord *coord)
 {
-    coord->x = 0;
-    coord->y = 0;
+    coord->x = 0.0;
+    coord->y = 0.0;
     coord->pixels = TRUE;
 }
 
