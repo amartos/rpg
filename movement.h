@@ -40,7 +40,7 @@ struct Movement
     Coord path[MAX_PATH_NODES]; // array of nodes
     unsigned int current_node;
     MovementType movement_type;
-    unsigned int velocity; // in pixels
+    double velocity; // in units
 };
 
 // prototypes

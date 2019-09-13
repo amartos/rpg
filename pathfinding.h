@@ -18,8 +18,8 @@
 // Character structure's path pointer to point to the corresponding Coord array
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
-        Coord const start_coord, Coord const goal_coord,
-        Coord const max_xy,
+        Coord const start, Coord const goal,
+        Coord const max_coord,
         unsigned int** const collision_map,
         unsigned int** const cost_map,
         unsigned int scores[MAX_PATH_NODES]

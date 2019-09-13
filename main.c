@@ -74,11 +74,10 @@ int main(int argc, char *argv[])
     Map test_map; init_map(&test_map, "assets/maps/test_map2");
     max_coord.x = test_map.maxx;
     max_coord.y = test_map.maxy;
-    max_coord.pixels = FALSE;
 
     // load characters
-    center.x = TILES_WIDTH * 4;
-    center.y = TILES_HEIGHT * 4;
+    center.x = 4.0;
+    center.y = 4.0;
     for (i=0;i<MAX_CHARACTERS;i++)
         init_character(&renderer, &all_characters[i], i, center, SQUARE);
 
@@ -180,7 +179,6 @@ int main(int argc, char *argv[])
                 {
                     coord.x = i * TILES_WIDTH;
                     coord.y = j * TILES_HEIGHT;
-                    coord.pixels = TRUE;
                     coord = cartesian_to_isometric(coord);
                     tiles_infos.x = coord.x;
                     tiles_infos.y = coord.y - TILES_HEIGHT; // offset
@@ -190,12 +188,10 @@ int main(int argc, char *argv[])
                 for (c=0;c<MAX_CHARACTERS;c++)
                 {
                     coord = all_characters[c].movement.position;
-                    pixels_to_unit(&coord);
                     coord2.x = i; coord2.y = j;
-                    coord2.pixels = FALSE;
                     if (is_same_coord(coord, coord2))
                     {
-                        isometrified = cartesian_to_isometric(all_characters[c].movement.position);
+                        isometrified = cartesian_to_isometric(coord);
                         sprites_infos.x = isometrified.x;
                         sprites_infos.y = isometrified.y;
                         state = MOVE;
@@ -223,7 +219,8 @@ int main(int argc, char *argv[])
         {
             if (all_characters[i].movement.moving)
             {
-                isometrified = cartesian_to_isometric(all_characters[i].movement.path[0]);
+                coord = all_characters[i].movement.path[0];
+                isometrified = cartesian_to_isometric(coord);
                 mouse_hover_rect.x = isometrified.x;
                 mouse_hover_rect.y = isometrified.y;
                 SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
@@ -240,25 +237,18 @@ int main(int argc, char *argv[])
             case SDL_MOUSEMOTION:
                 center.x = event.motion.x;
                 center.y = event.motion.y;
-                center.pixels = TRUE;
                 center = isometric_to_cartesian(center);
-                // round coord to current tile, not *exact* click position
-                round_coord(&center);
                 if (!is_out_of_map(center, max_coord))
                 {
-                    isometrified = cartesian_to_isometric(center);
-                    mouse_hover_rect.x = isometrified.x;
-                    mouse_hover_rect.y = isometrified.y;
+                    mouse_hover_rect.x = event.motion.x;
+                    mouse_hover_rect.y = event.motion.y;
                     SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 center.x = event.button.x;
                 center.y = event.button.y;
-                center.pixels = TRUE;
                 center = isometric_to_cartesian(center);
-                // round coord to current tile, not *exact* click position
-                round_coord(&center);
                 for (i=0;i<MAX_CHARACTERS;i++)
                 {
                     coord = center;
@@ -287,9 +277,8 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        isometrified = cartesian_to_isometric(center);
-                        mouse_hover_rect.x = isometrified.x;
-                        mouse_hover_rect.y = isometrified.y;
+                        mouse_hover_rect.x = event.button.x;
+                        mouse_hover_rect.y = event.button.y;
                         SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
 
                         all_characters[i].movement.current_node = 0;

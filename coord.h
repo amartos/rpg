@@ -19,7 +19,6 @@ struct Coord
 {
     double x;
     double y;
-    Bool pixels;
 };
 
 // prototypes

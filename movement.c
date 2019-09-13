@@ -24,7 +24,7 @@ void init_movement(
         init_coord(&movement->path[i]);
     movement->path[0] = start_position;
     movement->moving = FALSE;
-    movement->velocity = 4;
+    movement->velocity = 0.10;
     movement->direction = S;
     movement->current_node = 0;
     movement->movement_type = WALK;
@@ -88,25 +88,25 @@ static void walk(Movement *movement)
     }
 }
 
-static int round_angle(float n)
+static double round_angle(float n)
 {
-    int x = 0;
+    double x = 0.0;
     if (n <= -0.5)
         x = floor(n);
     else if (n >= 0.5)
         x = ceil(n);
     else
-        x = 0;
+        x = 0.0;
 
     return x;
 }
 
-static float sind(unsigned int angle)
+static double sind(unsigned int angle)
 {
     return sin(angle*M_PI/180);
 }
 
-static float cosd(unsigned int angle)
+static double cosd(unsigned int angle)
 {
     return cos(angle*M_PI/180);
 }
@@ -120,9 +120,9 @@ void deploy(
 {
     // most of this funtion will depend on the MAX_CHARACTERS, but cannot be
     // linked as it is very specific, thus need to be independently defined
-    unsigned space = TILES_WIDTH/4, absox, absoy;
-    int ox = 0, oy = 0;
-    unsigned int half_cn = char_number/2, third_cn = char_number/3;
+    double space = TILES_WIDTH/4, absox, absoy;
+    double ox = 0, oy = 0;
+    double half_cn = char_number/2, third_cn = char_number/3;
 
     if (char_number)
     {
@@ -145,12 +145,10 @@ void deploy(
                 oy = round_angle(sind(270 + 45*char_number + 45*direction));
                 break;
             default:
-                ox = 0;
-                oy = 0;
+                ox = 0.0;
+                oy = 0.0;
                 break;
             }
-        ox *= TILES_WIDTH;
-        oy *= TILES_HEIGHT;
 
         absox = abs(ox); absoy = abs(oy);
 
@@ -173,21 +171,16 @@ void move(
         unsigned int** const cost_map
         )
 {
-    unsigned int i, nodes = 0;
+    unsigned int nodes = 0;
     Coord start; init_coord(&start);
 
     switch (movement->movement_type)
     {
         case PATH:
-            // these 2 lines avoid the conversion of the pixels position
-            start = movement->position;
-            pixels_to_unit(&start);
-
-            pixels_to_unit(&movement->path[movement->current_node]);
             movement->movement_type = WALK;
             nodes = find_path(
                     movement->path,
-                    start,
+                    movement->position,
                     movement->path[movement->current_node],
                     max_coord,
                     collision_map,
@@ -197,8 +190,6 @@ void move(
             if (nodes)
             {
                 movement->current_node = nodes - 1;
-                for (i=0;i<nodes;i++)
-                    unit_to_pixels(&movement->path[i]);
                 goto walking;
             }
             else

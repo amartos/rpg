@@ -155,8 +155,8 @@ static unsigned int calculate_cost(
 
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
-        Coord const start_coord, Coord const goal_coord,
-        Coord const max_xy,
+        Coord const start, Coord const goal,
+        Coord const max_coord,
         unsigned int** const collision_map,
         unsigned int** const cost_map,
         unsigned int scores[]
@@ -164,17 +164,6 @@ unsigned int find_path(
 {
     // vars init
     unsigned int nodes = 0;
-
-    Coord start = start_coord;
-    Coord goal = goal_coord;
-    Coord max_coord = max_xy;
-
-    if (start.pixels)
-        pixels_to_unit(&start);
-    if (goal.pixels)
-        pixels_to_unit(&goal);
-    if (max_coord.pixels)
-        pixels_to_unit(&max_coord);
 
     // all this can be put in the first if statement for optimisation
     unsigned int i = 0, j = 0, n = 0, nnext = 0, ncurrent = 0;
@@ -188,21 +177,16 @@ unsigned int find_path(
     Coord current; init_coord(&current);
     Coord next; init_coord(&next);
     Coord coord; init_coord(&coord);
-    current.pixels = next.pixels = coord.pixels = FALSE;
     Coord all_next[8];
     Coord conversion[max_array+1];
 
     for (i=N;i<=NW;i++)
-    {
         init_coord(&all_next[i]);
-        all_next[i].pixels = FALSE;
-    }
     for (i=0;i<max_array;i++)
         queue[i] = 0;
     for (i=0;i<max_array+1;i++)
     {
         init_coord(&conversion[i]);
-        conversion[i].pixels = FALSE;
         cost[i] = 0;
         came_from[i] = 0;
     }
