@@ -177,11 +177,8 @@ int main(int argc, char *argv[])
                 id = test_map.schematics[FOREGROUND][i][j];
                 if (id)
                 {
-                    coord.x = i * TILES_WIDTH;
-                    coord.y = j * TILES_HEIGHT;
-                    coord = cartesian_to_isometric(coord);
-                    tiles_infos.x = coord.x;
-                    tiles_infos.y = coord.y - TILES_HEIGHT; // offset
+                    coord.x = i; coord.y = j;
+                    tiles_infos = coord_to_isosdlrect(coord);
                     SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
                 }
 
@@ -191,9 +188,7 @@ int main(int argc, char *argv[])
                     coord2.x = i; coord2.y = j;
                     if (is_same_coord(coord, coord2))
                     {
-                        isometrified = cartesian_to_isometric(coord);
-                        sprites_infos.x = isometrified.x;
-                        sprites_infos.y = isometrified.y;
+                        sprites_infos = coord_to_isosdlrect(coord);
                         state = MOVE;
                         direction = all_characters[c].movement.direction;
                         current_frame = all_characters[c].on_screen.current_frame;
@@ -219,10 +214,7 @@ int main(int argc, char *argv[])
         {
             if (all_characters[i].movement.moving)
             {
-                coord = all_characters[i].movement.path[0];
-                isometrified = cartesian_to_isometric(coord);
-                mouse_hover_rect.x = isometrified.x;
-                mouse_hover_rect.y = isometrified.y;
+                mouse_hover_rect = coord_to_isosdlrect(all_characters[i].movement.path[0]);
                 SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
             }
         }

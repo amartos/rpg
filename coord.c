@@ -28,6 +28,15 @@ Coord cartesian_to_isometric(Coord const cartesian)
     return isometric;
 }
 
+SDL_Rect coord_to_isosdlrect(Coord const coord)
+{
+    Coord isometrified = cartesian_to_isometric(coord);
+    SDL_Rect rect;
+    rect.x = isometrified.x; rect.y = isometrified.y;
+    rect.w = TILES_WIDTH; rect.h = TILES_HEIGHT;
+    return rect;
+}
+
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;

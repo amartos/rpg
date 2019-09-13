@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 #include <math.h>
 
 // structures
@@ -29,6 +30,7 @@ void unit_to_pixels(Coord *coord);
 void round_coord(Coord *coord);
 Coord isometric_to_cartesian(Coord const isometric);
 Coord cartesian_to_isometric(Coord const cartesian);
+SDL_Rect coord_to_isosdlrect(Coord const coord);
 Bool is_same_coord(Coord const a, Coord const b);
 Bool is_colliding(Coord const goal, unsigned int** const collision_map);
 Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map);
