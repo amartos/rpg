@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     printf("\n");
 
     Coord max; init_coord(&max);
-    max.x = 5.0; max.y = 5.0;
+    max.x = 4.0; max.y = 4.0;
     unsigned int i, j;
     // y and x, line and columns
     unsigned int map[5][5] = 
