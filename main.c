@@ -179,6 +179,7 @@ int main(int argc, char *argv[])
                 {
                     coord.x = i; coord.y = j;
                     tiles_infos = coord_to_isosdlrect(coord);
+                    tiles_infos.y -= TILES_HEIGHT; // level 1 offset
                     SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
                 }
 

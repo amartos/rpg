@@ -71,7 +71,7 @@ struct Tile
 // Maps
 // ------------------------------------
 
-#define TILES_WIDTH 32
+#define TILES_WIDTH 64
 #define TILES_HEIGHT 32
 
 #endif // define RPG_MACROS
