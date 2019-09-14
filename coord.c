@@ -53,61 +53,57 @@ Bool is_colliding(Coord const goal, unsigned int** const collision_map)
 
 Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map)
 {
-    Coord edge_coord; init_coord(&edge_coord);
+    Coord edge1; init_coord(&edge1);
+    Coord edge2; init_coord(&edge2);
     Cardinals direction = determine_direction(start, goal);
-    Bool edge1 = FALSE, edge2 = FALSE;
+    Bool collide_edge1 = FALSE;
+    Bool collide_edge2 = FALSE;
 
     switch (direction)
     {
         case NW:
             // North
-            edge_coord.x = start.x;
-            edge_coord.y = start.y - 1;
-            edge1 = is_colliding(edge_coord, collision_map);
+            edge1.x = start.x;
+            edge1.y = start.y - 1;
 
             // West
-            edge_coord.x = start.x - 1;
-            edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map);
+            edge2.x = start.x - 1;
+            edge2.y = start.y;
             break;
         case NE:
             // North
-            edge_coord.x = start.x;
-            edge_coord.y = start.y - 1;
-            edge1 = is_colliding(edge_coord, collision_map);
+            edge1.x = start.x;
+            edge1.y = start.y - 1;
 
             // East
-            edge_coord.x = start.x + 1;
-            edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map);
+            edge2.x = start.x + 1;
+            edge2.y = start.y;
             break;
         case SW:
             // South
-            edge_coord.x = start.x;
-            edge_coord.y = start.y + 1;
-            edge1 = is_colliding(edge_coord, collision_map);
+            edge1.x = start.x;
+            edge1.y = start.y + 1;
 
             // West
-            edge_coord.x = start.x - 1;
-            edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map);
+            edge2.x = start.x - 1;
+            edge2.y = start.y;
             break;
         case SE:
             // North
-            edge_coord.x = start.x;
-            edge_coord.y = start.y + 1;
-            edge1 = is_colliding(edge_coord, collision_map);
+            edge1.x = start.x;
+            edge1.y = start.y + 1;
 
             // East
-            edge_coord.x = start.x + 1;
-            edge_coord.y = start.y;
-            edge2 = is_colliding(edge_coord, collision_map);
+            edge2.x = start.x + 1;
+            edge2.y = start.y;
             break;
         default:
             return FALSE;
     }
 
-    if (edge1 || edge2)
+    collide_edge1 = is_colliding(edge1, collision_map);
+    collide_edge2 = is_colliding(edge2, collision_map);
+    if (collide_edge1 || collide_edge2)
         return TRUE;
     else
         return FALSE;
