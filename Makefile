@@ -38,6 +38,11 @@ map_creator: init clean
 TEST=test
 PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c
 PFEXEC=$(BIN)/pathfinding_test
+COORD=$(TEST)/coord_test.c coord.c
+COORDEXEC=$(BIN)/coord_test
 
 pathfinding: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(PFEXEC) $(PATHFINDING)
+
+coord: init clean
+	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(COORDEXEC) $(COORD)
