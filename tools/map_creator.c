@@ -29,9 +29,10 @@ int main(int argc, char *argv[])
     // custom structs init
     Bool done = FALSE;
 
-    Coord origin; init_coord(&origin);
-    Coord vertical; init_coord(&vertical);
-    Coord horizontal; init_coord(&horizontal);
+    SDL_Rect origin;
+    SDL_Rect vertical;
+    SDL_Rect horizontal;
+
     Coord max_coord; init_coord(&max_coord);
     Coord center; init_coord(&center);
     Coord isometrified; init_coord(&isometrified);
@@ -114,13 +115,9 @@ int main(int argc, char *argv[])
                 center.x = event.motion.x;
                 center.y = event.motion.y;
                 center = isometric_to_cartesian(center);
-                // round coord to current tile, not *exact* click position
-                round_coord(&center);
                 if (!is_out_of_map(center, max_coord))
                 {
-                    isometrified = cartesian_to_isometric(center);
-                    mouse_hover_rect.x = isometrified.x;
-                    mouse_hover_rect.y = isometrified.y;
+                    mouse_hover_rect = coord_to_isosdlrect(center);
                     if (tile_id)
                         SDL_RenderCopy(renderer, tiles[tile_id], NULL, &mouse_hover_rect);
                     else
@@ -131,30 +128,25 @@ int main(int argc, char *argv[])
                 center.x = event.button.x;
                 center.y = event.button.y;
                 center = isometric_to_cartesian(center);
-                // round coord to current tile, not *exact* click position
-                round_coord(&center);
                 if (!is_out_of_map(center, max_coord))
                 {
-                    isometrified = cartesian_to_isometric(center);
-                    pixels_to_unit(&center);
-                    mouse_hover_rect.x = isometrified.x;
-                    mouse_hover_rect.y = isometrified.y;
+                    mouse_hover_rect = coord_to_isosdlrect(center);
                     switch(event.button.button)
                     {
                         case SDL_BUTTON_LEFT:
                             SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][center.x][center.y] = tile_id;
+                            map.schematics[BACKGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = tile_id;
                             if (tile_id == ID_WALL0)
                             {
-                                map.schematics[FOREGROUND][center.x][center.y] = ID_WALL1;
-                                map.schematics[COLLISIONS][center.x][center.y] = 1;
+                                map.schematics[FOREGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = ID_WALL1;
+                                map.schematics[COLLISIONS][mouse_hover_rect.x][mouse_hover_rect.y] = 1;
                             }
                             break;
                         case SDL_BUTTON_RIGHT:
                             SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][center.x][center.y] = 0;
-                            map.schematics[FOREGROUND][center.x][center.y] = 0;
-                            map.schematics[COLLISIONS][center.x][center.y] = 0;
+                            map.schematics[BACKGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
+                            map.schematics[FOREGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
+                            map.schematics[COLLISIONS][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
                             break;
                     }
                 }
@@ -186,15 +178,17 @@ int main(int argc, char *argv[])
         for (i=0;i<=maxx;i++)
             for (j=0;j<=maxy;j++)
             {
-                center.x = i * TILES_WIDTH + TILES_WIDTH; center.y = j * TILES_HEIGHT;
+                center.x = i + 1; center.y = j;
 
-                origin = cartesian_to_isometric(center);
+                origin = coord_to_isosdlrect(center);
 
-                vertical.x = center.x; vertical.y = center.y + TILES_HEIGHT;
-                vertical = cartesian_to_isometric(vertical);
+                center.y += 1;
+                vertical = coord_to_isosdlrect(center);
+                center.y -= 1;
 
-                horizontal.x = center.x + TILES_WIDTH; horizontal.y = center.y;
-                horizontal = cartesian_to_isometric(horizontal);
+                center.x += 1;
+                horizontal = coord_to_isosdlrect(center);
+		center.x -= 1;
 
                 if (i < maxx)
                     SDL_RenderDrawLine(renderer, origin.x, origin.y, horizontal.x, horizontal.y);
