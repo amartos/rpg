@@ -40,9 +40,14 @@ PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c
 PFEXEC=$(BIN)/pathfinding_test
 COORD=$(TEST)/coord_test.c coord.c
 COORDEXEC=$(BIN)/coord_test
+MAP=$(TEST)/map_test.c map.c errors.c
+MAPEXEC=$(BIN)/map_test
 
 pathfinding: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(PFEXEC) $(PATHFINDING)
 
 coord: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(COORDEXEC) $(COORD)
+
+map: init clean
+	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAPEXEC) $(MAP)
