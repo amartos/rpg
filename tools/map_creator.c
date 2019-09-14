@@ -135,18 +135,18 @@ int main(int argc, char *argv[])
                     {
                         case SDL_BUTTON_LEFT:
                             SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = tile_id;
+                            map.schematics[BACKGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = tile_id;
                             if (tile_id == ID_WALL0)
                             {
-                                map.schematics[FOREGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = ID_WALL1;
-                                map.schematics[COLLISIONS][mouse_hover_rect.x][mouse_hover_rect.y] = 1;
+                                map.schematics[FOREGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = ID_WALL1;
+                                map.schematics[COLLISIONS][mouse_hover_rect.y][mouse_hover_rect.x] = 1;
                             }
                             break;
                         case SDL_BUTTON_RIGHT:
                             SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
-                            map.schematics[FOREGROUND][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
-                            map.schematics[COLLISIONS][mouse_hover_rect.x][mouse_hover_rect.y] = 0;
+                            map.schematics[BACKGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
+                            map.schematics[FOREGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
+                            map.schematics[COLLISIONS][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
                             break;
                     }
                 }
@@ -166,17 +166,17 @@ int main(int argc, char *argv[])
                     case SDLK_F5:
                         tile_id = 0;
                         for (t=BACKGROUND;t<=WEATHER;t++)
-                            for (i=0;i<maxx;i++)
-                                for (j=0;j<maxy;j++)
-                                    map.schematics[t][i][j] = 0;
+                            for (j=0;j<maxy;j++)
+                                for (i=0;i<maxx;i++)
+                                    map.schematics[t][j][i] = 0;
                         break;
                 }
                 break;
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (i=0;i<=maxx;i++)
-            for (j=0;j<=maxy;j++)
+        for (j=0;j<=maxy;j++)
+            for (i=0;i<=maxx;i++)
             {
                 center.x = i + 1; center.y = j;
 
@@ -241,18 +241,18 @@ int main(int argc, char *argv[])
         }
         for (j=0;j<maxy;j++)
         {
-            for (i=0;i<maxx;i++) // inverted to get per line
+            for (i=0;i<maxx;i++)
             {
                 switch(t)
                 {
                     case BACKGROUND:
                     case WEATHER:
                     case FOREGROUND:
-                        sprintf(line+(i*5), "%04X ", map.schematics[t][i][j]);
+                        sprintf(line+(i*5), "%04X ", map.schematics[t][j][i]);
                         break;
                     case COST:
                     case COLLISIONS:
-                        sprintf(line+(i*2), "%d ", map.schematics[t][i][j]);
+                        sprintf(line+(i*2), "%d ", map.schematics[t][j][i]);
                         break;
                 }
             }
