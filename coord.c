@@ -15,8 +15,8 @@ void reset_coord(Coord *coord)
 Coord isometric_to_cartesian(Coord const isometric)
 {
     Coord cartesian; init_coord(&cartesian);
-    cartesian.x = isometric.y/TILES_HEIGHT + isometric.x/TILES_WIDTH - SCREEN_WIDTH/2;
-    cartesian.y = isometric.y/TILES_HEIGHT - isometric.x/TILES_WIDTH;
+    cartesian.x = isometric.y/TILES_HEIGHT + (isometric.x - SCREEN_WIDTH/2)/TILES_WIDTH;
+    cartesian.y = isometric.y/TILES_HEIGHT - (isometric.x - SCREEN_WIDTH/2)/TILES_WIDTH;
     return cartesian;
 }
 
