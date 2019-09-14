@@ -105,21 +105,21 @@ int main(int argc, char *argv[])
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
     };
 
-    collision = malloc(sizeof(unsigned int*) * max_coord.x);
-    cost = malloc(sizeof(unsigned int*) * max_coord.x);
+    collision = malloc(sizeof(unsigned int*) * max_coord.y);
+    cost = malloc(sizeof(unsigned int*) * max_coord.y);
     if (collision == NULL || cost == NULL)
         exit(EXIT_FAILURE);
-    for(i=0;i<max_coord.x;i++)
+    for(j=0;j<max_coord.y;j++)
     {
-        collision[i] = malloc(sizeof(unsigned int) * max_coord.x);
-        cost[i] = malloc(sizeof(unsigned int) * max_coord.x);
-        if (collision[i] == NULL || cost[i] == NULL)
+        collision[j] = malloc(sizeof(unsigned int) * max_coord.x);
+        cost[j] = malloc(sizeof(unsigned int) * max_coord.x);
+        if (collision[j] == NULL || cost[j] == NULL)
             exit(EXIT_FAILURE);
 
-        for (j=0;j<max_coord.y;j++)
+        for (i=0;i<max_coord.x;i++)
         {
-            collision[i][j] = coll1[j][i];
-            cost[i][j] = cost1[j][i];
+            collision[j][i] = coll1[j][i];
+            cost[j][i] = cost1[j][i];
         }
     }
 
@@ -168,18 +168,18 @@ int main(int argc, char *argv[])
             for (j=0;j<max_coord.y;j++)
             {
                 infos.x = i * 32; infos.y = j * 32;
-                if (collision[i][j])
+                if (collision[j][i])
                     SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 0, 0, 0));
-                else if (cost[i][j])
-                    SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 255-10*cost[i][j], 255-10*cost[i][j], 255-10*cost[i][j]));
+                else if (cost[j][i])
+                    SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 255-10*cost[j][i], 255-10*cost[j][i], 255-10*cost[j][i]));
             }
         if (nodes)
         {
             for (i=0;i<MAX_PATH_NODES;i++)
                 if (max < scores[i])
                     max = scores[i];
-            for (i=0;i<max_coord.x;i++)
-                for (j=0;j<max_coord.x;j++)
+            for (j=0;j<max_coord.y;j++)
+                for (i=0;i<max_coord.x;i++)
                 {
                     ncurrent = max_coord.x * j + i;
                     if (scores[ncurrent])
@@ -215,10 +215,10 @@ int main(int argc, char *argv[])
         ETRY;
     }
     SDL_Quit();
-    for (i=0;i<max_coord.x;i++)
+    for (j=0;j<max_coord.y;j++)
     {
-        free(collision[i]);
-        free(cost[i]);
+        free(collision[j]);
+        free(cost[j]);
     }
     return 0;
 }

@@ -51,18 +51,18 @@ void init_map(Map *map, char const map_path[])
 
         for (t=BACKGROUND;t<=WEATHER;t++)
         {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * map->maxx);
+            map->schematics[t] = malloc(sizeof(unsigned int *) * map->maxy);
             if (map->schematics[t] == NULL)
                 THROW(MAP_MALLOC_FAILURE);
 
-            for(i=0;i<map->maxx;i++)
+            for(j=0;j<map->maxy;j++)
             {
-                map->schematics[t][i] = malloc(sizeof(unsigned int) * map->maxy);
-                if (map->schematics[t][i] == NULL)
+                map->schematics[t][j] = malloc(sizeof(unsigned int) * map->maxx);
+                if (map->schematics[t][j] == NULL)
                     THROW(MAP_MALLOC_FAILURE);
 
-                for (j=0;j<map->maxy;j++)
-                    map->schematics[t][i][j] = 0;
+                for (i=0;i<map->maxx;i++)
+                    map->schematics[t][j][i] = 0;
             }
         }
     }
@@ -122,35 +122,35 @@ void init_map(Map *map, char const map_path[])
                 case FOREGROUND:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[FOREGROUND][i][j]);
+                        sscanf(data, "%X ", &map->schematics[FOREGROUND][j][i]);
                         data += offset;
                     }
                     break;
                 case BACKGROUND:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[BACKGROUND][i][j]);
+                        sscanf(data, "%X ", &map->schematics[BACKGROUND][j][i]);
                         data += offset;
                     }
                     break;
                 case COLLISIONS:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%d ", &map->schematics[COLLISIONS][i][j]);
+                        sscanf(data, "%d ", &map->schematics[COLLISIONS][j][i]);
                         data += offset;
                     }
                     break;
                 case WEATHER:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[WEATHER][i][j]);
+                        sscanf(data, "%X ", &map->schematics[WEATHER][j][i]);
                         data += offset;
                     }
                     break;
                 case COST:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[COST][i][j]);
+                        sscanf(data, "%X ", &map->schematics[COST][j][i]);
                         data += offset;
                     }
                     break;
@@ -164,11 +164,11 @@ void init_map(Map *map, char const map_path[])
 
 void free_map(Map *map)
 {
-    unsigned int t,i, n_types = WEATHER + 1;
+    unsigned int t,j, n_types = WEATHER + 1;
     for (t=BACKGROUND;t<n_types;t++)
     {
-        for (i=0;i<map->maxx;i++)
-            free(map->schematics[t][i]);
+        for (j=0;j<map->maxy;j++)
+            free(map->schematics[t][j]);
         free(map->schematics[t]);
     }
     free(map->schematics);
@@ -189,18 +189,18 @@ void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
 
         for (t=BACKGROUND;t<=WEATHER;t++)
         {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * maxx);
+            map->schematics[t] = malloc(sizeof(unsigned int *) * maxy);
             if (map->schematics[t] == NULL)
                 THROW(MAP_MALLOC_FAILURE);
 
-            for(i=0;i<maxx;i++)
+            for(j=0;j<maxy;j++)
             {
-                map->schematics[t][i] = malloc(sizeof(unsigned int) * maxy);
-                if (map->schematics[t][i] == NULL)
+                map->schematics[t][j] = malloc(sizeof(unsigned int) * maxx);
+                if (map->schematics[t][j] == NULL)
                     THROW(MAP_MALLOC_FAILURE);
 
-                for (j=0;j<maxy;j++)
-                    map->schematics[t][i][j] = 0;
+                for (i=0;i<maxx;i++)
+                    map->schematics[t][j][i] = 0;
             }
         }
     }

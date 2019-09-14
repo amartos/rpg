@@ -149,7 +149,7 @@ static unsigned int calculate_cost(
     unsigned int x = next_coord.x, y = next_coord.y;
     int distance = abs(goal.x - x) + abs(goal.y - y);
 
-    next_cost = 1 + current_cost + distance + cost_map[x][y];
+    next_cost = 1 + current_cost + distance + cost_map[y][x];
     return next_cost;
 }
 

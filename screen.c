@@ -38,12 +38,12 @@ void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, SDL
     SDL_Rect tiles_positions;
     Coord positions; init_coord(&positions);
 
-    for (i=0;i<map.maxx;i++)
-        for (j=0;j<map.maxy;j++)
+    for (j=0;j<map.maxy;j++)
+        for (i=0;i<map.maxx;i++)
         {
             positions.x = i; positions.y = j;
             tiles_positions = coord_to_isosdlrect(positions);
-            id = map.schematics[type][i][j];
+            id = map.schematics[type][j][i];
             SDL_RenderCopy(*renderer, tiles[id], NULL, &tiles_positions);
         }
 }

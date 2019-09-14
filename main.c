@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
         for (j=0;j<max_coord.y;j++)
             for (i=0;i<max_coord.x;i++)
             {
-                id = test_map.schematics[FOREGROUND][i][j];
+                id = test_map.schematics[FOREGROUND][j][i];
                 if (id)
                 {
                     coord.x = i; coord.y = j;
