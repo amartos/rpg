@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <math.h>
 
 
@@ -18,42 +18,80 @@ int main(int argc, char *argv[])
     Bool done = FALSE;
 
     // SDL vars init
-    SDL_Surface *screen = NULL;
+    SDL_Window *window; SDL_Renderer *renderer;
     TRY
     {
         if (SDL_Init(SDL_INIT_VIDEO))
-            THROW(SCREEN_INIT_FAILURE);
-        screen = SDL_SetVideoMode(
-                640, 640, 32, 
-                SDL_RESIZABLE | SDL_HWSURFACE | SDL_DOUBLEBUF
-                );
-        if (screen == NULL)
-            THROW(VIDEO_MODE_LOAD_FAILURE);
+            THROW(VIDEO_INIT_FAILURE);
+        if (
+                SDL_CreateWindowAndRenderer(
+                0, 0, // to replace with FULL_SCREEN_DESKTOP
+                SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED,
+                &window, &renderer
+                )
+           )
+            THROW(WINDOW_INIT_FAILURE);
     }
-    CATCH(SCREEN_INIT_FAILURE)
+    CATCH(SDL_INIT_VIDEO)
     {
-        logger(SCREEN_INIT_FAILURE, SDL_GetError());
+        logger(VIDEO_INIT_FAILURE, SDL_GetError());
         exit(EXIT_FAILURE);
     }
-    CATCH(VIDEO_MODE_LOAD_FAILURE)
+    CATCH(WINDOW_INIT_FAILURE)
     {
-        logger(SCREEN_INIT_FAILURE, SDL_GetError());
+        logger(WINDOW_INIT_FAILURE, SDL_GetError());
         exit(EXIT_FAILURE);
     }
     ETRY;
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear"); // softer resizes 
+    SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     SDL_Rect infos;
     infos.x = 0; infos.y = 0;
     infos.w = 32; infos.h = 32;
 
+    SDL_Texture* rainbow[MAX_PATH_NODES];
+
+    SDL_Surface *black_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(black_rect_surface, NULL, SDL_MapRGB(black_rect_surface->format, 0, 0, 0));
+    black_rect_surface = SDL_ConvertSurfaceFormat(black_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *black_rect = SDL_CreateTextureFromSurface(renderer, black_rect_surface);
+    SDL_FreeSurface(black_rect_surface);
+
+    SDL_Surface *grey10_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(grey10_rect_surface, NULL, SDL_MapRGB(grey10_rect_surface->format, 155, 155, 155));
+    grey10_rect_surface = SDL_ConvertSurfaceFormat(grey10_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *grey10_rect = SDL_CreateTextureFromSurface(renderer, grey10_rect_surface);
+    SDL_FreeSurface(grey10_rect_surface);
+
+    SDL_Surface *grey5_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(grey5_rect_surface, NULL, SDL_MapRGB(grey5_rect_surface->format, 205, 205, 205));
+    grey5_rect_surface = SDL_ConvertSurfaceFormat(grey5_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *grey5_rect = SDL_CreateTextureFromSurface(renderer, grey5_rect_surface);
+    SDL_FreeSurface(grey5_rect_surface);
+
+    SDL_Surface *green_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH/2, TILES_HEIGHT/2, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(green_rect_surface, NULL, SDL_MapRGB(green_rect_surface->format, 0, 128, 0));
+    green_rect_surface = SDL_ConvertSurfaceFormat(green_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *green_rect = SDL_CreateTextureFromSurface(renderer, green_rect_surface);
+    SDL_FreeSurface(green_rect_surface);
+
+    SDL_Surface *start_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(start_rect_surface, NULL, SDL_MapRGB(start_rect_surface->format, 0, 255, 0));
+    start_rect_surface = SDL_ConvertSurfaceFormat(start_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *start_rect = SDL_CreateTextureFromSurface(renderer, start_rect_surface);
+    SDL_FreeSurface(start_rect_surface);
+
+    SDL_Rect start;
+    start.x = 5*32; start.y = 5*32;
+    start.w = 32; start.h = 32;
+    Coord start_units; init_coord(&start_units);
+    start_units.x = 5; start_units.y = 5;
+
     Coord coord; init_coord(&coord);
     Coord max_coord; init_coord(&max_coord);
     max_coord.x = 20; max_coord.y = 20;
-
-    Coord start; init_coord(&start);
-    start.x = 5*32; start.y = 5*32;
-    Coord start_units; init_coord(&start_units);
-    start_units.x = 5; start_units.y = 5;
 
     unsigned int **collision = NULL; 
     unsigned int **cost = NULL; 
@@ -150,7 +188,7 @@ int main(int argc, char *argv[])
                         nodes = find_path(
                                 path,
                                 start_units, click,
-                                max_coord.x, max_coord.y,
+                                max_coord,
                                 collision, cost,
                                 scores
                                 );
@@ -160,24 +198,45 @@ int main(int argc, char *argv[])
                 }
                 break;
         }
-       
-        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0xff, 0xff, 0xff));
-        infos.x = start.x; infos.y = start.y;
-        SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 0, 0xff, 0));
-        for (i=0;i<max_coord.x;i++)
-            for (j=0;j<max_coord.y;j++)
+
+        // Rendering
+        SDL_RenderClear(renderer);
+
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+        SDL_RenderDrawRect(renderer, NULL);
+
+        SDL_RenderCopy(renderer, start_rect, NULL, &start);
+        for (j=0;j<max_coord.y;j++)
+            for (i=0;i<max_coord.x;i++)
             {
                 infos.x = i * 32; infos.y = j * 32;
                 if (collision[j][i])
-                    SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 0, 0, 0));
+                    SDL_RenderCopy(renderer, black_rect, NULL, &infos);
                 else if (cost[j][i])
-                    SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 255-10*cost[j][i], 255-10*cost[j][i], 255-10*cost[j][i]));
+		{
+		    if (cost[j][i] == 10)
+                        SDL_RenderCopy(renderer, grey10_rect, NULL, &infos);
+		    else if (cost[j][i] == 5)
+                        SDL_RenderCopy(renderer, grey5_rect, NULL, &infos);
+		}
             }
+
         if (nodes)
         {
             for (i=0;i<MAX_PATH_NODES;i++)
                 if (max < scores[i])
                     max = scores[i];
+
+	    for (i=0;i<=max;i++)
+	    {
+                score = 255 * i / max;
+                SDL_Surface *temp = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+                SDL_FillRect(temp, NULL, SDL_MapRGB(temp->format, score, 0, 255 - score));
+                temp = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGBA8888, 0);
+                rainbow[i] = SDL_CreateTextureFromSurface(renderer, temp);
+                SDL_FreeSurface(temp);
+	    }
+
             for (j=0;j<max_coord.y;j++)
                 for (i=0;i<max_coord.x;i++)
                 {
@@ -185,16 +244,14 @@ int main(int argc, char *argv[])
                     if (scores[ncurrent])
                     {
                         infos.x = i * 32; infos.y = j * 32;
-                        coord.x = infos.x; coord.y = infos.y;
-                        score = 255 * scores[ncurrent] / max;
-                        SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, score, 0, 255 - score));
+                        SDL_RenderCopy(renderer, rainbow[scores[ncurrent]], NULL, &infos);
                     }
                 }
             infos.w = 16; infos.h = 16;
             for (i=0;i<nodes;i++)
             {
                 infos.x = path[i].x * 32 + 8; infos.y = path[i].y * 32 + 8;
-                SDL_FillRect(screen, &infos, SDL_MapRGB(screen->format, 0, 128, 0));
+                SDL_RenderCopy(renderer, green_rect, NULL, &infos);
             }
             nodes = 0;
             infos.w = 32; infos.h = 32;
@@ -202,17 +259,7 @@ int main(int argc, char *argv[])
                 scores[i] = 0;
         }
 
-        TRY
-        {
-            if (SDL_Flip(screen))
-                THROW(FLIP_SCREEN_FAILURE);
-        }
-        CATCH(FLIP_SCREEN_FAILURE)
-        {
-            logger(FLIP_SCREEN_FAILURE, SDL_GetError());
-            exit(EXIT_FAILURE);
-        }
-        ETRY;
+        SDL_RenderPresent(renderer);
     }
     SDL_Quit();
     for (j=0;j<max_coord.y;j++)
