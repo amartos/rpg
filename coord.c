@@ -48,7 +48,7 @@ Bool is_same_coord(Coord const a, Coord const b)
 Bool is_colliding(Coord const goal, unsigned int** const collision_map)
 {
     unsigned int x = goal.x, y = goal.y;
-    return collision_map[x][y];
+    return collision_map[y][x];
 }
 
 Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map)
