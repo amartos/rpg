@@ -1,8 +1,6 @@
 #ifndef RPG_COORD
 #define RPG_COORD
 
-#include "errors.h"
-#include "try_throw_catch.h"
 #include "macros.h"
 
 #include <stdio.h>
@@ -25,9 +23,6 @@ struct Coord
 // prototypes
 void init_coord(Coord *coord);
 void reset_coord(Coord *coord);
-void pixels_to_unit(Coord *coord);
-void unit_to_pixels(Coord *coord);
-void round_coord(Coord *coord);
 Coord isometric_to_cartesian(Coord const isometric);
 Coord cartesian_to_isometric(Coord const cartesian);
 SDL_Rect coord_to_isosdlrect(Coord const coord);
