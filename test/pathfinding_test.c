@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <math.h>
 
 #define STARTX 5
@@ -55,6 +56,23 @@ int main(int argc, char *argv[])
     infos.w = TEST_TILES_WIDTH; infos.h = TEST_TILES_HEIGHT;
 
     SDL_Texture* rainbow[MAX_PATH_NODES];
+
+    TTF_Init();
+    SDL_Rect text;
+    text.x = 0; text.y = 0;
+    text.w = TEST_TILES_WIDTH/2; text.h = TEST_TILES_HEIGHT/2;
+
+    SDL_Texture* scores_txt[MAX_PATH_NODES];
+    char txt[20] = {0};
+    SDL_Color white = {255, 255, 255, 255};
+    for (i=0;i<MAX_PATH_NODES;i++)
+    {
+        sprintf(txt, "%d", i);
+        TTF_Font *TTF_sans = TTF_OpenFont("assets/fonts/DejaVuSansMono.ttf", 12);
+        SDL_Surface* message_surface = TTF_RenderText_Solid(TTF_sans, txt, white);
+        scores_txt[i] = SDL_CreateTextureFromSurface(renderer, message_surface);
+        SDL_FreeSurface(message_surface);
+    }
 
     SDL_Surface *black_rect_surface = SDL_CreateRGBSurface(0, TEST_TILES_WIDTH, TEST_TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
     SDL_FillRect(black_rect_surface, NULL, SDL_MapRGB(black_rect_surface->format, 0, 0, 0));
@@ -248,6 +266,8 @@ int main(int argc, char *argv[])
                     {
                         infos.x = i * TEST_TILES_WIDTH; infos.y = j * TEST_TILES_HEIGHT;
                         SDL_RenderCopy(renderer, rainbow[scores[ncurrent]], NULL, &infos);
+                        text.x = i * TEST_TILES_WIDTH; text.y = j * TEST_TILES_HEIGHT;
+                        SDL_RenderCopy(renderer, scores_txt[scores[ncurrent]], NULL, &text);
                     }
                 }
             infos.w = TEST_TILES_WIDTH/2; infos.h = TEST_TILES_HEIGHT/2;
@@ -265,6 +285,7 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
     SDL_Quit();
+    TTF_Quit();
     for (j=0;j<max_coord.y;j++)
     {
         free(collision[j]);
