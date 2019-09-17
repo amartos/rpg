@@ -22,7 +22,7 @@ void init_movement(
     init_coord(&movement->position);
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&movement->path[i]);
-    movement->path[0] = start_position;
+    movement->position = start_position;
     movement->moving = FALSE;
     movement->velocity = 0.10;
     movement->direction = S;
