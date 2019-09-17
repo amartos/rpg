@@ -206,13 +206,18 @@ int main(int argc, char *argv[])
                     case SDL_BUTTON_LEFT:
                         click.x = event.button.x / TEST_TILES_WIDTH;
                         click.y = event.button.y / TEST_TILES_HEIGHT;
-                        nodes = find_path(
-                                path,
-                                start_units, click,
-                                max_coord,
-                                collision, cost,
-                                scores
-                                );
+                        if (
+                                !is_same_coord(click, start_units) &&
+                                !is_out_of_map(click, max_coord) &&
+                                !is_colliding(click, collision)
+                           )
+                            nodes = find_path(
+                                    path,
+                                    start_units, click,
+                                    max_coord,
+                                    collision, cost,
+                                    scores
+                                    );
                         break;
                     case SDL_BUTTON_RIGHT:
                         break;
