@@ -273,8 +273,6 @@ int main(int argc, char *argv[])
                     {
                         infos.x = i * TEST_TILES_WIDTH; infos.y = j * TEST_TILES_HEIGHT;
                         SDL_RenderCopy(renderer, rainbow[scores[ncurrent]], NULL, &infos);
-                        text.x = i * TEST_TILES_WIDTH; text.y = j * TEST_TILES_HEIGHT;
-                        SDL_RenderCopy(renderer, scores_txt[scores[ncurrent]], NULL, &text);
                     }
                 }
             infos.w = TEST_TILES_WIDTH/2; infos.h = TEST_TILES_HEIGHT/2;
@@ -283,6 +281,22 @@ int main(int argc, char *argv[])
                 infos.x = path[i].x * TEST_TILES_WIDTH + TEST_TILES_WIDTH/4; infos.y = path[i].y * TEST_TILES_HEIGHT + TEST_TILES_HEIGHT/4;
                 SDL_RenderCopy(renderer, green_rect, NULL, &infos);
             }
+            for (j=0;j<max_coord.y;j++)
+                for (i=0;i<max_coord.x;i++)
+                {
+                    ncurrent = max_coord.x * j + i;
+                    if (scores[ncurrent])
+                    {
+                        text.x = i * TEST_TILES_WIDTH; text.y = j * TEST_TILES_HEIGHT;
+                        if (scores[ncurrent] > 99)
+                            text.w = TEST_TILES_WIDTH/2 + TEST_TILES_WIDTH/4;
+                        else if (scores[ncurrent] < 10)
+                            text.w = TEST_TILES_WIDTH/4;
+                        else
+                            text.w = TEST_TILES_WIDTH/2;
+                        SDL_RenderCopy(renderer, scores_txt[scores[ncurrent]], NULL, &text);
+                    }
+                }
             nodes = 0;
             infos.w = TEST_TILES_WIDTH; infos.h = TEST_TILES_HEIGHT;
             for (i=0;i<MAX_PATH_NODES;i++)
