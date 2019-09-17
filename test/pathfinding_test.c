@@ -250,6 +250,8 @@ int main(int argc, char *argv[])
 
             for (i=0;i<=max;i++)
             {
+                if (rainbow[i] != NULL)
+                    SDL_DestroyTexture(rainbow[i]);
                 score = 255 * i / max;
                 SDL_Surface *temp = SDL_CreateRGBSurface(0, TEST_TILES_WIDTH, TEST_TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
                 SDL_FillRect(temp, NULL, SDL_MapRGB(temp->format, score, 0, 255 - score));
@@ -284,6 +286,21 @@ int main(int argc, char *argv[])
 
         SDL_RenderPresent(renderer);
     }
+    for (i=0;i<MAX_PATH_NODES;i++)
+    {
+        if (rainbow[i] != NULL)
+            SDL_DestroyTexture(rainbow[i]);
+        if (scores_txt[i] != NULL)
+            SDL_DestroyTexture(scores_txt[i]);
+    }
+    SDL_DestroyTexture(black_rect);
+    SDL_DestroyTexture(grey10_rect);
+    SDL_DestroyTexture(grey5_rect);
+    SDL_DestroyTexture(green_rect);
+    SDL_DestroyTexture(start_rect);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     TTF_Quit();
     for (j=0;j<max_coord.y;j++)
