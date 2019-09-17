@@ -227,8 +227,7 @@ int main(int argc, char *argv[])
                 center = isometric_to_cartesian(center);
                 if (!is_out_of_map(center, max_coord))
                 {
-                    mouse_hover_rect.x = event.motion.x;
-                    mouse_hover_rect.y = event.motion.y;
+                    mouse_hover_rect = coord_to_isosdlrect(center);
                     SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
                 }
                 break;
@@ -264,8 +263,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        mouse_hover_rect.x = event.button.x;
-                        mouse_hover_rect.y = event.button.y;
+                        mouse_hover_rect = coord_to_isosdlrect(center);
                         SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
 
                         stop_movement(&all_characters[i].movement);
