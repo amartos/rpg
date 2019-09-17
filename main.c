@@ -184,6 +184,7 @@ int main(int argc, char *argv[])
                     if (is_same_coord(coord, coord2))
                     {
                         sprites_infos = coord_to_isosdlrect(coord);
+                        sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
                         state = MOVE;
                         direction = all_characters[c].movement.direction;
                         current_frame = all_characters[c].on_screen.current_frame;
