@@ -230,15 +230,15 @@ int main(int argc, char *argv[])
                 if (max < scores[i])
                     max = scores[i];
 
-	    for (i=0;i<=max;i++)
-	    {
+            for (i=0;i<=max;i++)
+            {
                 score = 255 * i / max;
                 SDL_Surface *temp = SDL_CreateRGBSurface(0, TEST_TILES_WIDTH, TEST_TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
                 SDL_FillRect(temp, NULL, SDL_MapRGB(temp->format, score, 0, 255 - score));
                 temp = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGBA8888, 0);
                 rainbow[i] = SDL_CreateTextureFromSurface(renderer, temp);
                 SDL_FreeSurface(temp);
-	    }
+            }
 
             for (j=0;j<max_coord.y;j++)
                 for (i=0;i<max_coord.x;i++)
