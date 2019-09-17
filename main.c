@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     // custom structs init
     Bool done = FALSE;
     Bool paused = FALSE;
+    Bool mouse_down = FALSE;
 
     MovementType movement_type = WALK;
     Cardinals direction = S;
@@ -232,42 +233,50 @@ int main(int argc, char *argv[])
                     SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
                 }
                 break;
+            case SDL_MOUSEBUTTONUP:
+                if (mouse_down)
+                    mouse_down = FALSE;
+                break;
             case SDL_MOUSEBUTTONDOWN:
-                center.x = event.button.x;
-                center.y = event.button.y;
-                center = isometric_to_cartesian(center);
-                for (i=0;i<MAX_CHARACTERS;i++)
+                if (!mouse_down)
                 {
-                    coord = center;
-                    deploy(
-                            &coord,
-                            determine_direction(all_characters[i].movement.position, coord),
-                            all_characters[i].movement.formation, i
-                            );
-                    if (
-                            !is_same_coord(coord, all_characters[i].movement.position) &&
-                            !is_out_of_map(coord, max_coord) &&
-                            !is_colliding(coord, test_map.schematics[COLLISIONS])
-                        )
+                    mouse_down = TRUE;
+                    center.x = event.button.x;
+                    center.y = event.button.y;
+                    center = isometric_to_cartesian(center);
+                    for (i=0;i<MAX_CHARACTERS;i++)
                     {
-                        all_characters[i].movement.current_node = 0;
-                        all_characters[i].movement.path[0] = coord;
-                        switch(event.button.button)
+                        coord = center;
+                        deploy(
+                                &coord,
+                                determine_direction(all_characters[i].movement.position, coord),
+                                all_characters[i].movement.formation, i
+                                );
+                        if (
+                                !is_same_coord(coord, all_characters[i].movement.position) &&
+                                !is_out_of_map(coord, max_coord) &&
+                                !is_colliding(coord, test_map.schematics[COLLISIONS])
+                            )
                         {
-                            case SDL_BUTTON_LEFT:
-                                fire_movement(&all_characters[i].movement, PATH);
-                                break;
-                            case SDL_BUTTON_RIGHT:
-                                fire_movement(&all_characters[i].movement, TELEPORT);
-                                break;
+                            all_characters[i].movement.current_node = 0;
+                            all_characters[i].movement.path[0] = coord;
+                            switch(event.button.button)
+                            {
+                                case SDL_BUTTON_LEFT:
+                                    fire_movement(&all_characters[i].movement, PATH);
+                                    break;
+                                case SDL_BUTTON_RIGHT:
+                                    fire_movement(&all_characters[i].movement, TELEPORT);
+                                    break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        mouse_hover_rect = coord_to_isosdlrect(center);
-                        SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
+                        else
+                        {
+                            mouse_hover_rect = coord_to_isosdlrect(center);
+                            SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
 
-                        stop_movement(&all_characters[i].movement);
+                            stop_movement(&all_characters[i].movement);
+                        }
                     }
                 }
                 break;
