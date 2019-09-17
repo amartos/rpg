@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
                     coord = center;
                     deploy(
                             &coord,
-                            determine_direction(all_characters[i].movement.position, center),
+                            determine_direction(all_characters[i].movement.position, coord),
                             all_characters[i].movement.formation, i
                             );
                     if (
