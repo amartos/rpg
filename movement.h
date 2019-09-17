@@ -62,5 +62,7 @@ void move(
         unsigned int** const collision_map,
         unsigned int** const cost_map
         );
+void fire_movement(Movement *movement, MovementType const movement_type);
+void stop_movement(Movement *movement);
 
 #endif // define RPG_MOVEMENT

@@ -164,6 +164,20 @@ void deploy(
     }
 }
 
+void fire_movement(Movement *movement, MovementType const movement_type)
+{
+    movement->moving = TRUE;
+    movement->movement_type = movement_type;
+}
+
+void stop_movement(Movement *movement)
+{
+    movement->current_node = 0;
+    reset_coord(&movement->path[0]);
+    movement->movement_type = WALK;
+    movement->moving = FALSE;
+}
+
 void move(
         Movement *movement,
         Coord const max_coord,
@@ -214,10 +228,7 @@ void move(
             else
                 break;
         end_move:
-            movement->current_node = 0;
-            reset_coord(&movement->path[0]);
-            movement->movement_type = WALK;
-            movement->moving = FALSE;
+            stop_movement(movement);
             break;
     }
 }

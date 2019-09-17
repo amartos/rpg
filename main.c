@@ -12,12 +12,6 @@ static void check_character_frame(OnScreen *on_screen, unsigned int const time)
     }
 }
 
-static void fire_movement(Movement *movement, MovementType const movement_type)
-{
-    movement->moving = TRUE;
-    movement->movement_type = movement_type;
-}
-
 static void change_formation(Character characters[MAX_CHARACTERS], Deployment formation)
 {
     unsigned int i;
@@ -274,10 +268,7 @@ int main(int argc, char *argv[])
                         mouse_hover_rect.y = event.button.y;
                         SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
 
-                        all_characters[i].movement.current_node = 0;
-                        reset_coord(&all_characters[i].movement.path[0]);
-                        all_characters[i].movement.movement_type = WALK;
-                        all_characters[i].movement.moving = FALSE;
+                        stop_movement(&all_characters[i].movement);
                     }
                 }
                 break;
