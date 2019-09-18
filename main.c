@@ -94,37 +94,20 @@ int main(int argc, char *argv[])
     SDL_Texture *red_rect = SDL_CreateTextureFromSurface(renderer, red_rect_surface);
 
     SDL_Surface* mouse_hover_surfaces[INVALID+1];
-    for (i=0;i<=INVALID;i++)
-    {
-        mouse_hover_surfaces[i] = IMG_Load("assets/mouse/cursors.png");
-        if (mouse_hover_surfaces[i] == NULL)
-            exit(EXIT_FAILURE);
-    }
-
-    SDL_Color cursors_border[INVALID+1];
-    cursors_border[EMPTY].r = 0x3d; cursors_border[EMPTY].g = 0x3d; cursors_border[EMPTY].b = 0x3d; cursors_border[EMPTY].a = 255;
-    cursors_border[HOVER].r = 0; cursors_border[HOVER].g = 255; cursors_border[HOVER].b = 0; cursors_border[HOVER].a = 255;
-    cursors_border[VALID].r = 0; cursors_border[VALID].g = 0; cursors_border[VALID].b = 255; cursors_border[VALID].a = 255;
-    cursors_border[INVALID].r = 255; cursors_border[INVALID].g = 0; cursors_border[INVALID].b = 0; cursors_border[INVALID].a = 255;
-
-    SDL_Color cursors_inside[INVALID+1];
-    cursors_inside[EMPTY].r = 0xe4; cursors_inside[EMPTY].g = 0xe4; cursors_inside[EMPTY].b = 0xe4; cursors_inside[EMPTY].a = 255;
-    cursors_inside[HOVER].r = 0; cursors_inside[HOVER].g = 255; cursors_inside[HOVER].b = 0; cursors_inside[HOVER].a = 76;
-    cursors_inside[VALID].r = 0; cursors_inside[VALID].g = 0; cursors_inside[VALID].b = 255; cursors_inside[VALID].a = 76;
-    cursors_inside[INVALID].r = 255; cursors_inside[INVALID].g = 0; cursors_inside[INVALID].b = 0; cursors_inside[INVALID].a = 76;
-
+    mouse_hover_surfaces[EMPTY] = NULL;
+    mouse_hover_surfaces[HOVER] = IMG_Load("assets/mouse/cursors_hover.png");
+    mouse_hover_surfaces[INVALID] = IMG_Load("assets/mouse/cursors_invalid.png");
+    mouse_hover_surfaces[VALID] = IMG_Load("assets/mouse/cursors_valid.png");
     SDL_Texture* mouse[INVALID+1];
     mouse[EMPTY] = NULL;
     for (i=1;i<=INVALID;i++)
     {
-        set_color(mouse_hover_surfaces[i], cursors_border[EMPTY], cursors_border[i]);
-        set_color(mouse_hover_surfaces[i], cursors_inside[EMPTY], cursors_inside[i]);
         mouse_hover_surfaces[i] = SDL_ConvertSurfaceFormat(mouse_hover_surfaces[i], SDL_PIXELFORMAT_RGBA8888, 0);
         mouse[i] = SDL_CreateTextureFromSurface(renderer, mouse_hover_surfaces[i]);
     }
     SDL_Rect mouse_hover_rect;
     mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
-    mouse_hover_rect.w = TILES_WIDTH*2; mouse_hover_rect.h = TILES_HEIGHT*2;
+    mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
 
     SDL_FreeSurface(floor_surface);
     SDL_FreeSurface(wall_surface);
