@@ -207,8 +207,8 @@ int main(int argc, char *argv[])
                 break;
 
             case SDL_MOUSEMOTION:
-                center.x = event.motion.x;
-                center.y = event.motion.y;
+                center.x = event.motion.x - TILES_WIDTH/2;
+                center.y = event.motion.y - TILES_HEIGHT/2;
                 center = isometric_to_cartesian(center);
                 if (!is_out_of_map(center, max_coord))
                 {
@@ -224,8 +224,8 @@ int main(int argc, char *argv[])
                 if (!mouse_down)
                 {
                     mouse_down = TRUE;
-                    center.x = event.button.x;
-                    center.y = event.button.y;
+                    center.x = event.button.x - TILES_WIDTH/2;
+                    center.y = event.button.y - TILES_HEIGHT/2;
                     center = isometric_to_cartesian(center);
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
