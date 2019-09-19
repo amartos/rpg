@@ -219,13 +219,9 @@ void move(
                 if (!movement->current_node)
                     goto end_move;
                 else
-                {
                     movement->current_node--;
-                    break;
-                }
             }
-            else
-                break;
+            break;
         end_move:
             stop_movement(movement);
             break;
