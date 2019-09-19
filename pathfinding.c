@@ -155,7 +155,7 @@ static unsigned int calculate_cost(
 
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
-        Coord const start, Coord const goal,
+        Coord const precise_start, Coord const precise_goal,
         Coord const max_coord,
         unsigned int** const collision_map,
         unsigned int** const cost_map,
@@ -164,6 +164,14 @@ unsigned int find_path(
 {
     // vars init
     unsigned int nodes = 0;
+
+    unsigned int x = precise_start.x, y = precise_start.y;
+    Coord start; init_coord(&start);
+    start.x = x; start.y = y;
+
+    Coord goal; init_coord(&goal);
+    x = precise_goal.x; y = precise_goal.y;
+    goal.x = x; goal.y = y;
 
     // all this can be put in the first if statement for optimisation
     unsigned int i = 0, j = 0, n = 0, nnext = 0, ncurrent = 0;
@@ -249,17 +257,26 @@ unsigned int find_path(
             done = TRUE;
     }
 
-    nodes = 0;
+    path[0] = precise_goal;
+    nodes = 1;
     ncurrent = ngoal;
 
-    for (i=0;i<MAX_PATH_NODES;i++)
+    for (i=1;i<MAX_PATH_NODES;i++)
     {
         nodes++;
         path[i] = conversion[ncurrent]; // came_from[goal] = previous
         ncurrent = came_from[ncurrent];
         if (ncurrent == nstart)
+        {
+            if (i<MAX_PATH_NODES-1 && !is_same_coord(start, precise_start))
+            {
+                nodes++;
+                path[i+1] = precise_start;
+            }
             break;
+        }
     }
+
     if (scores != NULL)
         for (i=0;i<max_array+1;i++)
             scores[i] = cost[i];
