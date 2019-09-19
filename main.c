@@ -168,6 +168,7 @@ int main(int argc, char *argv[])
                     if (is_within_tile(coord, coord2))
                     {
                         sprites_infos = coord_to_isosdlrect(coord);
+                        sprites_infos.x += TILES_WIDTH/4; sprites_infos.y -= TILES_HEIGHT/4;
                         sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
                         state = MOVE;
                         direction = all_characters[c].movement.direction;
