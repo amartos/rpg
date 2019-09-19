@@ -35,14 +35,13 @@ void init_movement(
 
 static Coord determine_decrease(Movement const movement)
 {
-    unsigned int Dx = abs(movement.position.x - movement.path[movement.current_node].x);
-    unsigned int Dy = abs(movement.position.y - movement.path[movement.current_node].y);
     Coord decrease; init_coord(&decrease);
+    Coord goal; init_coord(&goal);
+    goal.x = fabs(movement.position.x - movement.path[movement.current_node].x);
+    goal.y = fabs(movement.position.y - movement.path[movement.current_node].y);
 
-    if (Dy < movement.velocity)
-        decrease.y = movement.velocity - Dy;
-    if (Dx < movement.velocity)
-        decrease.x = movement.velocity - Dx;
+    decrease.x = fmod(goal.x, movement.velocity);
+    decrease.y = fmod(goal.y, movement.velocity);
 
     return decrease;
 }
@@ -150,7 +149,7 @@ void deploy(
                 break;
             }
 
-        absox = abs(ox); absoy = abs(oy);
+        absox = fabs(ox); absoy = fabs(oy);
 
         if (absox > position->x && ox < 0)
             position->x = 0;

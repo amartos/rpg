@@ -40,9 +40,23 @@ SDL_Rect coord_to_isosdlrect(Coord const coord)
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
-    if (a.x == b.x && a.y == b.y)
+    double epsilon = 1/pow(10, COORD_PRECISION);
+    if (
+            fabs(a.x - b.x) < epsilon &&
+            fabs(a.y - b.y) < epsilon
+       )
         same = TRUE;
     return same;
+}
+
+Bool is_within_tile(Coord const a, Coord const b)
+{
+    Bool within = FALSE;
+    unsigned int ax = a.x, ay = a.y;
+    unsigned int bx = b.x, by = b.y;
+    if (ax == bx && ay == by)
+        within = TRUE;
+    return within;
 }
 
 Bool is_colliding(Coord const goal, unsigned int** const collision_map)
@@ -120,29 +134,10 @@ Bool is_out_of_map(Coord const goal, Coord const max_coord)
 
 Cardinals determine_direction(Coord const start, Coord const goal)
 {
-    Cardinals direction = S;
-    int Dx, Dy;
-
-    Dx = start.x - goal.x;
-    Dy = start.y - goal.y;
-
-    if (Dx < 0 && Dy < 0)
-        direction = SE;
-    else if (Dx < 0 && Dy == 0)
-        direction = E;
-    else if (Dx < 0 && Dy > 0)
-        direction = NE;
-    else if (Dx == 0 && Dy < 0)
-        direction = S;
-    else if (Dx == 0 && Dy > 0)
-        direction = N;
-    else if (Dx > 0 && Dy < 0)
-        direction = SW;
-    else if (Dx > 0 && Dy == 0)
-        direction = W;
-    else if (Dx > 0 && Dy > 0)
-        direction = NW;
-
-
+    double angle = atan2(goal.y - start.y, goal.x - start.x)*180/M_PI;
+    int direction = round((90+angle) / 45);
+    // if -135°, it corresponds to the 7th value, but gives -1
+    if (direction < 0)
+        direction = 7;
     return direction;
 }

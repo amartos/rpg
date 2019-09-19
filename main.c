@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
                 {
                     coord = all_characters[c].movement.position;
                     coord2.x = i; coord2.y = j;
-                    if (is_same_coord(coord, coord2))
+                    if (is_within_tile(coord, coord2))
                     {
                         sprites_infos = coord_to_isosdlrect(coord);
                         sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
