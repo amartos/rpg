@@ -88,10 +88,12 @@ int main(int argc, char *argv[])
     tiles[0x0101] = wall;
     tiles[0x0102] = wall1;
 
-    SDL_Surface *red_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0x0, 0, 0, 0x0);
-    SDL_FillRect(red_rect_surface, NULL, SDL_MapRGB(red_rect_surface->format, 255, 0, 0));
-    red_rect_surface = SDL_ConvertSurfaceFormat(red_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    SDL_Texture *red_rect = SDL_CreateTextureFromSurface(renderer, red_rect_surface);
+    SDL_Surface *grey_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(grey_rect_surface, NULL, SDL_MapRGB(grey_rect_surface->format, 0, 0, 0));
+    grey_rect_surface = SDL_ConvertSurfaceFormat(grey_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    SDL_Texture *grey_rect = SDL_CreateTextureFromSurface(renderer, grey_rect_surface);
+    SDL_SetTextureBlendMode(grey_rect,SDL_BLENDMODE_BLEND);
+	SDL_SetTextureAlphaMod(grey_rect, 50);
 
     SDL_Surface* mouse_hover_surfaces[INVALID+1];
     mouse_hover_surfaces[EMPTY] = NULL;
@@ -112,7 +114,7 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(floor_surface);
     SDL_FreeSurface(wall_surface);
     SDL_FreeSurface(wall1_surface);
-    SDL_FreeSurface(red_rect_surface);
+    SDL_FreeSurface(grey_rect_surface);
     for (i=0;i<=INVALID;i++)
         SDL_FreeSurface(mouse_hover_surfaces[i]);
 
@@ -185,11 +187,7 @@ int main(int argc, char *argv[])
             }
 
         if (paused)
-        {
-            tiles_infos.x = 0; tiles_infos.y = 0;
-            SDL_RenderCopy(renderer, red_rect, NULL, &tiles_infos);
-        }
-
+            SDL_RenderCopy(renderer, grey_rect, NULL, NULL);
 
         for (i=0;i<MAX_CHARACTERS;i++)
         {
