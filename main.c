@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
     unsigned int i = 0, j = 0, c = 0, id = 0, current_frame = 0;
     unsigned int screen_bg_color[3] = {0xFF, 0xFF, 0xFF};
     unsigned int time = 0, prev_time = 0;
+    int x, y, xscroll = 0, yscroll = 0;
+    int minx = 0, miny = 0, maxx = 0, maxy = 0;
 
     // SDL vars init
     SDL_Window *window; SDL_Renderer *renderer;
@@ -73,6 +75,8 @@ int main(int argc, char *argv[])
     // load characters
     center.x = 4.0;
     center.y = 4.0;
+    xscroll = (SCREEN_WIDTH/2) / TILES_WIDTH;
+    yscroll = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
     for (i=0;i<MAX_CHARACTERS;i++)
         init_character(&renderer, &all_characters[i], i, center, SQUARE);
 
@@ -149,40 +153,51 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
         SDL_RenderDrawRect(renderer, NULL);
 
-        apply_tiles(&renderer, BACKGROUND, test_map, tiles);
+        apply_tiles(&renderer, BACKGROUND, test_map, tiles, xscroll, yscroll);
         // inverted to draw isometric properly
-        for (j=0;j<max_coord.y;j++)
-            for (i=0;i<max_coord.x;i++)
+        minx = xscroll - 1; // show even the tile that is partly out of screen
+        maxx = xscroll + SCREEN_WIDTH/TILES_WIDTH;
+        miny = yscroll - 1; // show even the tile that is partly out of screen
+        maxy = yscroll + SCREEN_HEIGHT/TILES_HEIGHT;
+        for (y=miny;y<=maxy;y++)
+            for (x=minx;x<=maxx;x++)
             {
-                id = test_map.schematics[FOREGROUND][j][i];
-                if (id)
+                if (
+                        x >= 0 && y >= 0 &&
+                        x < (int)test_map.maxx &&
+                        y < (int)test_map.maxy
+                    )
                 {
-                    coord.x = i; coord.y = j;
-                    tiles_infos = coord_to_isosdlrect(coord);
-                    tiles_infos.y -= TILES_HEIGHT; // level 1 offset
-                    SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
-                }
-
-                for (c=0;c<MAX_CHARACTERS;c++)
-                {
-                    coord = all_characters[c].movement.position;
-                    coord2.x = i; coord2.y = j;
-                    if (is_within_tile(coord, coord2))
+                    id = test_map.schematics[FOREGROUND][y][x];
+                    if (id)
                     {
-                        sprites_infos = coord_to_isosdlrect(coord);
-                        sprites_infos.x += TILES_WIDTH/4; sprites_infos.y -= TILES_HEIGHT/4;
-                        sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
-                        state = MOVE;
-                        direction = all_characters[c].movement.direction;
-                        current_frame = all_characters[c].on_screen.current_frame;
-                        SDL_RenderCopy(
-                                renderer,
-                                all_characters[c].on_screen.sprite,
-                                &(all_characters[c].on_screen.frames[direction][state][current_frame]),
-                                &sprites_infos
-                                );
+                        coord.x = x - minx; coord.y = y - miny;
+                        tiles_infos = coord_to_isosdlrect(coord);
+                        tiles_infos.y -= TILES_HEIGHT; // level 1 offset
+                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
                     }
+                    for (c=0;c<MAX_CHARACTERS;c++)
+                    {
+                        coord = all_characters[c].movement.position;
+                        coord2.x = x; coord2.y = y;
+                        if (is_within_tile(coord, coord2))
+                        {
+                            coord.x -= minx; coord.y -= miny;
+                            sprites_infos = coord_to_isosdlrect(coord);
+                            sprites_infos.x += TILES_WIDTH/4; sprites_infos.y -= TILES_HEIGHT/4;
+                            sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
+                            state = MOVE;
+                            direction = all_characters[c].movement.direction;
+                            current_frame = all_characters[c].on_screen.current_frame;
+                            SDL_RenderCopy(
+                                    renderer,
+                                    all_characters[c].on_screen.sprite,
+                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
+                                    &sprites_infos
+                                    );
+                        }
 
+                    }
                 }
             }
 
@@ -193,7 +208,9 @@ int main(int argc, char *argv[])
         {
             if (all_characters[i].movement.moving)
             {
-                mouse_hover_rect = coord_to_isosdlrect(all_characters[i].movement.path[0]);
+                center = all_characters[i].movement.path[0];
+                center.x -= xscroll; center.y -= yscroll;
+                mouse_hover_rect = coord_to_isosdlrect(center);
                 SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
             }
         }
@@ -229,6 +246,7 @@ int main(int argc, char *argv[])
                     for (i=0;i<MAX_CHARACTERS;i++)
                     {
                         coord = center;
+                        coord.x += xscroll; coord.y += yscroll;
                         deploy(
                                 &coord,
                                 determine_direction(all_characters[i].movement.position, coord),
@@ -280,13 +298,21 @@ int main(int argc, char *argv[])
                     case SDLK_r:
                         change_formation(all_characters, CIRCLE);
                         break;
+                    case SDLK_F5:
+                        xscroll = (SCREEN_WIDTH/2)/TILES_WIDTH;
+                        yscroll = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
+                        break;
                     case SDLK_UP:
+                        yscroll -= 1;
                         break;
                     case SDLK_DOWN:
+                        yscroll += 1;
                         break;
                     case SDLK_LEFT:
+                        xscroll -= 1;
                         break;
                     case SDLK_RIGHT:
+                        xscroll += 1;
                         break;
                 }
                 break;
