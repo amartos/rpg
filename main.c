@@ -34,9 +34,7 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    Image tiles[0xFFFF]; init_tiles_array(renderer, tiles);
-    Image mouse[INVALID+1]; init_mouse_array(renderer, mouse);
-    Image characters[4]; init_characters_array(renderer, characters);
+    Image images[0xFFFF]; init_images_array(renderer, images);
     SDL_Texture *grey_rect = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
     SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
@@ -93,8 +91,8 @@ int main(int argc, char *argv[])
                     move(
                             &all_characters[i].movement,
                             max_coord,
-                            test_map.schematics[COLLISIONS],
-                            test_map.schematics[COST]
+                            test_map.collisions,
+                            test_map.cost
                             );
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
@@ -109,52 +107,7 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
         SDL_RenderDrawRect(renderer, NULL);
 
-        apply_tiles(&renderer, BACKGROUND, test_map, tiles, xscroll, yscroll);
-        // inverted to draw isometric properly
-        minx = xscroll - 1; // show even the tile that is partly out of screen
-        maxx = xscroll + SCREEN_WIDTH/TILES_WIDTH;
-        miny = yscroll - 1; // show even the tile that is partly out of screen
-        maxy = yscroll + SCREEN_HEIGHT/TILES_HEIGHT;
-        for (y=miny;y<=maxy;y++)
-            for (x=minx;x<=maxx;x++)
-            {
-                if (
-                        x >= 0 && y >= 0 &&
-                        x < (int)test_map.maxx &&
-                        y < (int)test_map.maxy
-                    )
-                {
-                    id = test_map.schematics[FOREGROUND][y][x];
-                    if (id)
-                    {
-                        coord.x = x - minx; coord.y = y - miny;
-                        tiles_infos = coord_to_isosdlrect(coord);
-                        tiles_infos.y -= TILES_HEIGHT; // level 1 offset
-                        SDL_RenderCopy(renderer, tiles[id].texture, NULL, &tiles_infos);
-                    }
-                    for (c=0;c<MAX_CHARACTERS;c++)
-                    {
-                        coord = all_characters[c].movement.position;
-                        coord2.x = x; coord2.y = y;
-                        if (is_within_tile(coord, coord2))
-                        {
-                            coord.x -= minx; coord.y -= miny;
-                            sprites_infos = coord_to_isosdlrect(coord);
-                            sprites_infos.x += TILES_WIDTH/4; sprites_infos.y -= TILES_HEIGHT/4;
-                            state = MOVE;
-                            direction = all_characters[c].movement.direction;
-                            current_frame = all_characters[c].on_screen.current_frame;
-                            SDL_RenderCopy(
-                                    renderer,
-                                    characters[c].texture,
-                                    &(all_characters[c].on_screen.frames[direction][state][current_frame]),
-                                    &sprites_infos
-                                    );
-                        }
-
-                    }
-                }
-            }
+        apply_tiles(&renderer, test_map, all_characters, images, xscroll, yscroll);
 
         if (paused)
             SDL_RenderCopy(renderer, grey_rect, NULL, NULL);
@@ -166,7 +119,7 @@ int main(int argc, char *argv[])
                 center = all_characters[i].movement.path[0];
                 center.x -= xscroll; center.y -= yscroll;
                 mouse_hover_rect = coord_to_isosdlrect(center);
-                SDL_RenderCopy(renderer, mouse[VALID].texture, NULL, &mouse_hover_rect);
+                SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);
             }
         }
 
@@ -184,7 +137,7 @@ int main(int argc, char *argv[])
                 if (!is_out_of_map(center, max_coord))
                 {
                     mouse_hover_rect = coord_to_isosdlrect(center);
-                    SDL_RenderCopy(renderer, mouse[HOVER].texture, NULL, &mouse_hover_rect);
+                    SDL_RenderCopy(renderer, images[HOVER].texture, NULL, &mouse_hover_rect);
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
@@ -210,7 +163,7 @@ int main(int argc, char *argv[])
                         if (
                                 !is_same_coord(coord, all_characters[i].movement.position) &&
                                 !is_out_of_map(coord, max_coord) &&
-                                !is_colliding(coord, test_map.schematics[COLLISIONS])
+                                !is_colliding(coord, test_map.collisions)
                             )
                         {
                             all_characters[i].movement.current_node = 0;
@@ -228,7 +181,7 @@ int main(int argc, char *argv[])
                         else
                         {
                             mouse_hover_rect = coord_to_isosdlrect(center);
-                            SDL_RenderCopy(renderer, mouse[INVALID].texture, NULL, &mouse_hover_rect);
+                            SDL_RenderCopy(renderer, images[INVALID].texture, NULL, &mouse_hover_rect);
 
                             stop_movement(&all_characters[i].movement);
                         }
@@ -278,9 +231,7 @@ int main(int argc, char *argv[])
     }
 
     free_map(&test_map);
-    free_images_array(0xFFFF, tiles);
-    free_images_array(INVALID+1, mouse);
-    free_images_array(4, characters);
+    free_images_array(images);
     SDL_DestroyTexture(grey_rect);
 
     SDL_Quit();

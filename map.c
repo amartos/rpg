@@ -1,12 +1,75 @@
 #include "map.h"
 
 
+static void map_malloc(Map *map)
+{
+    unsigned int i,j,t;
+    // TODO: malloc needs to be better checked
+    TRY
+    {
+        map->collisions = malloc(sizeof(unsigned int *) * map->maxy);
+        map->cost = malloc(sizeof(unsigned int *) * map->maxy);
+        map->weather = malloc(sizeof(unsigned int *) * map->maxy);
+        if (
+                map->collisions == NULL ||
+                map->cost == NULL ||
+                map->weather == NULL
+            )
+            THROW(MAP_MALLOC_FAILURE);
+        for(j=0;j<map->maxy;j++)
+        {
+            map->collisions[j] = malloc(sizeof(unsigned int) * map->maxx);
+            map->cost[j] = malloc(sizeof(unsigned int) * map->maxx);
+            map->weather[j] = malloc(sizeof(unsigned int) * map->maxx);
+            if (
+                    map->collisions[j] == NULL ||
+                    map->cost[j] ==NULL ||
+                    map->weather[j] == NULL
+                )
+                THROW(MAP_MALLOC_FAILURE);
+
+            for (i=0;i<map->maxx;i++)
+            {
+                map->collisions[j][i] = 0;
+                map->cost[j][i] = 0;
+                map->weather[j][i] = 0;
+            }
+        }
+
+        map->tiles = malloc(sizeof(unsigned int *) * (MAX_LEVELS));
+        if (map->tiles == NULL)
+            THROW(MAP_MALLOC_FAILURE);
+        for (t=0;t<MAX_LEVELS;t++)
+        {
+            map->tiles[t] = malloc(sizeof(unsigned int *) * map->maxy);
+            if (map->tiles[t] == NULL)
+                THROW(MAP_MALLOC_FAILURE);
+
+            for(j=0;j<map->maxy;j++)
+            {
+                map->tiles[t][j] = malloc(sizeof(unsigned int) * map->maxx);
+                if (map->tiles[t][j] == NULL)
+                    THROW(MAP_MALLOC_FAILURE);
+
+                for (i=0;i<map->maxx;i++)
+                    map->tiles[t][j][i] = 0;
+            }
+        }
+    }
+    CATCH(MAP_MALLOC_FAILURE)
+    {
+        logger(MAP_MALLOC_FAILURE, "oups");
+        exit(EXIT_FAILURE);
+    }
+    ETRY;
+}
+
 void init_map(Map *map, char const map_path[])
 {
     FILE *map_file = NULL;// FILE *converter_file = NULL;
-    unsigned int i = 0, j = 0, t = 0, offset = 0;
+    unsigned int i = 0, j = 0, offset = 0;
     char line[MAX_SIZE_LINE] = {0}, *data = NULL;
-    MapType map_type = 0;
+    unsigned int map_type = 0;
 
     TRY
     {
@@ -41,39 +104,9 @@ void init_map(Map *map, char const map_path[])
     data = line; sscanf(data, "x: %d", &map->maxx);
     fgets(line, MAX_SIZE_LINE, map_file);
     data = line; sscanf(data, "y: %d", &map->maxy);
-
-    // TODO: malloc needs to be better checked
-    TRY
-    {
-        map->schematics = malloc(sizeof(unsigned int *) * (WEATHER+1));
-        if (map->schematics == NULL)
-            THROW(MAP_MALLOC_FAILURE);
-
-        for (t=BACKGROUND;t<=WEATHER;t++)
-        {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * map->maxy);
-            if (map->schematics[t] == NULL)
-                THROW(MAP_MALLOC_FAILURE);
-
-            for(j=0;j<map->maxy;j++)
-            {
-                map->schematics[t][j] = malloc(sizeof(unsigned int) * map->maxx);
-                if (map->schematics[t][j] == NULL)
-                    THROW(MAP_MALLOC_FAILURE);
-
-                for (i=0;i<map->maxx;i++)
-                    map->schematics[t][j][i] = 0;
-            }
-        }
-    }
-    CATCH(MAP_MALLOC_FAILURE)
-    {
-        logger(MAP_MALLOC_FAILURE, "oups");
-        exit(EXIT_FAILURE);
-    }
-    ETRY;
-
     rewind(map_file);
+
+    map_malloc(map);
 
     // This is a nasty piece of code as it supposes that the map files are all
     // constructed EXACTLY the same way, and that all the map lines are of the
@@ -82,33 +115,33 @@ void init_map(Map *map, char const map_path[])
     // this code will definitely need to change
     while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
     {
-        if (!strcmp(line, "# background\n"))
+        if (!strcmp(line, "# level0\n"))
         {
-            map_type = BACKGROUND;
+            map_type = 0;
             j = 0;
             offset = 5;
         }
-        else if (!strcmp(line, "# foreground\n"))
+        else if (!strcmp(line, "# level1\n"))
         {
-            map_type = FOREGROUND;
+            map_type = 1;
             j = 0;
             offset = 5;
         }
         else if (!strcmp(line, "# collisions\n"))
         {
-            map_type = COLLISIONS;
+            map_type = 10;
             j = 0;
             offset = 2;
         }
         else if (!strcmp(line, "# weather\n"))
         {
-            map_type = WEATHER;
+            map_type = 11;
             j = 0;
             offset = 5;
         }
         else if (!strcmp(line, "# movement cost\n"))
         {
-            map_type = COST;
+            map_type = 12;
             j = 0;
             offset = 2;
         }
@@ -119,38 +152,38 @@ void init_map(Map *map, char const map_path[])
             data = line;
             switch (map_type)
             {
-                case FOREGROUND:
+                case 1:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[FOREGROUND][j][i]);
+                        sscanf(data, "%X ", &map->tiles[1][j][i]);
                         data += offset;
                     }
                     break;
-                case BACKGROUND:
+                case 0:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[BACKGROUND][j][i]);
+                        sscanf(data, "%X ", &map->tiles[0][j][i]);
                         data += offset;
                     }
                     break;
-                case COLLISIONS:
+                case 10:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%d ", &map->schematics[COLLISIONS][j][i]);
+                        sscanf(data, "%d ", &map->collisions[j][i]);
                         data += offset;
                     }
                     break;
-                case WEATHER:
+                case 11:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[WEATHER][j][i]);
+                        sscanf(data, "%X ", &map->weather[j][i]);
                         data += offset;
                     }
                     break;
-                case COST:
+                case 12:
                     for (i=0;i<map->maxx;i++)
                     {
-                        sscanf(data, "%X ", &map->schematics[COST][j][i]);
+                        sscanf(data, "%X ", &map->cost[j][i]);
                         data += offset;
                     }
                     break;
@@ -164,50 +197,21 @@ void init_map(Map *map, char const map_path[])
 
 void free_map(Map *map)
 {
-    unsigned int t,j, n_types = WEATHER + 1;
-    for (t=BACKGROUND;t<n_types;t++)
+    unsigned int t,j;
+    for (t=0;t<MAX_LEVELS;t++)
     {
         for (j=0;j<map->maxy;j++)
-            free(map->schematics[t][j]);
-        free(map->schematics[t]);
+            free(map->tiles[t][j]);
+        free(map->tiles[t]);
     }
-    free(map->schematics);
+    free(map->tiles);
+    free(map->collisions);
+    free(map->cost);
+    free(map->weather);
 }
 
 void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
 {
-    unsigned int i = 0, j = 0, t = 0;
-
     map->maxx = maxx, map->maxy = maxy;
-
-    // TODO: malloc needs to be better checked
-    TRY
-    {
-        map->schematics = malloc(sizeof(unsigned int *) * (WEATHER+1));
-        if (map->schematics == NULL)
-            THROW(MAP_MALLOC_FAILURE);
-
-        for (t=BACKGROUND;t<=WEATHER;t++)
-        {
-            map->schematics[t] = malloc(sizeof(unsigned int *) * maxy);
-            if (map->schematics[t] == NULL)
-                THROW(MAP_MALLOC_FAILURE);
-
-            for(j=0;j<maxy;j++)
-            {
-                map->schematics[t][j] = malloc(sizeof(unsigned int) * maxx);
-                if (map->schematics[t][j] == NULL)
-                    THROW(MAP_MALLOC_FAILURE);
-
-                for (i=0;i<maxx;i++)
-                    map->schematics[t][j][i] = 0;
-            }
-        }
-    }
-    CATCH(MAP_MALLOC_FAILURE)
-    {
-        logger(MAP_MALLOC_FAILURE, "oups");
-        exit(EXIT_FAILURE);
-    }
-    ETRY;
+    map_malloc(map);
 }

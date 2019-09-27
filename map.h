@@ -8,24 +8,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// structures
-// The different types of maps found in a map file
-// Background always fist, weather always last
-typedef enum MapType MapType;
-enum MapType {
-    BACKGROUND,
-    FOREGROUND,
-    COLLISIONS,
-    COST,
-    WEATHER
-};
+#define MAX_LEVELS 2 // ground + floors
 
+// structures
 // Maps structures
 typedef struct Map Map;
 struct Map
 {
     unsigned int maxx, maxy; // max number of tiles for x and y
-    unsigned int ***schematics;
+    unsigned int ***tiles;
+    unsigned int **collisions;
+    unsigned int **cost;
+    unsigned int **weather;
 };
 
 // prototypes

@@ -3,8 +3,9 @@ build/
 .ycm*
 
 ignore/
-assets/sprites/
-assets/tiles/
+assets/images/010*.png
+assets/images/0400.png
+assets/images/400*.png
 exec
 a.out
 *.o

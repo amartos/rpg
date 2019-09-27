@@ -49,46 +49,21 @@ static Image load_texture_image(SDL_Renderer *renderer, char const filename[], c
     return image;
 }
 
-static void init_image_array(
-        SDL_Renderer *renderer,
-        unsigned int const min, unsigned int const max,
-        Image array[max],
-        char path[]
-        )
-{
-    unsigned int i;
-    char i_text[8] = {0};
-    for (i=min;i<max;i++)
-    {
-        sprintf(i_text, "%04X.png", i);
-        array[i] = load_texture_image(renderer, i_text, path);
-    }
-}
-
-void init_tiles_array(SDL_Renderer *renderer, Image tiles[0xFFFF])
+void init_images_array(SDL_Renderer *renderer, Image images[0xFFFF])
 {
     unsigned int id;
+    char id_text[8] = {0};
 
     // start at 16, as first 15 will be used for infos & meta-images
-    for (id=0;id<0x10;id++)
-        tiles[id] = null_image();
-
-    init_image_array(renderer, 0x10, 0xFFFF, tiles, TILES_IMAGES_PATH);
+    for (id=0x10;id<0xFFFF;id++)
+    {
+        sprintf(id_text, "%04X.png", id);
+        images[id] = load_texture_image(renderer, id_text, IMAGES_PATH);
+    }
 
     // TODO: this should change when the array of collision image is defined
-    for (id=0x10;id<0xFFFF;id++)
-        tiles[id].collision = TRUE;
-}
-
-void init_mouse_array(SDL_Renderer *renderer, Image mouse[INVALID+1])
-{
-    mouse[EMPTY] = null_image();
-    init_image_array(renderer, HOVER, INVALID+1, mouse, MOUSE_IMAGES_PATH);
-}
-
-void init_characters_array(SDL_Renderer *renderer, Image characters[4])
-{
-    init_image_array(renderer, 0, 4, characters, CHARACTERS_IMAGES_PATH);
+    for (id=0x400;id<0x4000;id++)
+        images[id].collision = TRUE;
 }
 
 SDL_Texture* make_colored_rect(
@@ -120,10 +95,10 @@ static void free_image(Image *image)
     }
 }
 
-void free_images_array(unsigned int const max, Image images[])
+void free_images_array(Image images[])
 {
     unsigned int id;
-    for (id=0;id<max;id++)
+    for (id=0;id<0xFFFF;id++)
         free_image(&images[id]);
 }
 
