@@ -1,6 +1,12 @@
 #include "screen.h"
 
 
+void init_sdl_rect(SDL_Rect *rect)
+{
+    rect->x = 0; rect->y = 0;
+    rect->w = 0; rect->h = 0;
+}
+
 void init_screen(SDL_Window **window, SDL_Renderer **renderer)
 {
     TRY
@@ -35,7 +41,7 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
 void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, Image tiles[0xFFFF], int const xscroll, int const yscroll)
 {
     unsigned int id = 0;
-    SDL_Rect tiles_positions;
+    SDL_Rect tiles_positions; init_sdl_rect(&tiles_positions);
     Coord positions; init_coord(&positions);
     int x, y;
     int minx = xscroll - 1; // show even the tile that is partly out of screen

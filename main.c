@@ -39,12 +39,13 @@ int main(int argc, char *argv[])
     Image characters[4]; init_characters_array(renderer, characters);
     SDL_Texture *grey_rect = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
-    SDL_Rect sprites_infos;
-    sprites_infos.x = 0; sprites_infos.y = 0;
+    SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
     sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
-    SDL_Rect tiles_infos;
-    tiles_infos.x = 0; tiles_infos.y = 0;
-    tiles_infos.w = TILES_WIDTH*2; tiles_infos.h = TILES_HEIGHT*2;
+
+    SDL_Rect mouse_hover_rect; init_sdl_rect(&mouse_hover_rect);
+    mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
+
+    SDL_Rect tiles_infos; init_sdl_rect(&tiles_infos);
 
     SDL_Event event;
 
@@ -76,10 +77,6 @@ int main(int argc, char *argv[])
     yscroll = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
     for (i=0;i<MAX_CHARACTERS;i++)
         init_character(&all_characters[i], i, center, SQUARE);
-
-    SDL_Rect mouse_hover_rect;
-    mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
-    mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
 
     // main loop
     while (!done)
@@ -144,7 +141,6 @@ int main(int argc, char *argv[])
                             coord.x -= minx; coord.y -= miny;
                             sprites_infos = coord_to_isosdlrect(coord);
                             sprites_infos.x += TILES_WIDTH/4; sprites_infos.y -= TILES_HEIGHT/4;
-                            sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
                             state = MOVE;
                             direction = all_characters[c].movement.direction;
                             current_frame = all_characters[c].on_screen.current_frame;
