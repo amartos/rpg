@@ -1,27 +1,27 @@
 #include "images.h"
 
 
-static Tile null_tile()
+static Image null_image()
 {
-    Tile tile;
-    tile.w = 0;
-    tile.h = 0;
-    tile.collision = FALSE;
-    tile.path = NULL;
-    tile.texture = NULL;
-    return tile;
+    Image image;
+    image.w = 0;
+    image.h = 0;
+    image.collision = FALSE;
+    image.path = NULL;
+    image.texture = NULL;
+    return image;
 }
 
-static Tile init_tile()
+static Image init_image(char const path[])
 {
-    Tile tile = null_tile();
+    Image image = null_image();
 
     TRY
     {
-        tile.path = calloc(sizeof(char), 30);
-        if (tile.path == NULL)
+        image.path = calloc(sizeof(char), 30);
+        if (image.path == NULL)
             THROW(TILES_PATH_MALLOC_FAILURE);
-        strcpy(tile.path, TILES_PATH);
+        strcpy(image.path, path);
     }
     CATCH(TILES_PATH_MALLOC_FAILURE)
     {
@@ -30,60 +30,101 @@ static Tile init_tile()
     }
     ETRY;
 
-    return tile;
+    return image;
 }
 
-static Tile load_texture_tile(SDL_Renderer *renderer, char const filename[])
+static Image load_texture_image(SDL_Renderer *renderer, char const filename[], char const path[])
 {
-    Tile tile = init_tile();
-    strcat(tile.path, filename);
-    SDL_Surface* surface = IMG_Load(tile.path);
+    Image image = init_image(path);
+    strcat(image.path, filename);
+    SDL_Surface* surface = IMG_Load(image.path);
     if (surface != NULL)
     {
         surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-        tile.texture = SDL_CreateTextureFromSurface(renderer, surface);
-        tile.w = surface->w;
-        tile.h = surface->h;
+        image.texture = SDL_CreateTextureFromSurface(renderer, surface);
+        image.w = surface->w;
+        image.h = surface->h;
         SDL_FreeSurface(surface);
     }
-    return tile;
+    return image;
 }
 
-void init_tiles_array(SDL_Renderer *renderer, Tile tiles[0xFFFF])
+static void init_image_array(
+        SDL_Renderer *renderer,
+        unsigned int const min, unsigned int const max,
+        Image array[max],
+        char path[]
+        )
+{
+    unsigned int i;
+    char i_text[8] = {0};
+    for (i=min;i<max;i++)
+    {
+        sprintf(i_text, "%04X.png", i);
+        array[i] = load_texture_image(renderer, i_text, path);
+    }
+}
+
+void init_tiles_array(SDL_Renderer *renderer, Image tiles[0xFFFF])
 {
     unsigned int id;
-    char id_text[8] = {0};
 
-    // start at 16, as first 15 will be used for infos & meta-tiles
+    // start at 16, as first 15 will be used for infos & meta-images
     for (id=0;id<0x10;id++)
-        tiles[id] = null_tile();
+        tiles[id] = null_image();
 
-    for (id=0x10;id<0xFFFF;id++)
-    {
-        sprintf(id_text, "%04X.png", id);
-        tiles[id] = load_texture_tile(renderer, id_text);
-    }
+    init_image_array(renderer, 0x10, 0xFFFF, tiles, TILES_IMAGES_PATH);
 
-    // TODO: this should change when the array of collision tile is defined
+    // TODO: this should change when the array of collision image is defined
     for (id=0x10;id<0xFFFF;id++)
         tiles[id].collision = TRUE;
 }
 
-static void free_tile(Tile *tile)
+void init_mouse_array(SDL_Renderer *renderer, Image mouse[INVALID+1])
 {
-    if (!is_empty_string(tile->path))
+    mouse[EMPTY] = null_image();
+    init_image_array(renderer, HOVER, INVALID+1, mouse, MOUSE_IMAGES_PATH);
+}
+
+void init_characters_array(SDL_Renderer *renderer, Image characters[4])
+{
+    init_image_array(renderer, 0, 4, characters, CHARACTERS_IMAGES_PATH);
+}
+
+SDL_Texture* make_colored_rect(
+        SDL_Renderer *renderer,
+        unsigned int const w, unsigned int const h,
+        Uint8 const R, Uint8 const G, Uint8 const B, Uint8 const A
+        )
+{
+    SDL_Surface *surface = SDL_CreateRGBSurface(0, w, h, SCREEN_BPP, 0, 0, 0, 0);
+    SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, R, G, B));
+    surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureAlphaMod(texture, A);
+
+    return texture;
+}
+
+static void free_image(Image *image)
+{
+    if (image->path != NULL)
     {
-        free(tile->path);
-        if (tile->texture != NULL)
-            SDL_DestroyTexture(tile->texture);
+        free(image->path);
+        if (image->texture != NULL)
+            SDL_DestroyTexture(image->texture);
     }
 }
 
-void free_tiles_array(Tile tiles[0xFFFF])
+void free_images_array(unsigned int const max, Image images[])
 {
     unsigned int id;
-    for (id=0x10;id<0xFFFF;id++)
-        free_tile(&tiles[id]);
+    for (id=0;id<max;id++)
+        free_image(&images[id]);
 }
 
 void set_color(SDL_Surface *image, SDL_Color const original_color, SDL_Color const new_color)

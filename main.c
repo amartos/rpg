@@ -34,7 +34,10 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    Tile tiles[0xFFFF]; init_tiles_array(renderer, tiles);
+    Image tiles[0xFFFF]; init_tiles_array(renderer, tiles);
+    Image mouse[INVALID+1]; init_mouse_array(renderer, mouse);
+    Image characters[4]; init_characters_array(renderer, characters);
+    SDL_Texture *grey_rect = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
     SDL_Rect sprites_infos;
     sprites_infos.x = 0; sprites_infos.y = 0;
@@ -72,34 +75,11 @@ int main(int argc, char *argv[])
     xscroll = (SCREEN_WIDTH/2) / TILES_WIDTH;
     yscroll = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
     for (i=0;i<MAX_CHARACTERS;i++)
-        init_character(&renderer, &all_characters[i], i, center, SQUARE);
+        init_character(&all_characters[i], i, center, SQUARE);
 
-    SDL_Surface *grey_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
-    SDL_FillRect(grey_rect_surface, NULL, SDL_MapRGB(grey_rect_surface->format, 0, 0, 0));
-    grey_rect_surface = SDL_ConvertSurfaceFormat(grey_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    SDL_Texture *grey_rect = SDL_CreateTextureFromSurface(renderer, grey_rect_surface);
-    SDL_SetTextureBlendMode(grey_rect,SDL_BLENDMODE_BLEND);
-	SDL_SetTextureAlphaMod(grey_rect, 50);
-
-    SDL_Surface* mouse_hover_surfaces[INVALID+1];
-    mouse_hover_surfaces[EMPTY] = NULL;
-    mouse_hover_surfaces[HOVER] = IMG_Load("assets/mouse/cursors_hover.png");
-    mouse_hover_surfaces[INVALID] = IMG_Load("assets/mouse/cursors_invalid.png");
-    mouse_hover_surfaces[VALID] = IMG_Load("assets/mouse/cursors_valid.png");
-    SDL_Texture* mouse[INVALID+1];
-    mouse[EMPTY] = NULL;
-    for (i=1;i<=INVALID;i++)
-    {
-        mouse_hover_surfaces[i] = SDL_ConvertSurfaceFormat(mouse_hover_surfaces[i], SDL_PIXELFORMAT_RGBA8888, 0);
-        mouse[i] = SDL_CreateTextureFromSurface(renderer, mouse_hover_surfaces[i]);
-    }
     SDL_Rect mouse_hover_rect;
     mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
     mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
-
-    SDL_FreeSurface(grey_rect_surface);
-    for (i=0;i<=INVALID;i++)
-        SDL_FreeSurface(mouse_hover_surfaces[i]);
 
     // main loop
     while (!done)
@@ -170,7 +150,7 @@ int main(int argc, char *argv[])
                             current_frame = all_characters[c].on_screen.current_frame;
                             SDL_RenderCopy(
                                     renderer,
-                                    all_characters[c].on_screen.sprite,
+                                    characters[c].texture,
                                     &(all_characters[c].on_screen.frames[direction][state][current_frame]),
                                     &sprites_infos
                                     );
@@ -190,7 +170,7 @@ int main(int argc, char *argv[])
                 center = all_characters[i].movement.path[0];
                 center.x -= xscroll; center.y -= yscroll;
                 mouse_hover_rect = coord_to_isosdlrect(center);
-                SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
+                SDL_RenderCopy(renderer, mouse[VALID].texture, NULL, &mouse_hover_rect);
             }
         }
 
@@ -208,7 +188,7 @@ int main(int argc, char *argv[])
                 if (!is_out_of_map(center, max_coord))
                 {
                     mouse_hover_rect = coord_to_isosdlrect(center);
-                    SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
+                    SDL_RenderCopy(renderer, mouse[HOVER].texture, NULL, &mouse_hover_rect);
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
@@ -252,7 +232,7 @@ int main(int argc, char *argv[])
                         else
                         {
                             mouse_hover_rect = coord_to_isosdlrect(center);
-                            SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
+                            SDL_RenderCopy(renderer, mouse[INVALID].texture, NULL, &mouse_hover_rect);
 
                             stop_movement(&all_characters[i].movement);
                         }
@@ -302,7 +282,11 @@ int main(int argc, char *argv[])
     }
 
     free_map(&test_map);
-    free_tiles_array(tiles);
+    free_images_array(0xFFFF, tiles);
+    free_images_array(INVALID+1, mouse);
+    free_images_array(4, characters);
+    SDL_DestroyTexture(grey_rect);
+
     SDL_Quit();
     return 0;
 }

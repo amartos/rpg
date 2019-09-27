@@ -36,7 +36,6 @@ enum State
 typedef struct OnScreen OnScreen;
 struct OnScreen
 {
-    SDL_Texture *sprite;
     State state;
     Bool animated;
     // possible positions, State, max number of frames
@@ -62,7 +61,6 @@ struct Character
 // Character initialization. For now the values are manually set, but in the
 // future all will depend on the id
 void init_character(
-        SDL_Renderer **renderer,
         Character *character,
         unsigned int const id,
         Coord const start_position,

@@ -32,7 +32,7 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
     SDL_RenderSetLogicalSize(*renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, Tile tiles[0xFFFF], int const xscroll, int const yscroll)
+void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, Image tiles[0xFFFF], int const xscroll, int const yscroll)
 {
     unsigned int id = 0;
     SDL_Rect tiles_positions;
