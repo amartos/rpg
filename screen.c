@@ -32,7 +32,7 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
     SDL_RenderSetLogicalSize(*renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, SDL_Texture* tiles[0xFFFF], int const xscroll, int const yscroll)
+void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, Tile tiles[0xFFFF], int const xscroll, int const yscroll)
 {
     unsigned int id = 0;
     SDL_Rect tiles_positions;
@@ -53,7 +53,7 @@ void apply_tiles(SDL_Renderer **renderer, MapType const type, Map const map, SDL
                 positions.x = x - minx; positions.y = y - miny;
                 tiles_positions = coord_to_isosdlrect(positions);
                 id = map.schematics[type][y][x];
-                SDL_RenderCopy(*renderer, tiles[id], NULL, &tiles_positions);
+                SDL_RenderCopy(*renderer, tiles[id].texture, NULL, &tiles_positions);
             }
 }
 

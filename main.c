@@ -34,13 +34,7 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    SDL_Texture* tiles[0xFFFF];
-    for (i=0;i<0xFFFF;i++)
-        tiles[i] = NULL;
-
-    SDL_Surface *floor_surface = IMG_Load("assets/tiles/tile.png");
-    SDL_Surface *wall_surface = IMG_Load("assets/tiles/wall.png");
-    SDL_Surface *wall1_surface = IMG_Load("assets/tiles/wall1.png");
+    Tile tiles[0xFFFF]; init_tiles_array(renderer, tiles);
 
     SDL_Rect sprites_infos;
     sprites_infos.x = 0; sprites_infos.y = 0;
@@ -80,18 +74,6 @@ int main(int argc, char *argv[])
     for (i=0;i<MAX_CHARACTERS;i++)
         init_character(&renderer, &all_characters[i], i, center, SQUARE);
 
-    floor_surface = SDL_ConvertSurfaceFormat(floor_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    wall_surface = SDL_ConvertSurfaceFormat(wall_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    wall1_surface = SDL_ConvertSurfaceFormat(wall1_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-
-    SDL_Texture *floor = SDL_CreateTextureFromSurface(renderer, floor_surface);
-    SDL_Texture *wall = SDL_CreateTextureFromSurface(renderer, wall_surface);
-    SDL_Texture *wall1 = SDL_CreateTextureFromSurface(renderer, wall1_surface);
-
-    tiles[0x0100] = floor;
-    tiles[0x0101] = wall;
-    tiles[0x0102] = wall1;
-
     SDL_Surface *grey_rect_surface = SDL_CreateRGBSurface(0, TILES_WIDTH, TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
     SDL_FillRect(grey_rect_surface, NULL, SDL_MapRGB(grey_rect_surface->format, 0, 0, 0));
     grey_rect_surface = SDL_ConvertSurfaceFormat(grey_rect_surface, SDL_PIXELFORMAT_RGBA8888, 0);
@@ -115,9 +97,6 @@ int main(int argc, char *argv[])
     mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
     mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
 
-    SDL_FreeSurface(floor_surface);
-    SDL_FreeSurface(wall_surface);
-    SDL_FreeSurface(wall1_surface);
     SDL_FreeSurface(grey_rect_surface);
     for (i=0;i<=INVALID;i++)
         SDL_FreeSurface(mouse_hover_surfaces[i]);
@@ -174,7 +153,7 @@ int main(int argc, char *argv[])
                         coord.x = x - minx; coord.y = y - miny;
                         tiles_infos = coord_to_isosdlrect(coord);
                         tiles_infos.y -= TILES_HEIGHT; // level 1 offset
-                        SDL_RenderCopy(renderer, tiles[id], NULL, &tiles_infos);
+                        SDL_RenderCopy(renderer, tiles[id].texture, NULL, &tiles_infos);
                     }
                     for (c=0;c<MAX_CHARACTERS;c++)
                     {
@@ -323,6 +302,7 @@ int main(int argc, char *argv[])
     }
 
     free_map(&test_map);
+    free_tiles_array(tiles);
     SDL_Quit();
     return 0;
 }

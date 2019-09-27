@@ -47,14 +47,6 @@ enum ColorPalette
     YELLOW
 };
 
-// This is an embryo of a tile structure, unused yet
-typedef struct Tile Tile;
-struct Tile
-{
-    SDL_Surface *image;
-    int collision;
-};
-
 // ------------------------------------
 // Characters
 // ------------------------------------
@@ -73,5 +65,9 @@ struct Tile
 
 #define TILES_WIDTH 64
 #define TILES_HEIGHT 32
+
+
+// Prototypes
+Bool is_empty_string(char const string[]);
 
 #endif // define RPG_MACROS

@@ -49,5 +49,8 @@ void logger(Errors const error_id, char const sdl_message[])
         case PATHFIND_MALLOC_FAILURE:
             printe(now, error_id, "pathfind memory allocation failure", sdl_message);
             break;
+        case TILES_PATH_MALLOC_FAILURE:
+            printe(now, error_id, "tiles path memory allocation failure", sdl_message);
+            break;
     }
 }
