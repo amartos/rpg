@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
     Character all_characters[MAX_CHARACTERS];
     State state = MOVE;
 
+    Cursors mouse_type = HOVER;
+
     Coord coord2; init_coord(&coord2);
     Coord coord; init_coord(&coord);
     Coord max_coord; init_coord(&max_coord);
@@ -97,134 +99,130 @@ int main(int argc, char *argv[])
                     check_character_frame(&(all_characters[i].on_screen), time);
                 }
             }
+
+            // Rendering
+            SDL_RenderClear(renderer); 
+
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+            SDL_RenderDrawRect(renderer, NULL);
+
+            apply_tiles(&renderer, test_map, all_characters, images, xscroll, yscroll);
+
+            if (paused)
+                SDL_RenderCopy(renderer, grey_rect, NULL, NULL);
+
+            SDL_RenderCopy(renderer, images[mouse_type].texture, NULL, &mouse_hover_rect);
+
+            for (i=0;i<MAX_CHARACTERS;i++)
+            {
+                if (all_characters[i].movement.moving)
+                {
+                    center = all_characters[i].movement.path[0];
+                    center.x -= xscroll; center.y -= yscroll;
+                    mouse_hover_rect = coord_to_isosdlrect(center);
+                    SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);
+                }
+            }
         }
         else // do not overuse CPU
             SDL_Delay(FRAMERATE - (time - prev_time));
 
-        // Rendering
-        SDL_RenderClear(renderer); 
-
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
-        SDL_RenderDrawRect(renderer, NULL);
-
-        apply_tiles(&renderer, test_map, all_characters, images, xscroll, yscroll);
-
-        if (paused)
-            SDL_RenderCopy(renderer, grey_rect, NULL, NULL);
-
-        for (i=0;i<MAX_CHARACTERS;i++)
-        {
-            if (all_characters[i].movement.moving)
+        while(SDL_PollEvent(&event))
+            switch(event.type)
             {
-                center = all_characters[i].movement.path[0];
-                center.x -= xscroll; center.y -= yscroll;
-                mouse_hover_rect = coord_to_isosdlrect(center);
-                SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);
-            }
-        }
-
-        SDL_PollEvent(&event);
-        switch(event.type)
-        {
-            case SDL_QUIT:
-                done = TRUE;
-                break;
-
-            case SDL_MOUSEMOTION:
-                center.x = event.motion.x - TILES_WIDTH/2;
-                center.y = event.motion.y - TILES_HEIGHT/2;
-                center = isometric_to_cartesian(center);
-                if (!is_out_of_map(center, max_coord))
-                {
-                    mouse_hover_rect = coord_to_isosdlrect(center);
-                    SDL_RenderCopy(renderer, images[HOVER].texture, NULL, &mouse_hover_rect);
-                }
-                break;
-            case SDL_MOUSEBUTTONUP:
-                if (mouse_down)
-                    mouse_down = FALSE;
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (!mouse_down)
-                {
-                    mouse_down = TRUE;
-                    center.x = event.button.x - TILES_WIDTH/2;
-                    center.y = event.button.y - TILES_HEIGHT/2;
+                case SDL_QUIT:
+                    done = TRUE;
+                    break;
+                case SDL_MOUSEMOTION:
+                    center.x = event.motion.x - TILES_WIDTH/2;
+                    center.y = event.motion.y - TILES_HEIGHT/2;
                     center = isometric_to_cartesian(center);
-                    for (i=0;i<MAX_CHARACTERS;i++)
+                    mouse_hover_rect = coord_to_isosdlrect(center);
+                    if (!is_out_of_map(center, max_coord))
+                        mouse_type = HOVER;
+                    else
+                        mouse_type = INVALID;
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    if (mouse_down)
+                        mouse_down = FALSE;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    if (!mouse_down)
                     {
-                        coord = center;
-                        coord.x += xscroll; coord.y += yscroll;
-                        deploy(
-                                &coord,
-                                determine_direction(all_characters[i].movement.position, coord),
-                                all_characters[i].movement.formation, i
-                                );
-                        if (
-                                !is_same_coord(coord, all_characters[i].movement.position) &&
-                                !is_out_of_map(coord, max_coord) &&
-                                !is_colliding(coord, test_map.collisions)
-                            )
+                        mouse_down = TRUE;
+                        center.x = event.button.x - TILES_WIDTH/2;
+                        center.y = event.button.y - TILES_HEIGHT/2;
+                        center = isometric_to_cartesian(center);
+                        for (i=0;i<MAX_CHARACTERS;i++)
                         {
-                            all_characters[i].movement.current_node = 0;
-                            all_characters[i].movement.path[0] = coord;
-                            switch(event.button.button)
+                            coord = center;
+                            coord.x += xscroll; coord.y += yscroll;
+                            deploy(
+                                    &coord,
+                                    determine_direction(all_characters[i].movement.position, coord),
+                                    all_characters[i].movement.formation, i
+                                    );
+                            if (
+                                    !is_same_coord(coord, all_characters[i].movement.position) &&
+                                    !is_out_of_map(coord, max_coord) &&
+                                    !is_colliding(coord, test_map.collisions)
+                                )
                             {
-                                case SDL_BUTTON_LEFT:
-                                    fire_movement(&all_characters[i].movement, PATH);
-                                    break;
-                                case SDL_BUTTON_RIGHT:
-                                    fire_movement(&all_characters[i].movement, TELEPORT);
-                                    break;
+                                all_characters[i].movement.current_node = 0;
+                                all_characters[i].movement.path[0] = coord;
+                                switch(event.button.button)
+                                {
+                                    case SDL_BUTTON_LEFT:
+                                        fire_movement(&all_characters[i].movement, PATH);
+                                        break;
+                                    case SDL_BUTTON_RIGHT:
+                                        fire_movement(&all_characters[i].movement, TELEPORT);
+                                        break;
+                                }
                             }
-                        }
-                        else
-                        {
-                            mouse_hover_rect = coord_to_isosdlrect(center);
-                            SDL_RenderCopy(renderer, images[INVALID].texture, NULL, &mouse_hover_rect);
-
-                            stop_movement(&all_characters[i].movement);
+                            else
+                                stop_movement(&all_characters[i].movement);
                         }
                     }
-                }
-                break;
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym)
-                {
-                    case SDLK_SPACE:
-                        paused = !paused;
-                        break;
-                    case SDLK_a:
-                        change_formation(all_characters, LINE);
-                        break;
-                    case SDLK_z:
-                        change_formation(all_characters, SQUARE);
-                        break;
-                    case SDLK_e:
-                        change_formation(all_characters, TRIANGLE);
-                        break;
-                    case SDLK_r:
-                        change_formation(all_characters, CIRCLE);
-                        break;
-                    case SDLK_F5:
-                        xscroll = (SCREEN_WIDTH/2)/TILES_WIDTH;
-                        yscroll = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
-                        break;
-                    case SDLK_UP:
-                        yscroll -= 1;
-                        break;
-                    case SDLK_DOWN:
-                        yscroll += 1;
-                        break;
-                    case SDLK_LEFT:
-                        xscroll -= 1;
-                        break;
-                    case SDLK_RIGHT:
-                        xscroll += 1;
-                        break;
-                }
-                break;
-        }
+                    break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_SPACE:
+                            paused = !paused;
+                            break;
+                        case SDLK_a:
+                            change_formation(all_characters, LINE);
+                            break;
+                        case SDLK_z:
+                            change_formation(all_characters, SQUARE);
+                            break;
+                        case SDLK_e:
+                            change_formation(all_characters, TRIANGLE);
+                            break;
+                        case SDLK_r:
+                            change_formation(all_characters, CIRCLE);
+                            break;
+                        case SDLK_F5:
+                            xscroll = (SCREEN_WIDTH/2)/TILES_WIDTH;
+                            yscroll = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
+                            break;
+                        case SDLK_UP:
+                            yscroll -= 1;
+                            break;
+                        case SDLK_DOWN:
+                            yscroll += 1;
+                            break;
+                        case SDLK_LEFT:
+                            xscroll -= 1;
+                            break;
+                        case SDLK_RIGHT:
+                            xscroll += 1;
+                            break;
+                    }
+                    break;
+            }
 
 
         SDL_RenderPresent(renderer);
