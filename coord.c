@@ -28,6 +28,15 @@ Coord cartesian_to_isometric(Coord const cartesian)
     return isometric;
 }
 
+Coord event_to_coord(Sint32 x, Sint32 y)
+{
+    Coord map; init_coord(&map);
+    map.x = x - TILES_WIDTH/2;
+    map.y = y - TILES_HEIGHT/2;
+    map = isometric_to_cartesian(map);
+    return map;
+}
+
 SDL_Rect coord_to_isosdlrect(Coord const coord)
 {
     Coord isometrified = cartesian_to_isometric(coord);
@@ -130,6 +139,23 @@ Bool is_out_of_map(Coord const goal, Coord const max_coord)
         is_out = TRUE;
 
     return is_out;
+}
+
+Bool is_pos_legal(
+        Coord const position,
+        Coord const char_pos,
+        Coord const max_coord,
+        unsigned int** const collisions
+        )
+{
+    if (
+            !is_same_coord(position, char_pos) &&
+            !is_out_of_map(position, max_coord) &&
+            !is_colliding(position, collisions)
+        )
+        return TRUE;
+    else
+        return FALSE;
 }
 
 Cardinals determine_direction(Coord const start, Coord const goal)

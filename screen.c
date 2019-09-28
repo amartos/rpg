@@ -43,7 +43,7 @@ void apply_tiles(
         Map const map,
         Character all_characters[MAX_CHARACTERS],
         Image images[0xFFFF],
-        int const xscroll, int const yscroll
+        Coord scroll
         )
 {
     unsigned int id = 0, i, image_id;
@@ -55,10 +55,10 @@ void apply_tiles(
     Cardinals direction = N;
     unsigned int current_frame = 0, level = 0;
     int x, y;
-    int minx = xscroll - 1; // show even the tile that is partly out of screen
-    int maxx = xscroll + SCREEN_WIDTH/TILES_WIDTH;
-    int miny = yscroll - 1; // show even the tile that is partly out of screen
-    int maxy = yscroll + SCREEN_HEIGHT/TILES_HEIGHT;
+    int minx = scroll.x - 1; // show even the tile that is partly out of screen
+    int maxx = scroll.x + SCREEN_WIDTH/TILES_WIDTH;
+    int miny = scroll.y - 1; // show even the tile that is partly out of screen
+    int maxy = scroll.y + SCREEN_HEIGHT/TILES_HEIGHT;
 
     for (level=0;level<MAX_LEVELS;level++)
         for (y=miny;y<=maxy;y++)
@@ -104,6 +104,44 @@ void apply_tiles(
                         }
                     }
                 }
+}
+
+void render_screen(
+        SDL_Renderer *renderer,
+        Character characters[MAX_CHARACTERS],
+        Image images[0xFFFF],
+        SDL_Texture *pause_layer,
+        Cursors mouse_type,
+        SDL_Rect mouse_hover_rect,
+        Coord scroll,
+        Map const map,
+        Bool paused
+        )
+{
+    unsigned int i;
+    Coord position; init_coord(&position);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+    SDL_RenderDrawRect(renderer, NULL);
+
+    apply_tiles(&renderer, map, characters, images, scroll);
+
+    if (paused)
+        SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
+
+    SDL_RenderCopy(renderer, images[mouse_type].texture, NULL, &mouse_hover_rect);
+
+    for (i=0;i<MAX_CHARACTERS;i++)
+    {
+        if (characters[i].movement.moving)
+        {
+            position = characters[i].movement.path[0];
+            position.x -= scroll.x; position.y -= scroll.y;
+            mouse_hover_rect = coord_to_isosdlrect(position);
+            SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);
+        }
+    }
 }
 
 // void make_check_board(SDL_Renderer **renderer, unsigned int const x, unsigned int const y) // max tiles

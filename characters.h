@@ -9,6 +9,7 @@
 #include "images.h"
 #include "coord.h"
 #include "movement.h"
+#include "map.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,13 +59,16 @@ struct Character
 };
 
 // prototypes
+void change_formation(Character characters[MAX_CHARACTERS], Deployment formation);
+void check_character_frame(OnScreen *on_screen, unsigned int const time);
+void make_char_move(
+        Character characters[MAX_CHARACTERS],
+        Map const map,
+        unsigned int const time,
+        Bool paused
+        );
 // Character initialization. For now the values are manually set, but in the
 // future all will depend on the id
-void init_character(
-        Character *character,
-        unsigned int const id,
-        Coord const start_position,
-        Deployment const formation
-        );
+void init_character(Character *character);
 
 #endif // define RPG_CHARACTERS

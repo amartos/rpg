@@ -27,7 +27,18 @@ void apply_tiles(
         Map const map,
         Character all_characters[MAX_CHARACTERS],
         Image images[0xFFFF],
-        int const xscroll, int const yscroll
+        Coord scroll
         );
 
+void render_screen(
+        SDL_Renderer *renderer,
+        Character characters[MAX_CHARACTERS],
+        Image images[0xFFFF],
+        SDL_Texture *pause_layer,
+        Cursors mouse_type,
+        SDL_Rect mouse_hover_rect,
+        Coord scroll,
+        Map const map,
+        Bool paused
+        );
 #endif // define RPG_SCREEN

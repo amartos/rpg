@@ -44,12 +44,7 @@ struct Movement
 };
 
 // prototypes
-void init_movement(
-        Movement *movement,
-        Coord const start_position,
-        Deployment const formation,
-        unsigned int const id
-        );
+void init_movement(Movement *movement);
 void deploy(
         Coord *position,
         Cardinals const direction,

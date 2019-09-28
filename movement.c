@@ -11,26 +11,18 @@ static void teleport(Movement *movement)
     reset_coord(&movement->path[movement->current_node]);
 }
 
-void init_movement(
-        Movement *movement,
-        Coord const start_position,
-        Deployment const formation,
-        unsigned int const id
-        )
+void init_movement(Movement *movement)
 {
     unsigned int i;
     init_coord(&movement->position);
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&movement->path[i]);
-    movement->position = start_position;
     movement->moving = FALSE;
     movement->velocity = 0.25;
     movement->direction = S;
     movement->current_node = 0;
     movement->movement_type = WALK;
-
-    movement->formation = formation;
-    deploy(&movement->position, movement->direction, movement->formation, id);
+    movement->formation = LINE;
 }
 
 static Coord determine_decrease(Movement const movement)
