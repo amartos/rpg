@@ -39,7 +39,7 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
 }
 
 void apply_tiles(
-        SDL_Renderer **renderer,
+        SDL_Renderer *renderer,
         Map const map,
         Character all_characters[MAX_CHARACTERS],
         Image images[0xFFFF],
@@ -76,7 +76,7 @@ void apply_tiles(
                     {
                         image_rect.y -= level * TILES_HEIGHT; // level 1 offset
                         image_rect.w = TILES_WIDTH; image_rect.h = TILES_HEIGHT;
-                        SDL_RenderCopy(*renderer, images[id].texture, NULL, &image_rect);
+                        SDL_RenderCopy(renderer, images[id].texture, NULL, &image_rect);
                     }
                     if (level == 1)
                     {
@@ -94,7 +94,7 @@ void apply_tiles(
                                 current_frame = all_characters[i].on_screen.current_frame;
                                 image_id = 0x100 + i;
                                 SDL_RenderCopy(
-                                        *renderer,
+                                        renderer,
                                         images[image_id].texture,
                                         &all_characters[i].on_screen.frames[direction][state][current_frame],
                                         &image_rect
@@ -125,7 +125,7 @@ void render_screen(
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(&renderer, map, characters, images, scroll);
+    apply_tiles(renderer, map, characters, images, scroll);
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);

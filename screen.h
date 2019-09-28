@@ -23,7 +23,7 @@ void init_sdl_rect(SDL_Rect *rect);
 
 // SDL_Surface tile will change for an array once more tiles are included
 void apply_tiles(
-        SDL_Renderer **renderer,
+        SDL_Renderer *renderer,
         Map const map,
         Character all_characters[MAX_CHARACTERS],
         Image images[0xFFFF],
