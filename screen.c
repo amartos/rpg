@@ -41,7 +41,8 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
 void apply_tiles(
         SDL_Renderer *renderer,
         Map const map,
-        Character all_characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
+        unsigned int max_objects,
         Image images[0xFFFF],
         Coord scroll
         )
@@ -80,9 +81,9 @@ void apply_tiles(
                     }
                     if (level == 1)
                     {
-                        for (i=0;i<MAX_CHARACTERS;i++)
+                        for (i=0;i<max_objects;i++)
                         {
-                            char_position = all_characters[i].movement.position;
+                            char_position = objects[i].movement.position;
                             tile_position.x = x; tile_position.y = y;
                             if (is_within_tile(char_position, tile_position))
                             {
@@ -90,13 +91,13 @@ void apply_tiles(
                                 image_rect = coord_to_isosdlrect(char_position);
                                 image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
                                 image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
-                                direction = all_characters[i].movement.direction;
-                                current_frame = all_characters[i].on_screen.current_frame;
+                                direction = objects[i].movement.direction;
+                                current_frame = objects[i].animation.current_frame;
                                 image_id = 0x100 + i;
                                 SDL_RenderCopy(
                                         renderer,
                                         images[image_id].texture,
-                                        &all_characters[i].on_screen.frames[direction][state][current_frame],
+                                        &objects[i].animation.frames[direction][state][current_frame],
                                         &image_rect
                                         );
                             }
@@ -108,7 +109,8 @@ void apply_tiles(
 
 void render_screen(
         SDL_Renderer *renderer,
-        Character characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
+        unsigned int max_objects,
         Image images[0xFFFF],
         SDL_Texture *pause_layer,
         Cursors mouse_type,
@@ -125,18 +127,18 @@ void render_screen(
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(renderer, map, characters, images, scroll);
+    apply_tiles(renderer, map, objects, 4, images, scroll);
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
 
     SDL_RenderCopy(renderer, images[mouse_type].texture, NULL, &mouse_hover_rect);
 
-    for (i=0;i<MAX_CHARACTERS;i++)
+    for (i=0;i<max_objects;i++)
     {
-        if (characters[i].movement.moving)
+        if (objects[i].movement.moving)
         {
-            position = characters[i].movement.path[0];
+            position = objects[i].movement.path[0];
             position.x -= scroll.x; position.y -= scroll.y;
             mouse_hover_rect = coord_to_isosdlrect(position);
             SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);

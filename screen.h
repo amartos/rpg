@@ -8,7 +8,7 @@
 #include "coord.h"
 #include "map.h"
 #include "images.h"
-#include "characters.h"
+#include "animation.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,14 +24,16 @@ void init_sdl_rect(SDL_Rect *rect);
 void apply_tiles(
         SDL_Renderer *renderer,
         Map const map,
-        Character all_characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
+        unsigned int max_objects,
         Image images[0xFFFF],
         Coord scroll
         );
 
 void render_screen(
         SDL_Renderer *renderer,
-        Character characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
+        unsigned int max_objects,
         Image images[0xFFFF],
         SDL_Texture *pause_layer,
         Cursors mouse_type,

@@ -1,8 +1,6 @@
 #ifndef RPG_CHARACTERS
 #define RPG_CHARACTERS
 
-#define MAX_CHARACTERS 4 // max of team
-
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
@@ -15,12 +13,8 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-// this should be removed at some point
-#include <SDL2/SDL2_rotozoom.h>
 
 // structures
-// This structure describes the different states a character object can be
-// found in, mainly related to the sprites.
 typedef enum State State;
 enum State
 {
@@ -33,9 +27,8 @@ enum State
     STILL
 };
 
-// this give infos on what to show on screen for Character objects
-typedef struct OnScreen OnScreen;
-struct OnScreen
+typedef struct Animation Animation;
+struct Animation
 {
     State state;
     Bool animated;
@@ -47,28 +40,26 @@ struct OnScreen
     unsigned int time; // previous tick (for changing frame)
 };
 
-
-// This describes a Character type object, aka all what can be described as a
-// living being
-typedef struct Character Character;
-struct Character
+typedef struct AnimatedObject AnimatedObject;
+struct AnimatedObject
 {
     unsigned int id;
-    OnScreen on_screen;
+    Animation animation;
     Movement movement;
 };
 
 // prototypes
-void change_formation(Character characters[MAX_CHARACTERS], Deployment formation);
-void check_character_frame(OnScreen *on_screen, unsigned int const time);
-void make_char_move(
-        Character characters[MAX_CHARACTERS],
+void change_animobj_formation(AnimatedObject objects[], unsigned int max, Deployment formation);
+void check_animobj_frame(Animation *animation, unsigned int const time);
+void make_animobj_move(
+        AnimatedObject objects[],
+        unsigned int max,
         Map const map,
         unsigned int const time,
         Bool paused
         );
-// Character initialization. For now the values are manually set, but in the
+// AnimatedObject initialization. For now the values are manually set, but in the
 // future all will depend on the id
-void init_character(Character *character);
+void init_animobj(AnimatedObject *object);
 
 #endif // define RPG_CHARACTERS

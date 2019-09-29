@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
     max_coord.x = test_map.maxx; max_coord.y = test_map.maxy;
 
     // load characters
-    Character all_characters[MAX_CHARACTERS];
+    AnimatedObject all_characters[MAX_CHARACTERS];
     position.x = 4.0; position.y = 4.0;
     for (i=0;i<MAX_CHARACTERS;i++)
     {
-        init_character(&all_characters[i]);
+        init_animobj(&all_characters[i]);
         all_characters[i].movement.position = position;
         all_characters[i].id = i;
         all_characters[i].movement.formation = SQUARE;
@@ -63,9 +63,10 @@ int main(int argc, char *argv[])
         if (time - prev_time > FRAMERATE)
         {
             prev_time = time;
-            make_char_move(all_characters, test_map, time, paused);
+            make_animobj_move(all_characters, MAX_CHARACTERS, test_map, time, paused);
             render_screen(renderer,
                     all_characters,
+                    MAX_CHARACTERS,
                     images, pause_layer,
                     mouse_type, mouse_hover_rect,
                     scroll,
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
                     break;
                 case SDL_MOUSEBUTTONUP:
                 case SDL_MOUSEBUTTONDOWN:
-                    handle_mouse_click(event, scroll, all_characters, test_map);
+                    handle_mouse_click(event, scroll, all_characters, MAX_CHARACTERS, test_map);
                     break;
                 case SDL_KEYDOWN:
                     handle_keyboard(event, &paused, all_characters, &scroll);

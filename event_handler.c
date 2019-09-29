@@ -3,7 +3,7 @@
 
 void handle_keyboard(
         SDL_Event event, Bool *paused,
-        Character characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
         Coord *scroll
         )
 {
@@ -13,16 +13,16 @@ void handle_keyboard(
             *paused = !*paused;
             break;
         case SDLK_a:
-            change_formation(characters, LINE);
+            change_animobj_formation(objects, 4, LINE);
             break;
         case SDLK_z:
-            change_formation(characters, SQUARE);
+            change_animobj_formation(objects, 4, SQUARE);
             break;
         case SDLK_e:
-            change_formation(characters, TRIANGLE);
+            change_animobj_formation(objects, 4, TRIANGLE);
             break;
         case SDLK_r:
-            change_formation(characters, CIRCLE);
+            change_animobj_formation(objects, 4, CIRCLE);
             break;
         case SDLK_F5:
             scroll->x = (SCREEN_WIDTH/2)/TILES_WIDTH;
@@ -60,7 +60,8 @@ Cursors handle_mouse_motion(
 void handle_mouse_click(
         SDL_Event event,
         Coord const scroll,
-        Character characters[MAX_CHARACTERS],
+        AnimatedObject objects[],
+        unsigned int max_objects,
         Map const map
         )
 {
@@ -76,25 +77,25 @@ void handle_mouse_click(
 
     if (event.type == SDL_MOUSEBUTTONDOWN)
     {
-        for (i=0;i<MAX_CHARACTERS;i++)
+        for (i=0;i<max_objects;i++)
         {
             coord = position;
             deploy(
                     &coord,
-                    determine_direction(characters[i].movement.position, coord),
-                    characters[i].movement.formation, i
+                    determine_direction(objects[i].movement.position, coord),
+                    objects[i].movement.formation, i
                     );
-            if (is_pos_legal(coord, characters[i].movement.position, max_coord, map.collisions))
+            if (is_pos_legal(coord, objects[i].movement.position, max_coord, map.collisions))
             {
-                characters[i].movement.current_node = 0;
-                characters[i].movement.path[0] = coord;
+                objects[i].movement.current_node = 0;
+                objects[i].movement.path[0] = coord;
                 if (event.button.button == SDL_BUTTON_LEFT)
-                    fire_movement(&characters[i].movement, PATH);
+                    fire_movement(&objects[i].movement, PATH);
                 else if (event.button.button == SDL_BUTTON_RIGHT)
-                    fire_movement(&characters[i].movement, TELEPORT);
+                    fire_movement(&objects[i].movement, TELEPORT);
             }
             else
-                stop_movement(&characters[i].movement);
+                stop_movement(&objects[i].movement);
         }
     }
 }

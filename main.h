@@ -6,7 +6,7 @@
 #include "macros.h"
 
 #include "screen.h"
-#include "characters.h"
+#include "animation.h"
 #include "coord.h"
 #include "movement.h"
 #include "map.h"

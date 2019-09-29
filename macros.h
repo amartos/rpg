@@ -67,6 +67,8 @@ enum ColorPalette
 #define TILES_HEIGHT 32
 
 
+#define MAX_CHARACTERS 4
+
 // Prototypes
 Bool is_empty_string(char const string[]);
 
