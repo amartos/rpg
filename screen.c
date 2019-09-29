@@ -143,26 +143,3 @@ void render_screen(
         }
     }
 }
-
-// void make_check_board(SDL_Renderer **renderer, unsigned int const x, unsigned int const y) // max tiles
-// {
-//     unsigned int i, j;
-//     unsigned int screen_black_color[3] = {0xD3, 0xD3, 0xD3};
-//     SDL_Rect infos;
-//     Coord positions; init_coord(&positions);
-//     infos.w = TILES_WIDTH; infos.h = TILES_HEIGHT;
-//     SDL_FillRect(*screen, NULL, SDL_MapRGB((*screen)->format, 0xff, 0xff, 0xff));
-//     for (i=0;i<x;i++)
-//         for (j=0;j<y;j++)
-//         {
-//             if ((i-(j%2))%2)
-//             {
-//                 positions.x = i * TILES_WIDTH;
-//                 positions.y = j * TILES_HEIGHT;
-//                 positions = cartesian_to_isometric(positions);
-//                 infos.x = positions.x;
-//                 infos.y = positions.y;
-//                 set_BG_color(screen, &infos, screen_black_color);
-//             }
-//         }
-// }
