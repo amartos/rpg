@@ -40,6 +40,5 @@ SDL_Texture* make_colored_rect(
         Uint8 const R, Uint8 const G, Uint8 const B, Uint8 const A
         );
 void free_images_array(Image images[]);
-void set_color(SDL_Surface *image, SDL_Color const original_color, SDL_Color const new_color);
 
 #endif // define RPG_IMAGES
