@@ -12,11 +12,13 @@
 #include "map.h"
 #include "event_handler.h"
 #include "assets.h"
+#include "database.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <sqlite3.h>
 
 
 #endif // define RPG_MAIN

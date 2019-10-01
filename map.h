@@ -4,9 +4,11 @@
 #include "errors.h"
 #include "try_throw_catch.h"
 #include "macros.h"
+#include "database.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
 
 #define MAX_LEVELS 2 // ground + floors
 
@@ -23,7 +25,8 @@ struct Map
 };
 
 // prototypes
-void init_map(Map *map, char const map_path[]);
+void init_map(Map *map);
+void map_malloc(Map *map);
 void free_map(Map *map);
 void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy);
 

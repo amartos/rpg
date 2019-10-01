@@ -18,7 +18,7 @@ void init_movement(Movement *movement)
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&movement->path[i]);
     movement->moving = FALSE;
-    movement->velocity = 0.25;
+    movement->velocity = 0;
     movement->direction = S;
     movement->current_node = 0;
     movement->movement_type = WALK;

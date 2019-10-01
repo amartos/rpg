@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
+
+#include "database.h"
 
 #include "images.h"
 #include "animation.h"
@@ -21,6 +24,7 @@ struct Asset
 
 // prototypes
 void init_asset_array(Asset assets[0xFFFF]);
+void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF]);
 void free_assets_array(Asset assets[0xFFFF]);
 
 #endif // define RPG_ASSETS

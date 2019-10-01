@@ -49,8 +49,17 @@ void logger(Errors const error_id, char const sdl_message[])
         case PATHFIND_MALLOC_FAILURE:
             printe(now, error_id, "pathfind memory allocation failure", sdl_message);
             break;
-        case TILES_PATH_MALLOC_FAILURE:
-            printe(now, error_id, "tiles path memory allocation failure", sdl_message);
+        case DATABASE_READ_FAILURE:
+            printe(now, error_id, "database read failure", sdl_message);
+            break;
+        case QUERY_READ_FAILURE:
+            printe(now, error_id, "query read failure", sdl_message);
+            break;
+        case QUERY_END_FAILURE:
+            printe(now, error_id, "query end failure", sdl_message);
+            break;
+        case IMAGE_MALLOC_FAILURE:
+            printe(now, error_id, "image memory allocation failure", sdl_message);
             break;
     }
 }

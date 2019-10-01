@@ -1,7 +1,7 @@
 #include "map.h"
 
 
-static void map_malloc(Map *map)
+void map_malloc(Map *map)
 {
     unsigned int i,j,t;
     // TODO: malloc needs to be better checked
@@ -64,135 +64,32 @@ static void map_malloc(Map *map)
     ETRY;
 }
 
-void init_map(Map *map, char const map_path[])
+void init_map(Map *map)
 {
-    FILE *map_file = NULL;// FILE *converter_file = NULL;
-    unsigned int i = 0, j = 0, offset = 0;
-    char line[MAX_SIZE_LINE] = {0}, *data = NULL;
-    unsigned int map_type = 0;
+    unsigned int x, y, i;
+    INIT_DB
 
-    TRY
-    {
-        map_file = fopen(map_path, "r");
-        if (map_file == NULL)
-            THROW(MAP_FILE_LOADING_FAILURE);
-    }
-    CATCH(MAP_FILE_LOADING_FAILURE)
-    {
-        char error_msg[200] = {0};
-        sprintf(error_msg, "could not open map file at %s", map_path);
-        logger(MAP_FILE_LOADING_FAILURE, error_msg);
-        exit(EXIT_FAILURE);
-    }
-    CATCH(CONVERTER_FILE_LOADING_FAILURE)
-    {
-        logger(CONVERTER_FILE_LOADING_FAILURE, "could not open converter file");
-        exit(EXIT_FAILURE);
-    }
-    ETRY;
-
-    // get map infos
-    while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
-    {
-        if (!strcmp(line, "# infos\n"))
-            break;
-    }
-    fgets(line, MAX_SIZE_LINE, map_file); // empty line
-
-    // maxx and maxy
-    fgets(line, MAX_SIZE_LINE, map_file);
-    data = line; sscanf(data, "x: %d", &map->maxx);
-    fgets(line, MAX_SIZE_LINE, map_file);
-    data = line; sscanf(data, "y: %d", &map->maxy);
-    rewind(map_file);
+    QUERY_DB("SELECT MAX(x) FROM test_map;")
+        map->maxx = GET_QUERY_INT(0) + 1;
+    END_QUERY
+    QUERY_DB("SELECT MAX(y) FROM test_map;")
+        map->maxy = GET_QUERY_INT(0) + 1;
+    END_QUERY
 
     map_malloc(map);
 
-    // This is a nasty piece of code as it supposes that the map files are all
-    // constructed EXACTLY the same way, and that all the map lines are of the
-    // same length (a multiple of 4 digits hex numbers + 1 space). It is too 
-    // much constraint, but it's a start. If RLE compression is implemented, 
-    // this code will definitely need to change
-    while (fgets(line, MAX_SIZE_LINE, map_file) != NULL)
+    QUERY_DB("SELECT * FROM test_map;")
     {
-        if (!strcmp(line, "# level0\n"))
-        {
-            map_type = 0;
-            j = 0;
-            offset = 5;
-        }
-        else if (!strcmp(line, "# level1\n"))
-        {
-            map_type = 1;
-            j = 0;
-            offset = 5;
-        }
-        else if (!strcmp(line, "# collisions\n"))
-        {
-            map_type = 10;
-            j = 0;
-            offset = 2;
-        }
-        else if (!strcmp(line, "# weather\n"))
-        {
-            map_type = 11;
-            j = 0;
-            offset = 5;
-        }
-        else if (!strcmp(line, "# movement cost\n"))
-        {
-            map_type = 12;
-            j = 0;
-            offset = 2;
-        }
-        else if (!strcmp(line, "\n"))
-            continue;
-        else
-        {
-            data = line;
-            switch (map_type)
-            {
-                case 1:
-                    for (i=0;i<map->maxx;i++)
-                    {
-                        sscanf(data, "%X ", &map->tiles[1][j][i]);
-                        data += offset;
-                    }
-                    break;
-                case 0:
-                    for (i=0;i<map->maxx;i++)
-                    {
-                        sscanf(data, "%X ", &map->tiles[0][j][i]);
-                        data += offset;
-                    }
-                    break;
-                case 10:
-                    for (i=0;i<map->maxx;i++)
-                    {
-                        sscanf(data, "%d ", &map->collisions[j][i]);
-                        data += offset;
-                    }
-                    break;
-                case 11:
-                    for (i=0;i<map->maxx;i++)
-                    {
-                        sscanf(data, "%X ", &map->weather[j][i]);
-                        data += offset;
-                    }
-                    break;
-                case 12:
-                    for (i=0;i<map->maxx;i++)
-                    {
-                        sscanf(data, "%X ", &map->cost[j][i]);
-                        data += offset;
-                    }
-                    break;
-            }
-            j++;
-        }
+        x = GET_QUERY_INT(0);
+        y = GET_QUERY_INT(1);
+        map->collisions[y][x] = GET_QUERY_INT(2);
+        map->cost[y][x] = GET_QUERY_INT(3);
+        map->weather[y][x] = GET_QUERY_INT(4);
+        for (i=0;i<MAX_LEVELS;i++)
+            map->tiles[i][y][x] = GET_QUERY_INT(5+i);
     }
-
-    fclose(map_file);
+    END_QUERY
+    CLOSE_DB
 }
 
 void free_map(Map *map)
@@ -202,7 +99,6 @@ void free_map(Map *map)
     {
         for (j=0;j<map->maxy;j++)
             free(map->tiles[t][j]);
-        free(map->tiles[t]);
     }
     free(map->tiles);
     free(map->collisions);

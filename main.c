@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    Asset assets[0xFFFF]; init_asset_array(assets);
+    Asset assets[0xFFFF]; init_asset_array(assets); load_assets_db(renderer, assets);
     SDL_Texture *pause_layer = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
     SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     scroll.y = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
 
     // load maps
-    Map test_map; init_map(&test_map, "assets/maps/test_map2");
+    Map test_map; init_map(&test_map);
     max_coord.x = test_map.maxx; max_coord.y = test_map.maxy;
 
     // load characters
