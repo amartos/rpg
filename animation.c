@@ -1,16 +1,6 @@
 #include "animation.h"
 
 
-void change_animobj_formation(AnimatedObject objects[], unsigned int max, Deployment formation)
-{
-    unsigned int i;
-    for (i=0;i<max;i++)
-    {
-        objects[i].movement.formation = formation;
-        fire_movement(&objects[i].movement, PATH);
-    }
-}
-
 void check_animobj_frame(Animation *animation, unsigned int const time)
 {
     if (time - animation->time > animation->framerate)
@@ -22,33 +12,7 @@ void check_animobj_frame(Animation *animation, unsigned int const time)
     }
 }
 
-void make_animobj_move(
-        AnimatedObject objects[],
-        unsigned int max,
-        Map const map,
-        unsigned int const time,
-        Bool paused
-        )
-{
-    unsigned int i;
-    Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.maxx; max_coord.y = map.maxy;
-    for (i=0;i<max;i++)
-    {
-        if (objects[i].movement.moving && !paused)
-        {
-            move(
-                    &objects[i].movement,
-                    max_coord,
-                    map.collisions,
-                    map.cost
-                    );
-            check_animobj_frame(&objects[i].animation, time);
-        }
-    }
-}
-
-static void init_animation(Animation *animation)
+void init_animation(Animation *animation, unsigned int const frames)
 {
     unsigned int i, j, f;
 
@@ -56,7 +20,7 @@ static void init_animation(Animation *animation)
     // Frames
     //-------------------------------------------------------------------------
 
-    animation->total_frames = 2;
+    animation->total_frames = frames;
 
     // This depends on the sprite order
     // TODO: if(sprite changes), reorder
@@ -86,15 +50,4 @@ static void init_animation(Animation *animation)
 
     animation->state = MOVE;
     animation->time = 0;
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-void init_animobj(AnimatedObject *object)
-{
-    object->id = 0;
-    init_movement(&object->movement);
-    init_animation(&object->animation);
 }

@@ -40,26 +40,9 @@ struct Animation
     unsigned int time; // previous tick (for changing frame)
 };
 
-typedef struct AnimatedObject AnimatedObject;
-struct AnimatedObject
-{
-    unsigned int id;
-    Animation animation;
-    Movement movement;
-};
-
 // prototypes
-void change_animobj_formation(AnimatedObject objects[], unsigned int max, Deployment formation);
+void init_animation(Animation *animation, unsigned int const frames);
 void check_animobj_frame(Animation *animation, unsigned int const time);
-void make_animobj_move(
-        AnimatedObject objects[],
-        unsigned int max,
-        Map const map,
-        unsigned int const time,
-        Bool paused
-        );
-// AnimatedObject initialization. For now the values are manually set, but in the
-// future all will depend on the id
-void init_animobj(AnimatedObject *object);
+
 
 #endif // define RPG_CHARACTERS

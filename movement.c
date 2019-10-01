@@ -102,6 +102,12 @@ static double cosd(unsigned int angle)
     return cos(angle*M_PI/180);
 }
 
+void change_formation(Movement *movement, Deployment formation)
+{
+    movement->formation = formation;
+    fire_movement(movement, PATH);
+}
+
 void deploy(
         Coord *position,
         Cardinals const direction,

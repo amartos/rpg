@@ -3,26 +3,31 @@
 
 void handle_keyboard(
         SDL_Event event, Bool *paused,
-        AnimatedObject objects[],
+        Asset characters[MAX_CHARACTERS],
         Coord *scroll
         )
 {
+    unsigned int i;
     switch (event.key.keysym.sym)
     {
         case SDLK_SPACE:
             *paused = !*paused;
             break;
         case SDLK_a:
-            change_animobj_formation(objects, 4, LINE);
+            for (i=0;i<MAX_CHARACTERS;i++)
+                change_formation(characters[i].movement, LINE);
             break;
         case SDLK_z:
-            change_animobj_formation(objects, 4, SQUARE);
+            for (i=0;i<MAX_CHARACTERS;i++)
+                change_formation(characters[i].movement, SQUARE);
             break;
         case SDLK_e:
-            change_animobj_formation(objects, 4, TRIANGLE);
+            for (i=0;i<MAX_CHARACTERS;i++)
+                change_formation(characters[i].movement, TRIANGLE);
             break;
         case SDLK_r:
-            change_animobj_formation(objects, 4, CIRCLE);
+            for (i=0;i<MAX_CHARACTERS;i++)
+                change_formation(characters[i].movement, CIRCLE);
             break;
         case SDLK_F5:
             scroll->x = (SCREEN_WIDTH/2)/TILES_WIDTH;
@@ -60,7 +65,7 @@ Cursors handle_mouse_motion(
 void handle_mouse_click(
         SDL_Event event,
         Coord const scroll,
-        AnimatedObject objects[],
+        Asset characters[MAX_CHARACTERS],
         unsigned int max_objects,
         Map const map
         )
@@ -82,20 +87,20 @@ void handle_mouse_click(
             coord = position;
             deploy(
                     &coord,
-                    determine_direction(objects[i].movement.position, coord),
-                    objects[i].movement.formation, i
+                    determine_direction(characters[i].movement->position, coord),
+                    characters[i].movement->formation, i
                     );
-            if (is_pos_legal(coord, objects[i].movement.position, max_coord, map.collisions))
+            if (is_pos_legal(coord, characters[i].movement->position, max_coord, map.collisions))
             {
-                objects[i].movement.current_node = 0;
-                objects[i].movement.path[0] = coord;
+                characters[i].movement->current_node = 0;
+                characters[i].movement->path[0] = coord;
                 if (event.button.button == SDL_BUTTON_LEFT)
-                    fire_movement(&objects[i].movement, PATH);
+                    fire_movement(characters[i].movement, PATH);
                 else if (event.button.button == SDL_BUTTON_RIGHT)
-                    fire_movement(&objects[i].movement, TELEPORT);
+                    fire_movement(characters[i].movement, TELEPORT);
             }
             else
-                stop_movement(&objects[i].movement);
+                stop_movement(characters[i].movement);
         }
     }
 }

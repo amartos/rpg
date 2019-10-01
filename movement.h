@@ -45,6 +45,7 @@ struct Movement
 
 // prototypes
 void init_movement(Movement *movement);
+void change_formation(Movement *movement, Deployment formation);
 void deploy(
         Coord *position,
         Cardinals const direction,

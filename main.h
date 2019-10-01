@@ -11,6 +11,7 @@
 #include "movement.h"
 #include "map.h"
 #include "event_handler.h"
+#include "assets.h"
 
 #include <stdio.h>
 #include <stdlib.h>

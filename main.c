@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    Image images[0xFFFF]; init_images_array(renderer, images);
+    Asset assets[0xFFFF]; init_asset_array(assets);
     SDL_Texture *pause_layer = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
     SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
@@ -38,18 +38,17 @@ int main(int argc, char *argv[])
     max_coord.x = test_map.maxx; max_coord.y = test_map.maxy;
 
     // load characters
-    AnimatedObject all_characters[MAX_CHARACTERS];
+    Asset all_characters[MAX_CHARACTERS];
     position.x = 4.0; position.y = 4.0;
     for (i=0;i<MAX_CHARACTERS;i++)
     {
-        init_animobj(&all_characters[i]);
-        all_characters[i].movement.position = position;
-        all_characters[i].id = i;
-        all_characters[i].movement.formation = SQUARE;
+        all_characters[i] = assets[0x100+i];
+        all_characters[i].movement->position = position;
+        all_characters[i].movement->formation = SQUARE;
         deploy(
-                &all_characters[i].movement.position,
-                all_characters[i].movement.direction,
-                all_characters[i].movement.formation,
+                &all_characters[i].movement->position,
+                all_characters[i].movement->direction,
+                all_characters[i].movement->formation,
                 i
                 );
     }
@@ -63,11 +62,20 @@ int main(int argc, char *argv[])
         if (time - prev_time > FRAMERATE)
         {
             prev_time = time;
-            make_animobj_move(all_characters, MAX_CHARACTERS, test_map, time, paused);
+            for (i=0;i<MAX_CHARACTERS;i++)
+                if (all_characters[i].movement->moving && !paused)
+                {
+                    move(
+                            all_characters[i].movement,
+                            max_coord,
+                            test_map.collisions,
+                            test_map.cost
+                            );
+                    check_animobj_frame(all_characters[i].animation, time);
+                }
+
             render_screen(renderer,
-                    all_characters,
-                    MAX_CHARACTERS,
-                    images, pause_layer,
+                    assets, pause_layer,
                     mouse_type, mouse_hover_rect,
                     scroll,
                     test_map,
@@ -102,7 +110,7 @@ int main(int argc, char *argv[])
 
     // free all freeables
     free_map(&test_map);
-    free_images_array(images);
+    free_assets_array(assets);
     SDL_DestroyTexture(pause_layer);
     SDL_Quit();
 

@@ -9,6 +9,7 @@
 #include "map.h"
 #include "images.h"
 #include "animation.h"
+#include "assets.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,18 +24,14 @@ void init_sdl_rect(SDL_Rect *rect);
 // SDL_Surface tile will change for an array once more tiles are included
 void apply_tiles(
         SDL_Renderer *renderer,
+        Asset assets[0xFFFF],
         Map const map,
-        AnimatedObject objects[],
-        unsigned int max_objects,
-        Image images[0xFFFF],
         Coord scroll
         );
 
 void render_screen(
         SDL_Renderer *renderer,
-        AnimatedObject objects[],
-        unsigned int max_objects,
-        Image images[0xFFFF],
+        Asset assets[0xFFFF],
         SDL_Texture *pause_layer,
         Cursors mouse_type,
         SDL_Rect mouse_hover_rect,

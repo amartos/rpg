@@ -6,6 +6,7 @@
 #include "coord.h"
 #include "images.h"
 #include "animation.h"
+#include "assets.h"
 #include "map.h"
 
 #include <stdio.h>
@@ -15,7 +16,7 @@
 
 void handle_keyboard(
         SDL_Event event, Bool *paused,
-        AnimatedObject objects[],
+        Asset characters[MAX_CHARACTERS],
         Coord *scroll
         );
 
@@ -28,7 +29,7 @@ Cursors handle_mouse_motion(
 void handle_mouse_click(
         SDL_Event event,
         Coord const scroll,
-        AnimatedObject objects[],
+        Asset characters[MAX_CHARACTERS],
         unsigned int max_objects,
         Map const map
         );

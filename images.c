@@ -1,69 +1,29 @@
 #include "images.h"
 
 
-static Image null_image()
+static void init_image(Image *image)
 {
-    Image image;
-    image.w = 0;
-    image.h = 0;
-    image.collision = FALSE;
-    image.path = NULL;
-    image.texture = NULL;
-    return image;
+    unsigned int i;
+    image->w = 0;
+    image->h = 0;
+    image->collision = FALSE;
+    for (i=0;i<50;i++)
+        image->path[i] = '\0';
+    image->texture = malloc(sizeof(SDL_Texture*));
 }
 
-static Image init_image(char const path[])
+void load_texture_image(SDL_Renderer *renderer, Image *image, char const path[])
 {
-    Image image = null_image();
-
-    TRY
-    {
-        image.path = calloc(sizeof(char), 30);
-        if (image.path == NULL)
-            THROW(TILES_PATH_MALLOC_FAILURE);
-        strcpy(image.path, path);
-    }
-    CATCH(TILES_PATH_MALLOC_FAILURE)
-    {
-        logger(TILES_PATH_MALLOC_FAILURE, "");
-        exit(EXIT_FAILURE);
-    }
-    ETRY;
-
-    return image;
-}
-
-static Image load_texture_image(SDL_Renderer *renderer, char const filename[], char const path[])
-{
-    Image image = init_image(path);
-    strcat(image.path, filename);
-    SDL_Surface* surface = IMG_Load(image.path);
+    init_image(image); strcpy(image->path, path);
+    SDL_Surface* surface = IMG_Load(image->path);
     if (surface != NULL)
     {
         surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-        image.texture = SDL_CreateTextureFromSurface(renderer, surface);
-        image.w = surface->w;
-        image.h = surface->h;
+        image->texture = SDL_CreateTextureFromSurface(renderer, surface);
+        image->w = surface->w;
+        image->h = surface->h;
         SDL_FreeSurface(surface);
     }
-    return image;
-}
-
-void init_images_array(SDL_Renderer *renderer, Image images[0xFFFF])
-{
-    unsigned int id;
-    char id_text[8] = {0};
-
-    // start at 16, as first 15 will be used for infos & meta-images
-    for (id=0x10;id<0xFFFF;id++)
-    {
-        sprintf(id_text, "%04X.png", id);
-        images[id] = load_texture_image(renderer, id_text, IMAGES_PATH);
-    }
-
-    // TODO: this should change when the array of collision image is defined
-    for (id=0x400;id<0x4000;id++)
-        images[id].collision = TRUE;
 }
 
 SDL_Texture* make_colored_rect(
@@ -85,19 +45,8 @@ SDL_Texture* make_colored_rect(
     return texture;
 }
 
-static void free_image(Image *image)
+void free_image(Image *image)
 {
-    if (image->path != NULL)
-    {
-        free(image->path);
-        if (image->texture != NULL)
-            SDL_DestroyTexture(image->texture);
-    }
-}
-
-void free_images_array(Image images[])
-{
-    unsigned int id;
-    for (id=0;id<0xFFFF;id++)
-        free_image(&images[id]);
+    if (image->texture != NULL)
+        SDL_DestroyTexture(image->texture);
 }

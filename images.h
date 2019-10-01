@@ -28,17 +28,17 @@ struct Image
 {
     unsigned int w, h;
     Bool collision;
-    char *path;
+    char path[50];
     SDL_Texture *texture;
 };
 
 // prototypes
-void init_images_array(SDL_Renderer *renderer, Image images[0xFFFF]);
+void load_texture_image(SDL_Renderer *renderer, Image *image, char const path[]);
 SDL_Texture* make_colored_rect(
         SDL_Renderer *renderer,
         unsigned int const w, unsigned int const h,
         Uint8 const R, Uint8 const G, Uint8 const B, Uint8 const A
         );
-void free_images_array(Image images[]);
+void free_image(Image *image);
 
 #endif // define RPG_IMAGES

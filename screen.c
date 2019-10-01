@@ -40,14 +40,12 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
 
 void apply_tiles(
         SDL_Renderer *renderer,
+        Asset assets[0xFFFF],
         Map const map,
-        AnimatedObject objects[],
-        unsigned int max_objects,
-        Image images[0xFFFF],
         Coord scroll
         )
 {
-    unsigned int id = 0, i, image_id;
+    unsigned int id = 0, i, min = 0x100, max = 0x100 + MAX_CHARACTERS;
     SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord positions; init_coord(&positions);
     Coord tile_position; init_coord(&tile_position);
@@ -77,29 +75,31 @@ void apply_tiles(
                     {
                         image_rect.y -= level * TILES_HEIGHT; // level 1 offset
                         image_rect.w = TILES_WIDTH; image_rect.h = TILES_HEIGHT;
-                        SDL_RenderCopy(renderer, images[id].texture, NULL, &image_rect);
+                        SDL_RenderCopy(renderer, assets[id].image->texture, NULL, &image_rect);
                     }
                     if (level == 1)
                     {
-                        for (i=0;i<max_objects;i++)
+                        for (i=min;i<max;i++)
                         {
-                            char_position = objects[i].movement.position;
-                            tile_position.x = x; tile_position.y = y;
-                            if (is_within_tile(char_position, tile_position))
+                            if (assets[i].movement != NULL)
                             {
-                                char_position.x -= minx; char_position.y -= miny;
-                                image_rect = coord_to_isosdlrect(char_position);
-                                image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
-                                image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
-                                direction = objects[i].movement.direction;
-                                current_frame = objects[i].animation.current_frame;
-                                image_id = 0x100 + i;
-                                SDL_RenderCopy(
-                                        renderer,
-                                        images[image_id].texture,
-                                        &objects[i].animation.frames[direction][state][current_frame],
-                                        &image_rect
-                                        );
+                                char_position = assets[i].movement->position;
+                                tile_position.x = x; tile_position.y = y;
+                                if (is_within_tile(char_position, tile_position))
+                                {
+                                    char_position.x -= minx; char_position.y -= miny;
+                                    image_rect = coord_to_isosdlrect(char_position);
+                                    image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
+                                    image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
+                                    direction = assets[i].movement->direction;
+                                    current_frame = assets[i].animation->current_frame;
+                                    SDL_RenderCopy(
+                                            renderer,
+                                            assets[i].image->texture,
+                                            &assets[i].animation->frames[direction][state][current_frame],
+                                            &image_rect
+                                            );
+                                }
                             }
 
                         }
@@ -109,9 +109,7 @@ void apply_tiles(
 
 void render_screen(
         SDL_Renderer *renderer,
-        AnimatedObject objects[],
-        unsigned int max_objects,
-        Image images[0xFFFF],
+        Asset assets[0xFFFF],
         SDL_Texture *pause_layer,
         Cursors mouse_type,
         SDL_Rect mouse_hover_rect,
@@ -127,21 +125,21 @@ void render_screen(
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(renderer, map, objects, 4, images, scroll);
+    apply_tiles(renderer, assets, map, scroll);
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
 
-    SDL_RenderCopy(renderer, images[mouse_type].texture, NULL, &mouse_hover_rect);
+    SDL_RenderCopy(renderer, assets[mouse_type].image->texture, NULL, &mouse_hover_rect);
 
-    for (i=0;i<max_objects;i++)
+    for (i=0;i<0xFFFF;i++)
     {
-        if (objects[i].movement.moving)
+        if (assets[i].movement != NULL && assets[i].movement->moving)
         {
-            position = objects[i].movement.path[0];
+            position = assets[i].movement->path[0];
             position.x -= scroll.x; position.y -= scroll.y;
             mouse_hover_rect = coord_to_isosdlrect(position);
-            SDL_RenderCopy(renderer, images[VALID].texture, NULL, &mouse_hover_rect);
+            SDL_RenderCopy(renderer, assets[VALID].image->texture, NULL, &mouse_hover_rect);
         }
     }
 }
