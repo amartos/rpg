@@ -49,10 +49,9 @@ SDL_Rect coord_to_isosdlrect(Coord const coord)
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;
-    double epsilon = 1/pow(10, COORD_PRECISION);
     if (
-            fabs(a.x - b.x) < epsilon &&
-            fabs(a.y - b.y) < epsilon
+            is_same_double(a.x, b.x) &&
+            is_same_double(a.y, b.y)
        )
         same = TRUE;
     return same;

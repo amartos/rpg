@@ -13,6 +13,8 @@
 
 #define get_name(var)  #var // get var name
 #define MAX_SIZE_LINE 1000
+#define DOUBLE_PRECISION 2
+
 
 typedef enum Bool Bool;
 enum Bool
@@ -71,5 +73,6 @@ enum ColorPalette
 
 // Prototypes
 Bool is_empty_string(char const string[]);
+Bool is_same_double(double const a, double const b);
 
 #endif // define RPG_MACROS

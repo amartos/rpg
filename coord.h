@@ -8,8 +8,6 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
-#define COORD_PRECISION 2
-
 
 // structures
 // the order of the sprites on the asset img depends on this
