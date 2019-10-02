@@ -38,7 +38,7 @@ map_creator: init clean
 TEST=test
 PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c
 PFEXEC=$(BIN)/pathfinding_test
-COORD=$(TEST)/coord_test.c coord.c
+COORD=$(TEST)/coord_test.c coord.c macros.c
 COORDEXEC=$(BIN)/coord_test
 MAP=$(TEST)/map_test.c map.c errors.c
 MAPEXEC=$(BIN)/map_test
