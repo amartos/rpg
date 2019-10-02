@@ -28,9 +28,9 @@ int main(int argc, char *argv[])
 {
     Map map; init_map(&map);
     printf("max: x %d, y %d\n", map.maxx, map.maxy);
-    printf("BACKGROUND:\n"); printm(map.schematics[BACKGROUND], map.maxx, map.maxy);
-    printf("FOREGROUND:\n"); printm(map.schematics[FOREGROUND], map.maxx, map.maxy);
-    printf("COLLISIONS:\n"); printm(map.schematics[COLLISIONS], map.maxx, map.maxy);
-    printf("COST:\n"); printm(map.schematics[COST], map.maxx, map.maxy);
-    printf("WEATHER:\n"); printm(map.schematics[WEATHER], map.maxx, map.maxy);
+    printf("LEVEL 0:\n"); printm(map.tiles[0], map.maxx, map.maxy);
+    printf("LEVEL 1:\n"); printm(map.tiles[1], map.maxx, map.maxy);
+    printf("COLLISIONS:\n"); printm(map.collisions, map.maxx, map.maxy);
+    printf("COST:\n"); printm(map.cost, map.maxx, map.maxy);
+    printf("WEATHER:\n"); printm(map.weather, map.maxx, map.maxy);
 }
