@@ -156,17 +156,12 @@ int main(int argc, char *argv[])
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
     };
 
-    collision = malloc(sizeof(unsigned int*) * max_coord.y);
-    cost = malloc(sizeof(unsigned int*) * max_coord.y);
-    if (collision == NULL || cost == NULL)
-        exit(EXIT_FAILURE);
+    MALLOC(collision, sizeof(unsigned int*) * max_coord.y, MAP_MALLOC_FAILURE, NULL);
+    MALLOC(cost, sizeof(unsigned int*) * max_coord.y, MAP_MALLOC_FAILURE, NULL);
     for(j=0;j<max_coord.y;j++)
     {
-        collision[j] = malloc(sizeof(unsigned int) * max_coord.x);
-        cost[j] = malloc(sizeof(unsigned int) * max_coord.x);
-        if (collision[j] == NULL || cost[j] == NULL)
-            exit(EXIT_FAILURE);
-
+        MALLOC(collision[j], sizeof(unsigned int) * max_coord.x, MAP_MALLOC_FAILURE, NULL);
+        MALLOC(cost[j], sizeof(unsigned int) * max_coord.x, MAP_MALLOC_FAILURE, NULL);
         for (i=0;i<max_coord.x;i++)
         {
             collision[j][i] = coll1[j][i];
