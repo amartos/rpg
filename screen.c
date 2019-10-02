@@ -22,16 +22,8 @@ void init_screen(SDL_Window **window, SDL_Renderer **renderer)
            )
             THROW(WINDOW_INIT_FAILURE);
     }
-    CATCH(SDL_INIT_VIDEO)
-    {
-        logger(VIDEO_INIT_FAILURE, SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
-    CATCH(WINDOW_INIT_FAILURE)
-    {
-        logger(WINDOW_INIT_FAILURE, SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
+    CATCH_HANDLE(SDL_INIT_VIDEO, SDL_GetError())
+    CATCH_HANDLE(WINDOW_INIT_FAILURE, SDL_GetError())
     ETRY;
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear"); // softer resizes 

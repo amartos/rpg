@@ -7,14 +7,9 @@
     sqlite3* db; sqlite3_stmt *stmt; \
     int rc; \
     TRY \
-    { \
         if (sqlite3_open(DB_PATH, &db)) \
             THROW(DATABASE_READ_FAILURE);\
-    } \
-    CATCH(DATABASE_READ_FAILURE) \
-    { \
-        printf("database read failure\n"); \
-    } \
+    CATCH_HANDLE(DATABASE_READ_FAILURE, NULL) \
     ETRY;
 
 #define QUERY_DB(query) \
@@ -30,14 +25,8 @@
         if (rc != SQLITE_DONE) \
             THROW(QUERY_END_FAILURE); \
     } \
-    CATCH(QUERY_READ_FAILURE) \
-    { \
-        printf("query read failure\n"); \
-    } \
-    CATCH(QUERY_END_FAILURE) \
-    { \
-        printf("query end failure\n"); \
-    } \
+    CATCH_HANDLE(QUERY_READ_FAILURE, NULL) \
+    CATCH_HANDLE(QUERY_END_FAILURE, NULL) \
     ETRY;
 
 #define CLOSE_DB \
