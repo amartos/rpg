@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
                         if (
                                 !is_same_coord(click, start_units) &&
                                 !is_out_of_map(click, max_coord) &&
-                                !is_colliding(click, collision)
+                                !is_colliding(click, collision, max_coord)
                            )
                             nodes = find_path(
                                     path,
