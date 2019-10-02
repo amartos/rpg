@@ -48,7 +48,27 @@ static char* errstr(Errors const err_id)
     return err_msg;
 }
 
-void logger(Errors const err_id, char const *message)
+static void err_action(Errors const err_id)
+{
+    switch (err_id)
+    {
+        case VIDEO_INIT_FAILURE:
+        case WINDOW_INIT_FAILURE:
+        case MAP_MALLOC_FAILURE:
+        case PATHFIND_MALLOC_FAILURE:
+        case DATABASE_READ_FAILURE:
+        case QUERY_READ_FAILURE:
+        case QUERY_END_FAILURE:
+        case ERR_MSG_MALLOC_FAILURE:
+        case TEXTURE_MALLOC_FAILURE:
+            exit(EXIT_FAILURE);
+            break;
+        default:
+            break;
+    }
+}
+
+static void logger(Errors const err_id, char const *message)
 {
     time_t now; time(&now);
     char *err_msg = errstr(err_id);
@@ -57,4 +77,10 @@ void logger(Errors const err_id, char const *message)
     else
         printe(now, err_id, err_msg, message);
     free(err_msg);
+}
+
+void handle_error(Errors const err_id, char const *message)
+{
+    logger(err_id, message);
+    err_action(err_id);
 }
