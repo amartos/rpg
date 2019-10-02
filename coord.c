@@ -67,13 +67,15 @@ Bool is_within_tile(Coord const a, Coord const b)
     return within;
 }
 
-Bool is_colliding(Coord const goal, unsigned int** const collision_map)
+Bool is_colliding(Coord const goal, unsigned int** const collision_map, Coord const max_coord)
 {
     unsigned int x = goal.x, y = goal.y;
-    return collision_map[y][x];
+    if(!is_out_of_map(goal, max_coord))
+        return collision_map[y][x];
+    return TRUE;
 }
 
-Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map)
+Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Coord const max_coord)
 {
     Coord edge1; init_coord(&edge1);
     Coord edge2; init_coord(&edge2);
@@ -123,8 +125,8 @@ Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** c
             return FALSE;
     }
 
-    collide_edge1 = is_colliding(edge1, collision_map);
-    collide_edge2 = is_colliding(edge2, collision_map);
+    collide_edge1 = is_colliding(edge1, collision_map, max_coord);
+    collide_edge2 = is_colliding(edge2, collision_map, max_coord);
     if (collide_edge1 || collide_edge2)
         return TRUE;
     else
@@ -150,7 +152,7 @@ Bool is_pos_legal(
     if (
             !is_same_coord(position, char_pos) &&
             !is_out_of_map(position, max_coord) &&
-            !is_colliding(position, collisions)
+            !is_colliding(position, collisions, max_coord)
         )
         return TRUE;
     else

@@ -223,7 +223,7 @@ unsigned int find_path(
             {
                 if (
                     is_pos_legal(all_next[i], start, max_coord, collision_map) &&
-                    !are_corners_colliding(current, all_next[i], collision_map)
+                    !are_corners_colliding(current, all_next[i], collision_map, max_coord)
                     )
                 {
                     nnext = convert_coord_to_number(all_next[i], max_coord);

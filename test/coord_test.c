@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
 #define POS_TEST(x,y,m) \
     printf("(%f, %f) ", x, y); printf(m); \
-    printf("coll: %d, ", is_colliding(coordb, collisions));\
+    printf("coll: %d, ", is_colliding(coordb, collisions, max));\
     printf("out: %d, ", is_out_of_map(coordb, max));\
     printf("same: %d, ", is_same_coord(coord, coordb));\
     printf("is legal: %d\n", is_pos_legal(coordb, coord, max, collisions));
@@ -143,10 +143,10 @@ int main(int argc, char *argv[])
 
     coord.x = 1.0; coord.y = 3.0;
     coordb.x = 2.0; coordb.y = 2.0;
-    printf("are corners colliding: (%f, %f) (%f, %f) %d\n", coord.x, coord.y, coordb.x, coordb.y, are_corners_colliding(coord, coordb, collisions));
+    printf("are corners colliding: (%f, %f) (%f, %f) %d\n", coord.x, coord.y, coordb.x, coordb.y, are_corners_colliding(coord, coordb, collisions, max));
 
     coordb.x = 2.0; coordb.y = 3.0;
-    printf("are corners colliding: (%f, %f) (%f, %f) %d\n", coord.x, coord.y, coordb.x, coordb.y, are_corners_colliding(coord, coordb, collisions));
+    printf("are corners colliding: (%f, %f) (%f, %f) %d\n", coord.x, coord.y, coordb.x, coordb.y, are_corners_colliding(coord, coordb, collisions, max));
 
     printf("\n");
 
