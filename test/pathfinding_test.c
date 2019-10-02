@@ -194,8 +194,7 @@ int main(int argc, char *argv[])
                         click.x = event.button.x / TEST_TILES_WIDTH;
                         click.y = event.button.y / TEST_TILES_HEIGHT;
                         if (
-                                !is_same_coord(click, start_units) &&
-                                !is_out_of_map(click, max_coord) &&
+                                is_pos_legal(click, start_units, max_coord, collision) &&
                                 !is_colliding(click, collision, max_coord)
                            )
                             nodes = find_path(
