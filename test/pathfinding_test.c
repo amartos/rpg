@@ -36,16 +36,8 @@ int main(int argc, char *argv[])
            )
             THROW(WINDOW_INIT_FAILURE);
     }
-    CATCH(SDL_INIT_VIDEO)
-    {
-        logger(VIDEO_INIT_FAILURE, SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
-    CATCH(WINDOW_INIT_FAILURE)
-    {
-        logger(WINDOW_INIT_FAILURE, SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
+    CATCH_HANDLE(SDL_INIT_VIDEO, NULL)
+    CATCH_HANDLE(WINDOW_INIT_FAILURE, NULL)
     ETRY;
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear"); // softer resizes 
