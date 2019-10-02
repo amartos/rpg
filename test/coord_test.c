@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         for (i=0;i<5;i++)
             printf("%d", map[j][i]);
-	printf("\n");
+        printf("\n");
     }
     printf("\n");
 
