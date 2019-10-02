@@ -26,7 +26,7 @@ static void printm(unsigned int** const map, unsigned int const maxx, unsigned i
 
 int main(int argc, char *argv[])
 {
-    Map map; init_map(&map, "test/test_map.map");
+    Map map; init_map(&map);
     printf("max: x %d, y %d\n", map.maxx, map.maxy);
     printf("BACKGROUND:\n"); printm(map.schematics[BACKGROUND], map.maxx, map.maxy);
     printf("FOREGROUND:\n"); printm(map.schematics[FOREGROUND], map.maxx, map.maxy);
