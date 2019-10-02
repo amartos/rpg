@@ -21,7 +21,7 @@ static void printm(unsigned int** const map, unsigned int const maxx, unsigned i
                 printf("%04X ", map[j][i]);
 	    else
                 printf("     ");
-	printf("\n");
+        printf("\n");
     }
     MAP_LIMIT
     printf("\n");
