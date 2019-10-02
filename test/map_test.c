@@ -7,10 +7,13 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 
+#define MAP_LIMIT for (i=0;i<maxx;i++) {printf("-");} printf("\n");
 
 static void printm(unsigned int** const map, unsigned int const maxx, unsigned int const maxy)
 {
     unsigned int i, j;
+
+    MAP_LIMIT
     for (j=0;j<maxy;j++)
     {
         for (i=0;i<maxx;i++)
@@ -20,6 +23,7 @@ static void printm(unsigned int** const map, unsigned int const maxx, unsigned i
                 printf("     ");
 	printf("\n");
     }
+    MAP_LIMIT
     printf("\n");
 }
 
