@@ -313,5 +313,7 @@ int main(int argc, char *argv[])
         free(collision[j]);
         free(cost[j]);
     }
+    free(collision);
+    free(cost);
     return 0;
 }
