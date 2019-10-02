@@ -30,6 +30,13 @@ int main(int argc, char *argv[])
     coord = isometric_to_cartesian(coord);
     printf("re-cartesian: (%f, %f)\n", coord.x, coord.y);
 
+    printf("\n");
+
+    coord = event_to_coord(745, 348);
+    printf("event to coord: (%d, %d) => (%f, %f)\n", 745, 348, coord.x, coord.y);
+
+    printf("\n");
+
     SDL_Rect rect = coord_to_isosdlrect(coord);
     printf("sdl_rect: x %d, y %d, w %d, h %d\n ", rect.x, rect.y, rect.w, rect.h);
 
@@ -44,6 +51,15 @@ int main(int argc, char *argv[])
 
     reset_coord(&coord);
     printf("reset: (%f, %f)\n", coord.x, coord.y);
+
+    printf("\n");
+
+    coord.x = 5.0; coord.y = 4.0;
+    coordb.x = 5.125; coordb.y = 4.975;
+    printf("within tile: (%f, %f) (%f, %f) = %d\n", coord.x, coord.y, coordb.x, coordb.y, is_within_tile(coord, coordb));
+
+    coordb.x = 5.0; coordb.y = 5.0;
+    printf("within tile: (%f, %f) (%f, %f) = %d\n", coord.x, coord.y, coordb.x, coordb.y, is_within_tile(coord, coordb));
 
     printf("\n");
 
@@ -110,17 +126,18 @@ int main(int argc, char *argv[])
         for (j=0;j<5;j++)
             collisions[i][j] = map[i][j];
 
-    coord.x = 0.0; coord.y = 0.0;
-    printf("is colliding: (%f, %f) %d\n", coord.x, coord.y, is_colliding(coord, collisions));
+#define POS_TEST(x,y,m) \
+    printf("(%f, %f) ", x, y); printf(m); \
+    printf("coll: %d, ", is_colliding(coordb, collisions));\
+    printf("out: %d, ", is_out_of_map(coordb, max));\
+    printf("same: %d, ", is_same_coord(coord, coordb));\
+    printf("is legal: %d\n", is_pos_legal(coordb, coord, max, collisions));
 
-    coord.x = 2.0; coord.y = 2.0;
-    printf("is colliding: (%f, %f) %d\n", coord.x, coord.y, is_colliding(coord, collisions));
-
-    coord.x = 0.3; coord.y = 0.7;
-    printf("is colliding: (%f, %f) %d\n", coord.x, coord.y, is_colliding(coord, collisions));
-
-    coord.x = 1.5; coord.y = 1.25;
-    printf("is colliding: (%f, %f) %d\n", coord.x, coord.y, is_colliding(coord, collisions));
+    coord.x = 3.0; coord.y = 1.0; printf("char_pos: (%f, %f) ; pos:\n", coord.x, coord.y);
+    coordb.x = 1.0; coordb.y = 1.0; POS_TEST(coordb.x, coord.y, "legal  : ")
+    coordb.x = 0.0; coordb.y = 0.0; POS_TEST(coordb.x, coord.y, "collide: ")
+    coordb.x = 6.0; coordb.y = 6.0; POS_TEST(coordb.x, coord.y, "out    : ")
+    coordb.x = 3.0; coordb.y = 1.0; POS_TEST(coordb.x, coord.y, "same   : ")
 
     printf("\n");
 
@@ -132,9 +149,6 @@ int main(int argc, char *argv[])
     printf("are corners colliding: (%f, %f) (%f, %f) %d\n", coord.x, coord.y, coordb.x, coordb.y, are_corners_colliding(coord, coordb, collisions));
 
     printf("\n");
-
-    coord.x = 2.0; coord.y = 2.0;
-    printf("is out of map: (%f, %f) %d\n", coord.x, coord.y, is_out_of_map(coord, max));
 
     coord.x = 0.0; coord.y = 0.0;
     printf("is out of map: (%f, %f) %d\n", coord.x, coord.y, is_out_of_map(coord, max));
