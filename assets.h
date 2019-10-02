@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
+#include "errors.h"
+#include "try_throw_catch.h"
+#include "macros.h"
+
 #include "database.h"
 
 #include "images.h"

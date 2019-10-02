@@ -17,7 +17,8 @@ static void printe(
 
 static char* errstr(Errors const err_id)
 {
-    char *err_msg = malloc(sizeof(char) * 50);
+    char *err_msg = NULL;
+    MALLOC(err_msg, sizeof(char) * 50, ERR_MSG_MALLOC_FAILURE, NULL);
 
     if (err_id == VIDEO_INIT_FAILURE)
         strcpy(err_msg, "Video init failure");
@@ -35,6 +36,14 @@ static char* errstr(Errors const err_id)
         strcpy(err_msg, "Query end failure");
     else if (err_id == IMAGE_MALLOC_FAILURE)
         strcpy(err_msg, "Image memory allocation failure");
+    else if (err_id == ANIMATION_MALLOC_FAILURE)
+        strcpy(err_msg, "Animation memory allocation failure");
+    else if (err_id == MOVEMENT_MALLOC_FAILURE)
+        strcpy(err_msg, "Movement memory allocation failure");
+    else if (err_id == ERR_MSG_MALLOC_FAILURE)
+        strcpy(err_msg, "err_msg memory allocation failure");
+    else if (err_id == TEXTURE_MALLOC_FAILURE)
+        strcpy(err_msg, "Texture memory allocation failure");
 
     return err_msg;
 }

@@ -9,7 +9,7 @@ static void init_image(Image *image)
     image->collision = FALSE;
     for (i=0;i<50;i++)
         image->path[i] = '\0';
-    image->texture = malloc(sizeof(SDL_Texture*));
+    MALLOC(image->texture, sizeof(SDL_Texture*), TEXTURE_MALLOC_FAILURE, NULL);
 }
 
 void load_texture_image(SDL_Renderer *renderer, Image *image, char const path[])

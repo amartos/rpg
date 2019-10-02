@@ -15,6 +15,9 @@
 #define MAX_SIZE_LINE 1000
 #define DOUBLE_PRECISION 2
 
+#define MALLOC(p, s, e, m) \
+    TRY{p = malloc(s); if (p == NULL) {THROW(e);}} \
+    CATCH_HANDLE(e, m) ETRY;
 
 typedef enum Bool Bool;
 enum Bool

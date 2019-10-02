@@ -19,43 +19,23 @@ void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
 {
     unsigned int id, frames;
     double velocity;
-    char path[50] = {0};
+    char path[50] = {0}, id_str[10] = {0};
     INIT_DB
 
     QUERY_DB("SELECT * FROM images;")
     {
         id = GET_QUERY_INT(0);
+        sprintf(id_str, "id: %04X", id);
 
         strcpy(path,(const char*)GET_QUERY_TXT(2));
-        // TODO: better handle errors
-        TRY
-        {
-            assets[id].image = malloc(sizeof(Image));
-            if (assets[id].image == NULL)
-                THROW(IMAGE_MALLOC_FAILURE);
-        }
-        CATCH(IMAGE_MALLOC_FAILURE)
-        {
-            printf("oups\n");
-        }
-        ETRY;
+        MALLOC(assets[id].image, sizeof(Image), IMAGE_MALLOC_FAILURE, id_str);
         load_texture_image(renderer, assets[id].image, path);
 
         frames = GET_QUERY_INT(3);
         if (frames > 1)
         {
-            TRY
-            {
-                assets[id].animation = malloc(sizeof(Animation));
-                if (assets[id].animation == NULL)
-                    THROW(IMAGE_MALLOC_FAILURE);
-                init_animation(assets[id].animation, frames);
-            }
-            CATCH(IMAGE_MALLOC_FAILURE)
-            {
-                printf("oups\n");
-            }
-            ETRY;
+            MALLOC(assets[id].animation, sizeof(Animation), ANIMATION_MALLOC_FAILURE, id_str);
+            init_animation(assets[id].animation, frames);
         }
 
         velocity = GET_QUERY_INT(4);
@@ -63,17 +43,7 @@ void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
         {
             // This cannot be done before, as velocity can be == 0 in db
             velocity = 1/velocity;
-            TRY
-            {
-                assets[id].movement = malloc(sizeof(Movement));
-                if (assets[id].movement == NULL)
-                    THROW(IMAGE_MALLOC_FAILURE);
-            }
-            CATCH(IMAGE_MALLOC_FAILURE)
-            {
-                printf("oups\n");
-            }
-            ETRY;
+            MALLOC(assets[id].movement, sizeof(Movement), MOVEMENT_MALLOC_FAILURE, id_str);
             init_movement(assets[id].movement);
             assets[id].movement->velocity = velocity;
         }
