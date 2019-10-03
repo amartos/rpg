@@ -25,8 +25,8 @@
         if (rc != SQLITE_DONE) \
             THROW(QUERY_END_FAILURE); \
     } \
-    CATCH_HANDLE(QUERY_READ_FAILURE, NULL) \
-    CATCH_HANDLE(QUERY_END_FAILURE, NULL) \
+    CATCH_HANDLE(QUERY_READ_FAILURE, sqlite3_errmsg(db)) \
+    CATCH_HANDLE(QUERY_END_FAILURE, sqlite3_errmsg(db)) \
     ETRY;
 
 #define CLOSE_DB \
