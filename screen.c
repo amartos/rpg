@@ -71,7 +71,6 @@ void apply_tiles(
                     if (id)
                     {
                         image_rect.y -= level * TILES_HEIGHT; // level 1 offset
-                        image_rect.w = TILES_WIDTH; image_rect.h = TILES_HEIGHT;
                         SDL_RenderCopy(renderer, assets[id].image->texture, NULL, &image_rect);
                     }
                     if (level == 1)
