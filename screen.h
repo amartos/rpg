@@ -16,6 +16,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#define CALC_MIN_MAX_SCROLL \
+    int minx = scroll.x - 1; \
+    int maxx = scroll.x + SCREEN_WIDTH/TILES_WIDTH; \
+    int miny = scroll.y - 1; \
+    int maxy = scroll.y + SCREEN_HEIGHT/TILES_HEIGHT;
+
 
 // prototypes
 void init_screen(SDL_Window **window, SDL_Renderer **renderer);
@@ -27,7 +33,8 @@ void apply_tiles(
         Asset assets[0xFFFF],
         Map const map,
         Coord scroll,
-        Bool grid
+        Bool grid,
+        unsigned int const level
         );
 
 void render_screen(

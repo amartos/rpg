@@ -35,46 +35,63 @@ void apply_tiles(
         Asset assets[0xFFFF],
         Map const map,
         Coord scroll,
-        Bool grid
+        Bool grid,
+        unsigned int const level
         )
 {
-    unsigned int id = 0, i, min = 0x100, max = 0x100 + MAX_CHARACTERS;
+    unsigned int id = 0;
     SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord positions; init_coord(&positions);
+    CALC_MIN_MAX_SCROLL
+
+    int x, y;
+    for (y=miny;y<=maxy;y++)
+        for (x=minx;x<=maxx;x++)
+            if (
+                    x >= 0 && y >= 0 &&
+                    x < (int)map.maxx &&
+                    y < (int)map.maxy
+               )
+            {
+                positions.x = x; positions.y = y;
+                image_rect = coord_to_isosdlrect(positions, scroll);
+
+                if (!level && grid)
+                    SDL_RenderCopy(renderer, assets[0x0013].image->texture, NULL, &image_rect);
+
+                id = map.tiles[level][y][x];
+                if (id)
+                {
+                    image_rect.y -= level * TILES_HEIGHT; // level 1 offset
+                    SDL_RenderCopy(renderer, assets[id].image->texture, NULL, &image_rect);
+                }
+            }
+}
+
+static void apply_characters(
+        SDL_Renderer *renderer,
+        Asset assets[0xFFFF],
+        Map map,
+        Coord scroll
+        )
+{
+    unsigned int i, min = 0x100, max = 0x100 + MAX_CHARACTERS, current_frame;
+    SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord tile_position; init_coord(&tile_position);
     Coord char_position; init_coord(&char_position);
     State state = MOVE;
     Cardinals direction = N;
-    unsigned int current_frame = 0, level = 0;
     int x, y;
-    int minx = scroll.x - 1; // show even the tile that is partly out of screen
-    int maxx = scroll.x + SCREEN_WIDTH/TILES_WIDTH;
-    int miny = scroll.y - 1; // show even the tile that is partly out of screen
-    int maxy = scroll.y + SCREEN_HEIGHT/TILES_HEIGHT;
+    CALC_MIN_MAX_SCROLL
 
-    for (level=0;level<MAX_LEVELS;level++)
-        for (y=miny;y<=maxy;y++)
-            for (x=minx;x<=maxx;x++)
+    for (y=miny;y<=maxy;y++)
+        for (x=minx;x<=maxx;x++)
                 if (
                         x >= 0 && y >= 0 &&
                         x < (int)map.maxx &&
                         y < (int)map.maxy
                    )
                 {
-                    positions.x = x; positions.y = y;
-                    image_rect = coord_to_isosdlrect(positions, scroll);
-
-                    if (!level && grid)
-                        SDL_RenderCopy(renderer, assets[0x0013].image->texture, NULL, &image_rect);
-
-                    id = map.tiles[level][y][x];
-                    if (id)
-                    {
-                        image_rect.y -= level * TILES_HEIGHT; // level 1 offset
-                        SDL_RenderCopy(renderer, assets[id].image->texture, NULL, &image_rect);
-                    }
-                    if (level == 1)
-                    {
                         for (i=min;i<max;i++)
                         {
                             if (assets[i].movement != NULL)
@@ -96,9 +113,7 @@ void apply_tiles(
                                             );
                                 }
                             }
-
                         }
-                    }
                 }
 }
 
@@ -113,14 +128,17 @@ void render_screen(
         Bool paused
         )
 {
-    unsigned int i;
+    unsigned int i, level = 0;
     Coord position; init_coord(&position);
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(renderer, assets, map, scroll, FALSE);
+    apply_tiles(renderer, assets, map, scroll, FALSE, level); // level 0
+    apply_characters(renderer, assets, map, scroll);
+    for (level=1;level<MAX_LEVELS;level++)
+        apply_tiles(renderer, assets, map, scroll, FALSE, level); // level 0
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
