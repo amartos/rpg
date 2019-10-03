@@ -28,18 +28,21 @@ Coord cartesian_to_isometric(Coord const cartesian)
     return isometric;
 }
 
-Coord event_to_coord(Sint32 x, Sint32 y)
+Coord event_to_coord(Sint32 x, Sint32 y, Coord const scroll)
 {
     Coord map; init_coord(&map);
-    map.x = x - TILES_WIDTH/2;
-    map.y = y - TILES_HEIGHT/2;
+    map.x = x; map.y = y;
     map = isometric_to_cartesian(map);
+    map.x += scroll.x; map.y += scroll.y; // scroll correction
     return map;
 }
 
-SDL_Rect coord_to_isosdlrect(Coord const coord)
+SDL_Rect coord_to_isosdlrect(Coord const coord, Coord const scroll)
 {
-    Coord isometrified = cartesian_to_isometric(coord);
+
+    Coord isometrified = coord;
+    isometrified.x -= scroll.x; isometrified.y -= scroll.y; // scroll correction
+    isometrified = cartesian_to_isometric(isometrified);
     SDL_Rect rect;
     rect.x = isometrified.x; rect.y = isometrified.y;
     rect.w = TILES_WIDTH; rect.h = TILES_HEIGHT;

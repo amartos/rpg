@@ -60,8 +60,8 @@ void apply_tiles(
                         y < (int)map.maxy
                    )
                 {
-                    positions.x = x - minx; positions.y = y - miny;
-                    image_rect = coord_to_isosdlrect(positions);
+                    positions.x = x; positions.y = y;
+                    image_rect = coord_to_isosdlrect(positions, scroll);
                     id = map.tiles[level][y][x];
                     if (id)
                     {
@@ -79,8 +79,7 @@ void apply_tiles(
                                 tile_position.x = x; tile_position.y = y;
                                 if (is_within_tile(char_position, tile_position))
                                 {
-                                    char_position.x -= minx; char_position.y -= miny;
-                                    image_rect = coord_to_isosdlrect(char_position);
+                                    image_rect = coord_to_isosdlrect(char_position, scroll);
                                     image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
                                     image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
                                     direction = assets[i].movement->direction;
@@ -129,8 +128,7 @@ void render_screen(
         if (assets[i].movement != NULL && assets[i].movement->moving)
         {
             position = assets[i].movement->path[0];
-            position.x -= scroll.x; position.y -= scroll.y;
-            mouse_hover_rect = coord_to_isosdlrect(position);
+            mouse_hover_rect = coord_to_isosdlrect(position, scroll);
             SDL_RenderCopy(renderer, assets[VALID].image->texture, NULL, &mouse_hover_rect);
         }
     }

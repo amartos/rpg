@@ -32,13 +32,26 @@ int main(int argc, char *argv[])
 
     printf("\n");
 
-    coord = event_to_coord(745, 348);
-    printf("event to coord: (%d, %d) => (%f, %f)\n", 745, 348, coord.x, coord.y);
+    Coord scroll; init_coord(&scroll);
+    coord = event_to_coord(745, 348, scroll);
+    SDL_Rect rect = coord_to_isosdlrect(coord, scroll);
+    printf("scroll: (%f, %f) ", scroll.x, scroll.y);
+    printf("event: (%d, %d) coord: (%f, %f) ", 745, 348, coord.x, coord.y);
+    printf("sdl_rect: (%d, %d ; %dx%d)\n", rect.x, rect.y, rect.w, rect.h);
 
-    printf("\n");
+    scroll.x = 10; scroll.y = 2;
+    coord = event_to_coord(745, 348, scroll);
+    rect = coord_to_isosdlrect(coord, scroll);
+    printf("scroll: (%f, %f) ", scroll.x, scroll.y);
+    printf("event: (%d, %d) coord: (%f, %f) ", 745, 348, coord.x, coord.y);
+    printf("sdl_rect: (%d, %d ; %dx%d)\n", rect.x, rect.y, rect.w, rect.h);
 
-    SDL_Rect rect = coord_to_isosdlrect(coord);
-    printf("sdl_rect: x %d, y %d, w %d, h %d\n ", rect.x, rect.y, rect.w, rect.h);
+    scroll.x = -10; scroll.y = -2;
+    coord = event_to_coord(745, 348, scroll);
+    rect = coord_to_isosdlrect(coord, scroll);
+    printf("scroll: (%f, %f) ", scroll.x, scroll.y);
+    printf("event: (%d, %d) coord: (%f, %f) ", 745, 348, coord.x, coord.y);
+    printf("sdl_rect: (%d, %d ; %dx%d)\n", rect.x, rect.y, rect.w, rect.h);
 
     printf("\n");
 

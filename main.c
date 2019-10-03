@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
                     done = TRUE;
                     break;
                 case SDL_MOUSEMOTION:
-                    mouse_type = handle_mouse_motion(event, &mouse_hover_rect, max_coord);
+                    mouse_type = handle_mouse_motion(event, scroll, &mouse_hover_rect, max_coord);
                     break;
                 case SDL_MOUSEBUTTONUP:
                 case SDL_MOUSEBUTTONDOWN:

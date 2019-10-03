@@ -50,12 +50,15 @@ void handle_keyboard(
 
 Cursors handle_mouse_motion(
         SDL_Event const event,
+        Coord const scroll,
         SDL_Rect *mouse_hover_rect,
         Coord const max_coord
         )
 {
-    Coord position = event_to_coord(event.motion.x, event.motion.y);
-    *mouse_hover_rect = coord_to_isosdlrect(position);
+    mouse_hover_rect->x = event.motion.x;
+    mouse_hover_rect->y = event.motion.y;
+
+    Coord position = event_to_coord(event.motion.x, event.motion.y, scroll);
     if (!is_out_of_map(position, max_coord))
         return HOVER;
     else
@@ -75,8 +78,7 @@ void handle_mouse_click(
     Coord max_coord; init_coord(&max_coord);
     max_coord.x = map.maxx; max_coord.y = map.maxy;
 
-    Coord position = event_to_coord(event.button.x, event.button.y);
-    position.x += scroll.x; position.y += scroll.y;
+    Coord position = event_to_coord(event.button.x, event.button.y, scroll);
 
     Coord coord; init_coord(&coord);
 

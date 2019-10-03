@@ -22,6 +22,7 @@ void handle_keyboard(
 
 Cursors handle_mouse_motion(
         SDL_Event const event,
+        Coord const scroll,
         SDL_Rect *mouse_hover_rect,
         Coord const max_coord
         );
