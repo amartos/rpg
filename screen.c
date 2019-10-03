@@ -84,37 +84,33 @@ static void apply_characters(
     int x, y;
     CALC_MIN_MAX_SCROLL
 
-    for (y=miny;y<=maxy;y++)
-        for (x=minx;x<=maxx;x++)
-                if (
-                        x >= 0 && y >= 0 &&
-                        x < (int)map.maxx &&
-                        y < (int)map.maxy
-                   )
-                {
-                        for (i=min;i<max;i++)
-                        {
-                            if (assets[i].movement != NULL)
+    for (i=min;i<max;i++)
+        if (assets[i].movement != NULL)
+            for (y=miny;y<=maxy;y++)
+                for (x=minx;x<=maxx;x++)
+                    if (
+                            x >= 0 && y >= 0 &&
+                            x < (int)map.maxx &&
+                            y < (int)map.maxy
+                       )
+                    {
+                            char_position = assets[i].movement->position;
+                            tile_position.x = x; tile_position.y = y;
+                            if (is_within_tile(char_position, tile_position))
                             {
-                                char_position = assets[i].movement->position;
-                                tile_position.x = x; tile_position.y = y;
-                                if (is_within_tile(char_position, tile_position))
-                                {
-                                    image_rect = coord_to_isosdlrect(char_position, scroll);
-                                    image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
-                                    image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
-                                    direction = assets[i].movement->direction;
-                                    current_frame = assets[i].animation->current_frame;
-                                    SDL_RenderCopy(
-                                            renderer,
-                                            assets[i].image->texture,
-                                            &assets[i].animation->frames[direction][state][current_frame],
-                                            &image_rect
-                                            );
-                                }
+                                image_rect = coord_to_isosdlrect(char_position, scroll);
+                                image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
+                                image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
+                                direction = assets[i].movement->direction;
+                                current_frame = assets[i].animation->current_frame;
+                                SDL_RenderCopy(
+                                        renderer,
+                                        assets[i].image->texture,
+                                        &assets[i].animation->frames[direction][state][current_frame],
+                                        &image_rect
+                                        );
                             }
-                        }
-                }
+                    }
 }
 
 void render_screen(
@@ -145,6 +141,7 @@ void render_screen(
 
     SDL_RenderCopy(renderer, assets[mouse_type].image->texture, NULL, &mouse_hover_rect);
 
+    // show destination for characters
     for (i=0;i<0xFFFF;i++)
     {
         if (assets[i].movement != NULL && assets[i].movement->moving)
