@@ -12,6 +12,13 @@ void reset_coord(Coord *coord)
     init_coord(coord);
 }
 
+Coord int_to_coord(unsigned int const x, unsigned int const y)
+{
+    Coord coord; init_coord(&coord);
+    coord.x = x; coord.y = y;
+    return coord;
+}
+
 Coord isometric_to_cartesian(Coord const isometric)
 {
     Coord cartesian; init_coord(&cartesian);

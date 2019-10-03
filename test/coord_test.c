@@ -11,6 +11,12 @@ int main(int argc, char *argv[])
     Coord coord; init_coord(&coord);
     printf("init: (%f, %f)\n", coord.x, coord.y);
 
+
+    printf("\n");
+
+    coord = int_to_coord(12, 37);
+    printf("coord %d, %d: (%f, %f)\n", 12 , 37, coord.x, coord.y);
+
     printf("\n");
 
     coord.x = 1.0; coord.y = 1.0;

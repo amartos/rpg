@@ -75,8 +75,7 @@ void handle_mouse_click(
 {
     unsigned int i;
 
-    Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.maxx; max_coord.y = map.maxy;
+    Coord max_coord = int_to_coord(map.maxx, map.maxy);
 
     Coord position = event_to_coord(event.button.x, event.button.y, scroll);
 

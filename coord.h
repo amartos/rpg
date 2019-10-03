@@ -24,6 +24,7 @@ struct Coord
 // prototypes
 void init_coord(Coord *coord);
 void reset_coord(Coord *coord);
+Coord int_to_coord(unsigned int const x, unsigned int const y);
 Coord isometric_to_cartesian(Coord const isometric);
 Coord cartesian_to_isometric(Coord const cartesian);
 Coord event_to_coord(Sint32 x, Sint32 y, Coord const scroll);
