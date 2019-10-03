@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
-#define MAX_LEVELS 2 // ground + floors
+#define MAX_LEVELS 3 // ground + floors
 
 // structures
 // Maps structures
