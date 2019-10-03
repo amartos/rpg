@@ -34,16 +34,20 @@ void handle_keyboard(
             scroll->y = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
             break;
         case SDLK_UP:
+            scroll->x -= 1;
             scroll->y -= 1;
             break;
         case SDLK_DOWN:
+            scroll->x += 1;
             scroll->y += 1;
             break;
         case SDLK_LEFT:
             scroll->x -= 1;
+            scroll->y += 1;
             break;
         case SDLK_RIGHT:
             scroll->x += 1;
+            scroll->y -= 1;
             break;
     }
 }
