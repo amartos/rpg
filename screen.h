@@ -26,7 +26,8 @@ void apply_tiles(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
         Map const map,
-        Coord scroll
+        Coord scroll,
+        Bool grid
         );
 
 void render_screen(

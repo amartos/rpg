@@ -34,7 +34,8 @@ void apply_tiles(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
         Map const map,
-        Coord scroll
+        Coord scroll,
+        Bool grid
         )
 {
     unsigned int id = 0, i, min = 0x100, max = 0x100 + MAX_CHARACTERS;
@@ -62,6 +63,10 @@ void apply_tiles(
                 {
                     positions.x = x; positions.y = y;
                     image_rect = coord_to_isosdlrect(positions, scroll);
+
+                    if (!level && grid)
+                        SDL_RenderCopy(renderer, assets[0x0013].image->texture, NULL, &image_rect);
+
                     id = map.tiles[level][y][x];
                     if (id)
                     {
@@ -116,7 +121,7 @@ void render_screen(
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(renderer, assets, map, scroll);
+    apply_tiles(renderer, assets, map, scroll, FALSE);
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
