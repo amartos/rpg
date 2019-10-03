@@ -46,11 +46,9 @@ void init_map(Map *map)
     unsigned int x, y, i;
     INIT_DB
 
-    QUERY_DB("SELECT MAX(x) FROM test_map;")
-        map->maxx = GET_QUERY_INT(0) + 1;
-    END_QUERY
-    QUERY_DB("SELECT MAX(y) FROM test_map;")
-        map->maxy = GET_QUERY_INT(0) + 1;
+    QUERY_DB("SELECT * FROM maps where name='test_map';")
+        map->maxx = GET_QUERY_INT(2) + 1;
+        map->maxy = GET_QUERY_INT(3) + 1;
     END_QUERY
 
     map_malloc(map);
