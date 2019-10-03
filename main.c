@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
                 );
     }
 
+    SDL_ShowCursor(SDL_DISABLE);
+
     // main loop
     while (!done)
     {
