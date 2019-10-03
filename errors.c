@@ -32,6 +32,8 @@ static char* errstr(Errors const err_id)
         strcpy(err_msg, "Database read failure");
     else if (err_id == QUERY_READ_FAILURE)
         strcpy(err_msg, "Query read failure");
+    else if (err_id == QUERY_MODIFY_FAILURE)
+        strcpy(err_msg, "Query modification failure");
     else if (err_id == QUERY_END_FAILURE)
         strcpy(err_msg, "Query end failure");
     else if (err_id == IMAGE_MALLOC_FAILURE)
