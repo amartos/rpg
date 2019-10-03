@@ -1,39 +1,101 @@
 #include "map_creator.h"
 
 
+static void map_creator_render_screen(
+        SDL_Renderer *renderer,
+        Asset assets[0xFFFF],
+        unsigned int tile_id,
+        Coord center,
+        Map const map,
+        Camera camera
+        )
+{
+    Coord position; init_coord(&position);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
+    SDL_RenderDrawRect(renderer, NULL);
+
+    unsigned int level;
+    for (level=0;level<MAX_LEVELS;level++)
+        apply_tiles(renderer, assets, map, camera, TRUE, level);
+
+    SDL_Rect mouse_hover_rect; init_sdl_rect(&mouse_hover_rect);
+    mouse_hover_rect = coord_to_isosdlrect(center, camera);
+    if (tile_id)
+        SDL_RenderCopy(renderer, assets[tile_id].image->texture, NULL, &mouse_hover_rect);
+    else
+        SDL_RenderCopy(renderer, assets[HOVER].image->texture, NULL, &mouse_hover_rect);
+
+    SDL_RenderPresent(renderer);
+}
+
+static void write_to_db(char const map_name[MAX_SIZE_LINE], Map const map)
+{
+    unsigned int x, y, z;
+    char query[MAX_SIZE_LINE] = {0};
+    char level_value[MAX_SIZE_LINE] = {0};
+    INIT_DB
+
+    sprintf(query, "create table %s( \
+        x int not null, y int not null, \
+        collision int not null, cost int not null, \
+        weather int not null", map_name);
+    ZLOOP(0, ", z%d hex not null", z)
+    strcat(query, ", foreign key (z0");
+    ZLOOP(1, ", z%d", z)
+    strcat(query, ") references images(id");
+    ZLOOP(1, ", id", NULL)
+    strcat(query, ") on update cascade on delete cascade, \
+                    primary key (x,y));");
+    MODIFY_DB(query)
+
+    sprintf(query,
+            "insert into maps values(%s, '%s', %d, %d);",
+            "null", map_name, map.maxx, map.maxy);
+    MODIFY_DB(query)
+
+    for (y=0;y<map.maxy;y++)
+        for (x=0;x<map.maxx;x++)
+        {
+            sprintf(query, "insert into %s values(%d, %d, %d, %d, %d",
+                    map_name, x, y, map.collisions[y][x], map.cost[y][x], map.weather[y][x]);
+            for (z=0;z<MAX_LEVELS;z++)
+            {
+                sprintf(level_value, ", %d", map.tiles[z][y][x]);
+                strcat(query, level_value);
+            }
+            strcat(query, ");");
+            MODIFY_DB(query)
+        }
+    CLOSE_DB
+}
+
 int main(int argc, char *argv[])
 {
-    unsigned int i = 0, j = 0, t = 0, tile_id = 0;
+    unsigned int tile_id = 0, x, y;
 
     // SDL vars init
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
-    SDL_Texture* tiles[0xFFFF];
-    for (i=0;i<0xFFFF;i++)
-        tiles[i] = NULL;
+    Camera camera; init_camera(&camera);
+    camera.scroll.x = (SCREEN_WIDTH/2) / TILES_WIDTH;
+    camera.scroll.y = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
 
-    SDL_Surface *floor_surface = IMG_Load("assets/tiles/tile.png");
-    SDL_Surface *wall_surface = IMG_Load("assets/tiles/wall.png");
-    SDL_Surface *wall1_surface = IMG_Load("assets/tiles/wall1.png");
+    Asset assets[0xFFFF]; init_asset_array(assets); load_assets_db(renderer, assets);
 
-    SDL_Rect sprites_infos;
-    sprites_infos.x = 0; sprites_infos.y = 0;
+    SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
     sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
-    SDL_Rect tiles_infos;
-    tiles_infos.x = 0; tiles_infos.y = 0;
-    tiles_infos.w = TILES_WIDTH*2; tiles_infos.h = TILES_HEIGHT*2;
+    SDL_Rect tiles_infos; init_sdl_rect(&tiles_infos);
 
     SDL_Event event;
 
     // custom structs init
     Bool done = FALSE;
 
-    SDL_Rect origin;
-    SDL_Rect vertical;
-    SDL_Rect horizontal;
-
     Coord max_coord; init_coord(&max_coord);
+
     Coord center; init_coord(&center);
     Coord isometrified; init_coord(&isometrified);
 
@@ -45,66 +107,10 @@ int main(int argc, char *argv[])
     max_coord.x = map.maxx;
     max_coord.y = map.maxy;
 
-    floor_surface = SDL_ConvertSurfaceFormat(floor_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    wall_surface = SDL_ConvertSurfaceFormat(wall_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-    wall1_surface = SDL_ConvertSurfaceFormat(wall1_surface, SDL_PIXELFORMAT_RGBA8888, 0);
-
-    SDL_Texture *floor = SDL_CreateTextureFromSurface(renderer, floor_surface);
-    SDL_Texture *wall = SDL_CreateTextureFromSurface(renderer, wall_surface);
-    SDL_Texture *wall1 = SDL_CreateTextureFromSurface(renderer, wall1_surface);
-
-    tiles[0x0100] = floor;
-    tiles[0x0101] = wall;
-    tiles[0x0102] = wall1;
-
-    SDL_Surface* mouse_hover_surfaces[INVALID+1];
-    for (i=0;i<=INVALID;i++)
-    {
-        mouse_hover_surfaces[i] = IMG_Load("assets/mouse/cursors.png");
-        if (mouse_hover_surfaces[i] == NULL)
-            exit(EXIT_FAILURE);
-    }
-
-    SDL_Color cursors_border[INVALID+1];
-    cursors_border[EMPTY].r = 0x3d; cursors_border[EMPTY].g = 0x3d; cursors_border[EMPTY].b = 0x3d; cursors_border[EMPTY].a = 255;
-    cursors_border[HOVER].r = 0; cursors_border[HOVER].g = 255; cursors_border[HOVER].b = 0; cursors_border[HOVER].a = 255;
-    cursors_border[VALID].r = 0; cursors_border[VALID].g = 0; cursors_border[VALID].b = 255; cursors_border[VALID].a = 255;
-    cursors_border[INVALID].r = 255; cursors_border[INVALID].g = 0; cursors_border[INVALID].b = 0; cursors_border[INVALID].a = 255;
-
-    SDL_Color cursors_inside[INVALID+1];
-    cursors_inside[EMPTY].r = 0xe4; cursors_inside[EMPTY].g = 0xe4; cursors_inside[EMPTY].b = 0xe4; cursors_inside[EMPTY].a = 255;
-    cursors_inside[HOVER].r = 0; cursors_inside[HOVER].g = 255; cursors_inside[HOVER].b = 0; cursors_inside[HOVER].a = 76;
-    cursors_inside[VALID].r = 0; cursors_inside[VALID].g = 0; cursors_inside[VALID].b = 255; cursors_inside[VALID].a = 76;
-    cursors_inside[INVALID].r = 255; cursors_inside[INVALID].g = 0; cursors_inside[INVALID].b = 0; cursors_inside[INVALID].a = 76;
-
-    SDL_Texture* mouse[INVALID+1];
-    mouse[EMPTY] = NULL;
-    for (i=1;i<=INVALID;i++)
-    {
-        set_color(mouse_hover_surfaces[i], cursors_border[EMPTY], cursors_border[i]);
-        set_color(mouse_hover_surfaces[i], cursors_inside[EMPTY], cursors_inside[i]);
-        mouse_hover_surfaces[i] = SDL_ConvertSurfaceFormat(mouse_hover_surfaces[i], SDL_PIXELFORMAT_RGBA8888, 0);
-        mouse[i] = SDL_CreateTextureFromSurface(renderer, mouse_hover_surfaces[i]);
-    }
-    SDL_Rect mouse_hover_rect;
-    mouse_hover_rect.x = 0; mouse_hover_rect.y = 0;
-    mouse_hover_rect.w = TILES_WIDTH*2; mouse_hover_rect.h = TILES_HEIGHT*2;
-
-    SDL_FreeSurface(floor_surface);
-    SDL_FreeSurface(wall_surface);
-    SDL_FreeSurface(wall1_surface);
-    for (i=0;i<=INVALID;i++)
-        SDL_FreeSurface(mouse_hover_surfaces[i]);
 
     // main loop
     while (!done)
     {
-        // Rendering
-        SDL_RenderClear(renderer); 
-
-        apply_tiles(&renderer, BACKGROUND, map, tiles);
-        apply_tiles(&renderer, FOREGROUND, map, tiles);
-
         SDL_WaitEvent(&event);
         switch(event.type)
         {
@@ -112,44 +118,36 @@ int main(int argc, char *argv[])
                 done = TRUE;
                 break;
             case SDL_MOUSEMOTION:
-                center.x = event.motion.x;
-                center.y = event.motion.y;
-                center = isometric_to_cartesian(center);
-                if (!is_out_of_map(center, max_coord))
-                {
-                    mouse_hover_rect = coord_to_isosdlrect(center);
-                    if (tile_id)
-                        SDL_RenderCopy(renderer, tiles[tile_id], NULL, &mouse_hover_rect);
-                    else
-                        SDL_RenderCopy(renderer, mouse[HOVER], NULL, &mouse_hover_rect);
-                }
+                center = event_to_coord(event.motion.x, event.motion.y, camera);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                center.x = event.button.x;
-                center.y = event.button.y;
-                center = isometric_to_cartesian(center);
+                center = event_to_coord(event.button.x, event.button.y, camera);
                 if (!is_out_of_map(center, max_coord))
                 {
-                    mouse_hover_rect = coord_to_isosdlrect(center);
+                    x = center.x; y = center.y;
                     switch(event.button.button)
                     {
                         case SDL_BUTTON_LEFT:
-                            SDL_RenderCopy(renderer, mouse[VALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = tile_id;
+                            map.tiles[0][y][x] = tile_id;
                             if (tile_id == ID_WALL0)
                             {
-                                map.schematics[FOREGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = ID_WALL1;
-                                map.schematics[COLLISIONS][mouse_hover_rect.y][mouse_hover_rect.x] = 1;
+                                map.tiles[1][y][x] = ID_WALL1;
+                                map.collisions[y][x] = 1;
                             }
                             break;
                         case SDL_BUTTON_RIGHT:
-                            SDL_RenderCopy(renderer, mouse[INVALID], NULL, &mouse_hover_rect);
-                            map.schematics[BACKGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
-                            map.schematics[FOREGROUND][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
-                            map.schematics[COLLISIONS][mouse_hover_rect.y][mouse_hover_rect.x] = 0;
+                            map.tiles[0][y][x] = 0;
+                            map.tiles[1][y][x] = 0;
+                            map.collisions[y][x] = 0;
                             break;
                     }
                 }
+                break;
+            case SDL_MOUSEWHEEL:
+                if (event.wheel.y > 0 && camera.scale < 1)
+                    camera.scale *= 2;
+                else if (event.wheel.y < 0 && camera.scale > 0.5)
+                    camera.scale *= 0.5;
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym)
@@ -165,103 +163,44 @@ int main(int argc, char *argv[])
                         break;
                     case SDLK_F5:
                         tile_id = 0;
-                        for (t=BACKGROUND;t<=WEATHER;t++)
-                            for (j=0;j<maxy;j++)
-                                for (i=0;i<maxx;i++)
-                                    map.schematics[t][j][i] = 0;
+                        for (y=0;y<maxy;y++)
+                            for (x=0;x<maxx;x++)
+                            {
+                                map.tiles[0][y][x] = 0;
+                                map.tiles[1][y][x] = 0;
+                                map.collisions[y][x] = 0;
+                                map.cost[y][x] = 0;
+                                map.weather[y][x] = 0;
+                            }
+                        break;
+                    case SDLK_UP:
+                        camera.scroll.x -= 1;
+                        camera.scroll.y -= 1;
+                        break;
+                    case SDLK_DOWN:
+                        camera.scroll.x += 1;
+                        camera.scroll.y += 1;
+                        break;
+                    case SDLK_LEFT:
+                        camera.scroll.x -= 1;
+                        camera.scroll.y += 1;
+                        break;
+                    case SDLK_RIGHT:
+                        camera.scroll.x += 1;
+                        camera.scroll.y -= 1;
                         break;
                 }
                 break;
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (j=0;j<=maxy;j++)
-            for (i=0;i<=maxx;i++)
-            {
-                center.x = i + 1; center.y = j;
-
-                origin = coord_to_isosdlrect(center);
-
-                center.y += 1;
-                vertical = coord_to_isosdlrect(center);
-                center.y -= 1;
-
-                center.x += 1;
-                horizontal = coord_to_isosdlrect(center);
-		center.x -= 1;
-
-                if (i < maxx)
-                    SDL_RenderDrawLine(renderer, origin.x, origin.y, horizontal.x, horizontal.y);
-                if (j<maxy)
-                    SDL_RenderDrawLine(renderer, origin.x, origin.y, vertical.x, vertical.y);
-
-            }
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
-
-        SDL_RenderPresent(renderer);
+        // Rendering
+        map_creator_render_screen(renderer, assets, tile_id, center, map, camera);
     }
 
-    FILE *map_file = NULL;// FILE *converter_file = NULL;
-    TRY
-    {
-        map_file = fopen(map_name, "a");
-        if (map_file == NULL)
-            THROW(MAP_FILE_LOADING_FAILURE);
-    }
-    CATCH(MAP_FILE_LOADING_FAILURE)
-    {
-        char error_msg[MAX_SIZE_LINE+50] = {0};
-        sprintf(error_msg, "could not open map file at %s", map_name);
-        logger(MAP_FILE_LOADING_FAILURE, error_msg);
-        exit(EXIT_FAILURE);
-    }
-    ETRY;
+    write_to_db(map_name, map);
 
-    char line[MAX_SIZE_LINE] = {0};
-    fprintf(map_file, "# infos\n\nx: %d\ny: %d\n", maxx, maxy);
-    for (t=0;t<=WEATHER;t++)
-    {
-        switch(t)
-        {
-            case BACKGROUND:
-                fprintf(map_file, "# %s\n\n", "background");
-                break;
-            case FOREGROUND:
-                fprintf(map_file, "# %s\n\n", "foreground");
-                break;
-            case COLLISIONS:
-                fprintf(map_file, "# %s\n\n", "collisions");
-                break;
-            case COST:
-                fprintf(map_file, "# %s\n\n", "movement cost");
-                break;
-            case WEATHER:
-                fprintf(map_file, "# %s\n\n", "weather");
-                break;
-        }
-        for (j=0;j<maxy;j++)
-        {
-            for (i=0;i<maxx;i++)
-            {
-                switch(t)
-                {
-                    case BACKGROUND:
-                    case WEATHER:
-                    case FOREGROUND:
-                        sprintf(line+(i*5), "%04X ", map.schematics[t][j][i]);
-                        break;
-                    case COST:
-                    case COLLISIONS:
-                        sprintf(line+(i*2), "%d ", map.schematics[t][j][i]);
-                        break;
-                }
-            }
-            fprintf(map_file, "%s\n", line);
-        }
-        fprintf(map_file, "\n");
-    }
-    fclose(map_file);
-
+    // free all freeables
+    free_assets_array(assets);
     free_map(&map);
     SDL_Quit();
 

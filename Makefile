@@ -26,7 +26,7 @@ nuke: clean
 # Tools
 #################
 TOOLS=tools
-MAP_CREATOR=$(TOOLS)/map_creator.c errors.c screen.c images.c coord.c map.c 
+MAP_CREATOR=$(TOOLS)/map_creator.c errors.c screen.c images.c coord.c map.c assets.c macros.c animation.c movement.c pathfinding.c
 MAP_CREATOR_EXEC=$(BIN)/map_creator
 
 map_creator: init clean
