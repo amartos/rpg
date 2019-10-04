@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
     max_coord.x = map.maxx;
     max_coord.y = map.maxy;
 
+    SDL_ShowCursor(SDL_DISABLE);
 
     // main loop
     while (!done)
