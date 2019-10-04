@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <unistd.h>
 
 #define ZLOOP(i, text, value) \
     for (z=i;z<MAX_LEVELS;z++) \

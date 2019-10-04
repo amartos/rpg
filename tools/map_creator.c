@@ -100,9 +100,31 @@ int main(int argc, char *argv[])
     Coord isometrified; init_coord(&isometrified);
 
     char map_name[MAX_SIZE_LINE] = {0};
-    unsigned int maxx = 20, maxy = 20;
-    printf("map name (no spaces, %d max characters): ", MAX_SIZE_LINE); scanf("%s", map_name);
-    printf("max tiles [x y]: "); scanf("%d %d", &maxx, &maxy);
+    unsigned int maxx = 0, maxy = 0;
+
+    int opt;
+    while((opt = getopt(argc, argv, "n:s:")) != -1)
+    {
+        switch(opt)
+        {
+            case 'n':
+                sprintf(map_name, "%s", optarg);
+                break;
+            case 's':
+                sscanf(optarg, "%dx%d)", &maxx, &maxy);
+                break;
+            default:
+                break;
+        }
+    }
+    if (maxx == 0 || maxy == 0 || map_name[0] == '\0')
+    {
+        printf("USAGE: COMMAND -n MAP_NAME -s WIDTHxHEIGHT\n \
+-> MAP_NAME is of %d max characters\n \
+-> WIDTH and HEIGHT are in number of tiles\n", MAX_SIZE_LINE);
+        exit(EXIT_FAILURE);
+    }
+
     Map map; init_empty_map(&map, maxx, maxy);
     max_coord.x = map.maxx;
     max_coord.y = map.maxy;
