@@ -264,5 +264,6 @@ int main(int argc, char *argv[])
 
     free_map(&map);
     SDL_Quit();
-    return 0;
+
+    return EXIT_SUCCESS;
 }
