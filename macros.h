@@ -68,10 +68,6 @@ enum ColorPalette
 // Maps
 // ------------------------------------
 
-#define TILES_WIDTH 64
-#define TILES_HEIGHT 32
-
-
 #define MAX_CHARACTERS 4
 
 // Prototypes

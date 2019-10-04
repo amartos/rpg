@@ -9,6 +9,10 @@ int main(int argc, char *argv[])
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
 
+    Camera camera; init_camera(&camera);
+    camera.scroll.x = (SCREEN_WIDTH/2) / TILES_WIDTH;
+    camera.scroll.y = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
+
     Asset assets[0xFFFF]; init_asset_array(assets); load_assets_db(renderer, assets);
     SDL_Texture *pause_layer = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
 
@@ -29,9 +33,6 @@ int main(int argc, char *argv[])
 
     Coord max_coord; init_coord(&max_coord);
     Coord position; init_coord(&position);
-    Coord scroll; init_coord(&scroll);
-    scroll.x = (SCREEN_WIDTH/2) / TILES_WIDTH;
-    scroll.y = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
 
     // load maps
     Map test_map; init_map(&test_map);
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
                 &all_characters[i].movement->position,
                 all_characters[i].movement->direction,
                 all_characters[i].movement->formation,
-                i
+                i, camera
                 );
     }
 
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
             render_screen(renderer,
                     assets, pause_layer,
                     mouse_type, mouse_hover_rect,
-                    scroll,
+                    camera,
                     test_map,
                     paused
                     );
@@ -95,14 +96,23 @@ int main(int argc, char *argv[])
                     done = TRUE;
                     break;
                 case SDL_MOUSEMOTION:
-                    mouse_type = handle_mouse_motion(event, scroll, &mouse_hover_rect, max_coord);
+                    mouse_type = handle_mouse_motion(event, camera, &mouse_hover_rect, max_coord);
                     break;
                 case SDL_MOUSEBUTTONUP:
                 case SDL_MOUSEBUTTONDOWN:
-                    handle_mouse_click(event, scroll, all_characters, MAX_CHARACTERS, test_map);
+                    handle_mouse_click(event, camera, all_characters, MAX_CHARACTERS, test_map);
+                    break;
+                case SDL_MOUSEWHEEL:
+                    if (event.wheel.y > 0 && camera.scale < 1)
+                        camera.scale *= 2;
+                    else if (event.wheel.y < 0 && camera.scale > 0.5)
+                        camera.scale *= 0.5;
+                    // scale the mouse cursor while zooming
+                    mouse_hover_rect.w = TILES_WIDTH;
+                    mouse_hover_rect.h = TILES_HEIGHT;
                     break;
                 case SDL_KEYDOWN:
-                    handle_keyboard(event, &paused, all_characters, &scroll);
+                    handle_keyboard(event, &paused, all_characters, &camera);
                     break;
             }
 

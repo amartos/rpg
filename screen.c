@@ -34,7 +34,7 @@ void apply_tiles(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
         Map const map,
-        Coord scroll,
+        Camera camera,
         Bool grid,
         unsigned int const level
         )
@@ -54,7 +54,7 @@ void apply_tiles(
                )
             {
                 positions.x = x; positions.y = y;
-                image_rect = coord_to_isosdlrect(positions, scroll);
+                image_rect = coord_to_isosdlrect(positions, camera);
 
                 if (!level && grid)
                     SDL_RenderCopy(renderer, assets[0x0013].image->texture, NULL, &image_rect);
@@ -72,7 +72,7 @@ static void apply_characters(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
         Map map,
-        Coord scroll
+        Camera camera
         )
 {
     unsigned int i, min = 0x100, max = 0x100 + MAX_CHARACTERS, current_frame;
@@ -98,9 +98,10 @@ static void apply_characters(
                             tile_position.x = x; tile_position.y = y;
                             if (is_within_tile(char_position, tile_position))
                             {
-                                image_rect = coord_to_isosdlrect(char_position, scroll);
+                                image_rect = coord_to_isosdlrect(char_position, camera);
                                 image_rect.x += TILES_WIDTH/4; image_rect.y -= TILES_HEIGHT/4;
-                                image_rect.w = SPRITES_WIDTH; image_rect.h = SPRITES_HEIGHT;
+                                image_rect.w = scale(SPRITES_WIDTH, camera);
+                                image_rect.h = scale(SPRITES_HEIGHT, camera);
                                 direction = assets[i].movement->direction;
                                 current_frame = assets[i].animation->current_frame;
                                 SDL_RenderCopy(
@@ -119,7 +120,7 @@ void render_screen(
         SDL_Texture *pause_layer,
         Cursors mouse_type,
         SDL_Rect mouse_hover_rect,
-        Coord scroll,
+        Camera camera,
         Map const map,
         Bool paused
         )
@@ -131,10 +132,10 @@ void render_screen(
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF); // RGBA
     SDL_RenderDrawRect(renderer, NULL);
 
-    apply_tiles(renderer, assets, map, scroll, FALSE, level); // level 0
-    apply_characters(renderer, assets, map, scroll);
+    apply_tiles(renderer, assets, map, camera, FALSE, level); // level 0
+    apply_characters(renderer, assets, map, camera);
     for (level=1;level<MAX_LEVELS;level++)
-        apply_tiles(renderer, assets, map, scroll, FALSE, level); // level 0
+        apply_tiles(renderer, assets, map, camera, FALSE, level); // level 0
 
     if (paused)
         SDL_RenderCopy(renderer, pause_layer, NULL, NULL);
@@ -147,7 +148,7 @@ void render_screen(
         if (assets[i].movement != NULL && assets[i].movement->moving)
         {
             position = assets[i].movement->path[0];
-            mouse_hover_rect = coord_to_isosdlrect(position, scroll);
+            mouse_hover_rect = coord_to_isosdlrect(position, camera);
             SDL_RenderCopy(renderer, assets[VALID].image->texture, NULL, &mouse_hover_rect);
         }
     }

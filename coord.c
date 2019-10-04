@@ -19,7 +19,7 @@ Coord int_to_coord(unsigned int const x, unsigned int const y)
     return coord;
 }
 
-Coord isometric_to_cartesian(Coord const isometric)
+Coord isometric_to_cartesian(Coord const isometric, Camera const camera)
 {
     Coord cartesian; init_coord(&cartesian);
     cartesian.x = isometric.y/TILES_HEIGHT + (isometric.x - SCREEN_WIDTH/2)/TILES_WIDTH;
@@ -27,7 +27,7 @@ Coord isometric_to_cartesian(Coord const isometric)
     return cartesian;
 }
 
-Coord cartesian_to_isometric(Coord const cartesian)
+Coord cartesian_to_isometric(Coord const cartesian, Camera const camera)
 {
     Coord isometric; init_coord(&isometric);
     isometric.x = (cartesian.x - cartesian.y) * TILES_WIDTH/2 + SCREEN_WIDTH/2;
@@ -35,21 +35,21 @@ Coord cartesian_to_isometric(Coord const cartesian)
     return isometric;
 }
 
-Coord event_to_coord(Sint32 x, Sint32 y, Coord const scroll)
+Coord event_to_coord(Sint32 x, Sint32 y, Camera const camera)
 {
     Coord map; init_coord(&map);
     map.x = x; map.y = y;
-    map = isometric_to_cartesian(map);
-    map.x += scroll.x; map.y += scroll.y; // scroll correction
+    map = isometric_to_cartesian(map, camera);
+    map.x += camera.scroll.x; map.y += camera.scroll.y; // scroll correction
     return map;
 }
 
-SDL_Rect coord_to_isosdlrect(Coord const coord, Coord const scroll)
+SDL_Rect coord_to_isosdlrect(Coord const coord, Camera const camera)
 {
 
     Coord isometrified = coord;
-    isometrified.x -= scroll.x; isometrified.y -= scroll.y; // scroll correction
-    isometrified = cartesian_to_isometric(isometrified);
+    isometrified.x -= camera.scroll.x; isometrified.y -= camera.scroll.y; // scroll correction
+    isometrified = cartesian_to_isometric(isometrified, camera);
     SDL_Rect rect;
     rect.x = isometrified.x; rect.y = isometrified.y;
     rect.w = TILES_WIDTH; rect.h = TILES_HEIGHT;
@@ -177,4 +177,16 @@ Cardinals determine_direction(Coord const start, Coord const goal)
     if (direction < 0)
         direction = 7;
     return direction;
+}
+
+void init_camera(Camera *camera)
+{
+    init_coord(&camera->scroll);
+    camera->scale = 1;
+}
+
+double scale(unsigned int const size, Camera const camera)
+{
+    double scaled = size * camera.scale;
+    return scaled;
 }

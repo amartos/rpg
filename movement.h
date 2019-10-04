@@ -50,7 +50,8 @@ void deploy(
         Coord *position,
         Cardinals const direction,
         Deployment const formation,
-        unsigned int const char_number
+        unsigned int const char_number,
+        Camera const camera
         );
 void move(
         Movement *movement,

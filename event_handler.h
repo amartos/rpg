@@ -17,19 +17,19 @@
 void handle_keyboard(
         SDL_Event event, Bool *paused,
         Asset characters[MAX_CHARACTERS],
-        Coord *scroll
+        Camera *pcamera
         );
 
 Cursors handle_mouse_motion(
         SDL_Event const event,
-        Coord const scroll,
+        Camera const camera,
         SDL_Rect *mouse_hover_rect,
         Coord const max_coord
         );
 
 void handle_mouse_click(
         SDL_Event event,
-        Coord const scroll,
+        Camera const camera,
         Asset characters[MAX_CHARACTERS],
         unsigned int max_objects,
         Map const map

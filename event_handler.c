@@ -4,10 +4,11 @@
 void handle_keyboard(
         SDL_Event event, Bool *paused,
         Asset characters[MAX_CHARACTERS],
-        Coord *scroll
+        Camera *pcamera
         )
 {
     unsigned int i;
+    Camera camera = *pcamera;
     switch (event.key.keysym.sym)
     {
         case SDLK_SPACE:
@@ -30,39 +31,37 @@ void handle_keyboard(
                 change_formation(characters[i].movement, CIRCLE);
             break;
         case SDLK_F5:
-            scroll->x = (SCREEN_WIDTH/2)/TILES_WIDTH;
-            scroll->y = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
+            pcamera->scroll.x = (SCREEN_WIDTH/2)/TILES_WIDTH;
+            pcamera->scroll.y = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
             break;
         case SDLK_UP:
-            scroll->x -= 1;
-            scroll->y -= 1;
+            pcamera->scroll.x -= 1;
+            pcamera->scroll.y -= 1;
             break;
         case SDLK_DOWN:
-            scroll->x += 1;
-            scroll->y += 1;
+            pcamera->scroll.x += 1;
+            pcamera->scroll.y += 1;
             break;
         case SDLK_LEFT:
-            scroll->x -= 1;
-            scroll->y += 1;
+            pcamera->scroll.x -= 1;
+            pcamera->scroll.y += 1;
             break;
         case SDLK_RIGHT:
-            scroll->x += 1;
-            scroll->y -= 1;
+            pcamera->scroll.x += 1;
+            pcamera->scroll.y -= 1;
             break;
     }
 }
 
 Cursors handle_mouse_motion(
         SDL_Event const event,
-        Coord const scroll,
+        Camera const camera,
         SDL_Rect *mouse_hover_rect,
         Coord const max_coord
         )
 {
-    mouse_hover_rect->x = event.motion.x;
-    mouse_hover_rect->y = event.motion.y;
-
-    Coord position = event_to_coord(event.motion.x, event.motion.y, scroll);
+    Coord position = event_to_coord(event.motion.x, event.motion.y, camera);
+    *mouse_hover_rect = coord_to_isosdlrect(position, camera);
     if (!is_out_of_map(position, max_coord))
         return HOVER;
     else
@@ -71,7 +70,7 @@ Cursors handle_mouse_motion(
 
 void handle_mouse_click(
         SDL_Event event,
-        Coord const scroll,
+        Camera const camera,
         Asset characters[MAX_CHARACTERS],
         unsigned int max_objects,
         Map const map
@@ -81,7 +80,7 @@ void handle_mouse_click(
 
     Coord max_coord = int_to_coord(map.maxx, map.maxy);
 
-    Coord position = event_to_coord(event.button.x, event.button.y, scroll);
+    Coord position = event_to_coord(event.button.x, event.button.y, camera);
 
     Coord coord; init_coord(&coord);
 
@@ -93,7 +92,7 @@ void handle_mouse_click(
             deploy(
                     &coord,
                     determine_direction(characters[i].movement->position, coord),
-                    characters[i].movement->formation, i
+                    characters[i].movement->formation, i, camera
                     );
             if (is_pos_legal(coord, characters[i].movement->position, max_coord, map.collisions))
             {

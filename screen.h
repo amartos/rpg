@@ -17,10 +17,10 @@
 #include <SDL2/SDL_image.h>
 
 #define CALC_MIN_MAX_SCROLL \
-    int minx = scroll.x - 1; \
-    int maxx = scroll.x + SCREEN_WIDTH/TILES_WIDTH; \
-    int miny = scroll.y - 1; \
-    int maxy = scroll.y + SCREEN_HEIGHT/TILES_HEIGHT;
+    int minx = camera.scroll.x - 1; \
+    int maxx = camera.scroll.x + SCREEN_WIDTH/TILES_WIDTH; \
+    int miny = camera.scroll.y - 1; \
+    int maxy = camera.scroll.y + SCREEN_HEIGHT/TILES_HEIGHT;
 
 
 // prototypes
@@ -32,7 +32,7 @@ void apply_tiles(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
         Map const map,
-        Coord scroll,
+        Camera camera,
         Bool grid,
         unsigned int const level
         );
@@ -43,7 +43,7 @@ void render_screen(
         SDL_Texture *pause_layer,
         Cursors mouse_type,
         SDL_Rect mouse_hover_rect,
-        Coord scroll,
+        Camera camera,
         Map const map,
         Bool paused
         );

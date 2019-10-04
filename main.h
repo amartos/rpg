@@ -5,9 +5,9 @@
 #include "try_throw_catch.h"
 #include "macros.h"
 
+#include "coord.h"
 #include "screen.h"
 #include "animation.h"
-#include "coord.h"
 #include "movement.h"
 #include "map.h"
 #include "event_handler.h"
