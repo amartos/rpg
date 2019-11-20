@@ -25,7 +25,7 @@ struct Map
 };
 
 // prototypes
-void init_map(Map *map);
+void init_map(Map *map, char map_name[]);
 void map_malloc(Map *map);
 void free_map(Map *map);
 void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy);

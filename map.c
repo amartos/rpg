@@ -41,19 +41,22 @@ void map_malloc(Map *map)
     }
 }
 
-void init_map(Map *map)
+void init_map(Map *map, char map_name[])
 {
     unsigned int x, y, i;
+    char query[100] = {0};
     INIT_DB
 
-    QUERY_DB("SELECT * FROM maps where name='test_map';")
+    sprintf(query, "SELECT * FROM maps where name='%s';", map_name);
+    QUERY_DB(query)
         map->maxx = GET_QUERY_INT(2) + 1;
         map->maxy = GET_QUERY_INT(3) + 1;
     END_QUERY
 
     map_malloc(map);
 
-    QUERY_DB("SELECT * FROM test_map;")
+    sprintf(query, "SELECT * FROM %s;", map_name);
+    QUERY_DB(query)
     {
         x = GET_QUERY_INT(0);
         y = GET_QUERY_INT(1);

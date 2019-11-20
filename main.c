@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     Coord position; init_coord(&position);
 
     // load maps
-    Map test_map; init_map(&test_map);
+    Map test_map; init_map(&test_map, "test_map");
     max_coord.x = test_map.maxx; max_coord.y = test_map.maxy;
 
     // load characters
