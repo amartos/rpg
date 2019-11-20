@@ -276,7 +276,7 @@ unsigned int find_path(
     }
 
     if (scores != NULL)
-        for (i=0;i<max_array+1;i++)
+        for (i=0;i<MAX_PATH_NODES;i++)
             scores[i] = cost[i];
 
     return nodes;
