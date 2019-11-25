@@ -56,6 +56,13 @@ SDL_Rect coord_to_isosdlrect(Coord const coord, Camera const camera)
     return rect;
 }
 
+Bool is_coord_empty(Coord const coord)
+{
+    if (is_same_double(coord.x, 0.000) && is_same_double(coord.y, 0.000))
+        return TRUE;
+    return FALSE;
+}
+
 Bool is_same_coord(Coord const a, Coord const b)
 {
     Bool same = FALSE;

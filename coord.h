@@ -38,6 +38,7 @@ Coord isometric_to_cartesian(Coord const isometric, Camera const camera);
 Coord cartesian_to_isometric(Coord const cartesian, Camera const camera);
 Coord event_to_coord(Sint32 x, Sint32 y, Camera const camera);
 SDL_Rect coord_to_isosdlrect(Coord const coord, Camera const camera);
+Bool is_coord_empty(Coord const coord);
 Bool is_same_coord(Coord const a, Coord const b);
 Bool is_within_tile(Coord const a, Coord const b);
 Bool is_colliding(Coord const goal, unsigned int** const collision_map, Coord const max_coord);

@@ -1,81 +1,122 @@
 #include "pathfinding.h"
 
 
-static void set_in_queue(unsigned int const max_array, unsigned int queue[], unsigned int const next)
+static void set_in_queue(unsigned int const max_array, Coord queue[max_array], Coord const next)
 {
     unsigned int i;
     Bool already_in = FALSE;
     for (i=0;i<max_array;i++)
-        if (queue[i] == next)
+        if (is_same_coord(queue[i], next))
             already_in = TRUE;
     if (!already_in)
         for (i=0;i<max_array;i++)
-            if (!queue[i])
+            if (is_coord_empty(queue[i]))
             {
                 queue[i] = next;
                 break;
             }
 }
 
-static void delete_from_queue(unsigned int const max_array, unsigned int queue[], unsigned int const number)
+static void delete_from_queue(unsigned int const max_array, Coord queue[max_array], Coord const coord)
 {
     unsigned int i;
     for (i=0;i<max_array;i++)
-        if (queue[i] == number)
-            queue[i] = 0;
+        if (is_same_coord(queue[i], coord))
+            reset_coord(&queue[i]);
 }
 
-static Bool check_queue(unsigned int const max_array, unsigned int const queue[])
+static Bool check_queue(unsigned int const max_array, Coord const queue[max_array])
 {
     unsigned i;
     Bool done = TRUE;
     for (i=0;i<max_array;i++)
-        if (queue[i])
+        if (!is_coord_empty(queue[i]))
             done = FALSE;
     return done;
 }
 
-static Bool is_queue_ordered(unsigned int const max_array, unsigned int const queue[], unsigned int const cost[])
+static unsigned int get_max_score_queued(
+        unsigned int const max_array,
+        Coord const queue[max_array],
+        unsigned int const maxx,
+        unsigned int const cost[][maxx]
+        )
 {
-    unsigned int i, current, next;
-    Bool done = TRUE;
-    for (i=0;i<max_array-1;i++)
+    unsigned int i, x, y, max = 0;
+    for (i=0;i<max_array;i++)
     {
-        current = queue[i];
-        next = queue[i+1];
-        if (next)
-            if (cost[current] > cost[next] || !current)
-               done = FALSE;
+        x = queue[i].x; y = queue[i].y;
+        max = cost[y][x] < max ? max : cost[y][x];
     }
-    return done;
+    return max;
 }
 
-static void order_queue(unsigned int const max_array, unsigned int queue[], unsigned int const cost[])
+static void copy_queue(
+        unsigned int const max_array,
+        Coord const from_queue[max_array],
+        Coord to_queue[max_array]
+        )
 {
-    unsigned int i, current, next;
-    Bool done = FALSE;
+    unsigned int i;
+    for (i=0;i<max_array;i++)
+        to_queue[i] = from_queue[i];
+}
 
-    while (!done)
+static void count_scores_queued(
+        unsigned int const max_array,
+        Coord const queue[max_array],
+        unsigned int const maxx,
+        unsigned int const cost[][maxx],
+        unsigned int const max_score,
+        unsigned int counts[max_score+1]
+        )
+{
+    unsigned int i, x, y;
+    for (i=0;i<max_array;i++)
     {
-        for (i=0;i<max_array-1;i++) // do not check last+1
-        {
-            current = queue[i];
-            next = queue[i+1];
-            if (next)
-                if (cost[current] > cost[next] || !current)
+        x = queue[i].x; y = queue[i].y;
+        counts[cost[y][x]]++;
+    }
+}
+
+static void order_queue(
+        unsigned int const max_array,
+        Coord queue[max_array],
+        unsigned int const maxx,
+        unsigned int const cost[][maxx]
+        )
+{
+    unsigned int i, j, x, y, index = 0;
+    unsigned int max = get_max_score_queued(max_array, queue, maxx, cost);
+    unsigned int counts[max+1];
+    for (i=0;i<=max;i++)
+        counts[i] = 0;
+
+    Coord new_queue[max_array];
+    for (i=0;i<max_array;i++)
+        init_coord(&new_queue[i]);
+
+    count_scores_queued(max_array, queue, maxx, cost, max, counts);
+
+    // find lowest scores in order in queue and sets them first in new_queue
+    // score 0 used as NULL thus skipped
+    // scores not in queue also skipped
+    for (i=1;i<=max;i++) // score
+        if (counts[i])
+            for (j=0;j<max_array;j++) // order of queue
+            {
+                x = queue[j].x; y = queue[j].y;
+                if (cost[y][x] == i)
                 {
-                    queue[i] = next;
-                    queue[i+1] = current;
+                    new_queue[index] = queue[j];
+                    index++;
+                    counts[i]--;
+                    if (counts[i] <= 0)
+                        break;
                 }
-        }
-        done = is_queue_ordered(max_array, queue, cost);
-    }
-}
+            }
 
-static unsigned int convert_coord_to_number(Coord const coord, Coord const max_coord)
-{
-    unsigned int number = max_coord.x * coord.y + coord.x;
-    return number;
+    copy_queue(max_array, new_queue, queue);
 }
 
 static void get_neighbours(Coord next[8], Coord const current, Coord const max_coord)
@@ -151,66 +192,65 @@ static unsigned int calculate_cost(
 
 static void dijkstra(
         Bool a_star,
-        unsigned int cost[],
-        unsigned int came_from[],
-        Coord conversion[],
+        unsigned int const maxx,
+        unsigned int cost[][maxx],
+        Coord came_from[][maxx],
         Coord start, Coord goal,
         Coord const max_coord,
         unsigned int** const collision_map,
         unsigned int** const cost_map
         )
 {
-    unsigned int i = 0, nnext = 0, ncurrent = 0, new_cost = 0;
-    unsigned int nstart = convert_coord_to_number(start, max_coord);
-    unsigned int ngoal = convert_coord_to_number(goal, max_coord);
+    unsigned int i = 0, new_cost = 0;
     unsigned int max_array = max_coord.x * max_coord.y;
-    unsigned int queue[max_array];
+    unsigned int currx = start.x, curry = start.y;
+    unsigned int nextx = 0, nexty = 0;
+    Coord queue[max_array];
     for (i=0;i<max_array;i++)
-        queue[i] = 0;
+        init_coord(&queue[i]);
     Bool done = FALSE;
 
     Coord current; init_coord(&current);
-    Coord next; init_coord(&next);
+    Coord next[8];
     Coord coord; init_coord(&coord);
-    Coord all_next[8];
-    for (i=N;i<=NW;i++)
-        init_coord(&all_next[i]);
 
-    came_from[nstart] = nstart;
-    queue[0] = nstart;
-    cost[nstart] = 0;
+    for (i=N;i<=NW;i++)
+        init_coord(&next[i]);
+
+    came_from[curry][currx] = start; // start came from start
+    queue[0] = start;
+    cost[curry][currx] = 0; // cost start
 
     while (!done)
     {
-        ncurrent = queue[0];
-        if (ncurrent)
+        current = queue[0];
+        if (!is_coord_empty(current))
         {
-            delete_from_queue(max_array, queue, ncurrent);
-            current = conversion[ncurrent]; // get coord from number
-            get_neighbours(all_next, current, max_coord);
+            delete_from_queue(max_array, queue, current);
+            get_neighbours(next, current, max_coord);
             for (i=N;i<=NW;i++)
             {
                 if (
-                    is_pos_legal(all_next[i], start, max_coord, collision_map) &&
-                    !are_corners_colliding(current, all_next[i], collision_map, max_coord)
+                    is_pos_legal(next[i], start, max_coord, collision_map) &&
+                    !are_corners_colliding(current, next[i], collision_map, max_coord)
                     )
                 {
-                    nnext = convert_coord_to_number(all_next[i], max_coord);
-                    new_cost = calculate_cost(cost[ncurrent], all_next[i], cost_map);
+                    nextx = next[i].x; nexty = next[i].y;
+                    new_cost = calculate_cost(cost[curry][currx], next[i], cost_map);
                     if (a_star)
                         // Converts Dijkstra in A* : add cost f(distance)
-                        new_cost += abs(goal.x - all_next[i].x) + abs(goal.y - all_next[i].y);
+                        new_cost += abs(goal.x - next[i].x) + abs(goal.y - next[i].y);
 
-                    if (!came_from[nnext] || new_cost < cost[nnext])
+                    if (is_coord_empty(came_from[nexty][nextx]) || new_cost < cost[nexty][nextx])
                     {
-                        came_from[nnext] = ncurrent;
-                        cost[nnext] = new_cost;
-                        set_in_queue(max_array, queue, nnext);
+                        came_from[nexty][nextx] = current;
+                        cost[nexty][nextx] = new_cost;
+                        set_in_queue(max_array, queue, next[i]);
                     }
                     else
-                        delete_from_queue(max_array, queue, ncurrent);
+                        delete_from_queue(max_array, queue, current);
 
-                    if (nnext == ngoal)
+                    if (is_same_coord(next[i], goal))
                     {
                         done = TRUE;
                         break;
@@ -220,7 +260,7 @@ static void dijkstra(
 
             if (!done)
             {
-                order_queue(max_array, queue, cost);
+                order_queue(max_array, queue, maxx, cost);
                 done = check_queue(max_array, queue);
             }
         }
@@ -237,49 +277,37 @@ unsigned int find_path(
         unsigned int** const cost_map
         )
 {
-    unsigned int nodes = 1, i,j,n;
+    unsigned int nodes = 1, i;
 
     unsigned int x = precise_start.x, y = precise_start.y;
-    Coord start; init_coord(&start);
-    start.x = x; start.y = y;
-
-    Coord goal; init_coord(&goal);
+    Coord start = int_to_coord(x, y);
     x = precise_goal.x; y = precise_goal.y;
-    goal.x = x; goal.y = y;
+    Coord goal = int_to_coord(x, y);
 
-    unsigned int nstart = convert_coord_to_number(start, max_coord);
-    unsigned int ngoal = convert_coord_to_number(goal, max_coord);
-    unsigned int ncurrent = ngoal;
-    unsigned int max_array = max_coord.x * max_coord.y;
+    unsigned int maxx = max_coord.x, maxy = max_coord.y;
 
-    unsigned int cost[max_array+1], came_from[max_array+1];
-    Coord conversion[max_array+1], coord;
+    unsigned int cost[maxy][maxx];
+    Coord came_from[maxy][maxx];
 
-    for (i=0;i<max_array+1;i++)
-    {
-        init_coord(&conversion[i]);
-        cost[i] = 0;
-        came_from[i] = 0;
-    }
-
-    for (i=0;i<max_coord.x;i++)
-        for (j=0;j<max_coord.y;j++)
+    for (y=0;y<maxy;y++)
+        for (x=0;x<maxx;x++)
         {
-            coord.x = i, coord.y = j;
-            n = convert_coord_to_number(coord, max_coord);
-            conversion[n] = coord;
+            cost[y][x] = 0;
+            init_coord(&came_from[y][x]);
         }
 
     //A*
-    dijkstra(TRUE, cost, came_from, conversion, start, goal, max_coord, collision_map, cost_map);
+    dijkstra(TRUE, maxx, cost, came_from, start, goal, max_coord, collision_map, cost_map);
 
     path[0] = precise_goal;
+    Coord current = goal;
     for (i=1;i<MAX_PATH_NODES;i++)
     {
         nodes++;
-        path[i] = conversion[ncurrent];
-        ncurrent = came_from[ncurrent]; // came_from[goal] = previous
-        if (ncurrent == nstart)
+        path[i] = current;
+        x = current.x; y = current.y;
+        current = came_from[y][x]; // came_from[goal] = previous
+        if (is_same_coord(current, start))
         {
             if (i<MAX_PATH_NODES-1 && !is_same_coord(start, precise_start))
             {
