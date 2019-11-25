@@ -21,8 +21,7 @@ unsigned int find_path(
         Coord const start, Coord const goal,
         Coord const max_coord,
         unsigned int** const collision_map,
-        unsigned int** const cost_map,
-        unsigned int scores[MAX_PATH_NODES]
+        unsigned int** const cost_map
         );
 
 #endif // define RPG_PATHFINDING

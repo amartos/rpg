@@ -92,9 +92,6 @@ int main(int argc, char *argv[])
 
     Camera camera; init_camera(&camera);
 
-    unsigned int scores[MAX_PATH_NODES];
-    for (i=0;i<MAX_PATH_NODES;i++)
-        scores[i] = 0;
     Coord path[MAX_PATH_NODES];
     for (i=0;i<MAX_PATH_NODES;i++)
         init_coord(&path[i]);
@@ -124,8 +121,7 @@ int main(int argc, char *argv[])
                                     path,
                                     start_units, click,
                                     max_coord,
-                                    map.collisions, map.cost,
-                                    scores
+                                    map.collisions, map.cost
                                     );
                         break;
                     case SDL_BUTTON_RIGHT:

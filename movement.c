@@ -196,8 +196,7 @@ void move(
                     movement->path[movement->current_node],
                     max_coord,
                     collision_map,
-                    cost_map,
-                    NULL
+                    cost_map
                     );
             if (nodes)
             {

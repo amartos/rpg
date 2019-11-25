@@ -234,8 +234,7 @@ unsigned int find_path(
         Coord const precise_start, Coord const precise_goal,
         Coord const max_coord,
         unsigned int** const collision_map,
-        unsigned int** const cost_map,
-        unsigned int scores[]
+        unsigned int** const cost_map
         )
 {
     unsigned int nodes = 1, i,j,n;
@@ -290,10 +289,6 @@ unsigned int find_path(
             break;
         }
     }
-
-    if (scores != NULL)
-        for (i=0;i<MAX_PATH_NODES;i++)
-            scores[i] = cost[i];
 
     return nodes;
 }
