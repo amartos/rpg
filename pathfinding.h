@@ -1,10 +1,7 @@
 #ifndef RPG_PATHFINDING
 #define RPG_PATHFINDING
 
-#define MAX_PATH_NODES 1000
-
 #include "errors.h"
-#include "try_throw_catch.h"
 #include "macros.h"
 
 #include "coord.h"
@@ -13,9 +10,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-// A* pathfinding
-// returns the number of nodes it has found for the path, and modifies the
-// Character structure's path pointer to point to the corresponding Coord array
+// Maximum number of nodes to go through
+#define MAX_PATH_NODES 1000
+
+/* A* pathfinding
+ * Returns 0 if no path was found, or the number of nodes if it found one, and
+ * sets the nodes to go through in order within the "path" array */
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
         Coord const start, Coord const goal,

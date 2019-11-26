@@ -1,110 +1,286 @@
 #include "event_handler.h"
 
 
-void handle_keyboard(
-        SDL_Event event, Bool *paused,
-        Asset characters[MAX_CHARACTERS],
-        Camera *pcamera
-        )
+// events for special keys, eg. space, alt, ctrl, etc
+static void push_special(SDL_Event const event, Bool *paused)
 {
-    unsigned int i;
-    Camera camera = *pcamera;
-    switch (event.key.keysym.sym)
+    switch(event.key.keysym.sym)
     {
+        default:
+            break;
         case SDLK_SPACE:
             *paused = !*paused;
             break;
-        case SDLK_a:
-            for (i=0;i<MAX_CHARACTERS;i++)
-                change_formation(characters[i].movement, LINE);
-            break;
-        case SDLK_z:
-            for (i=0;i<MAX_CHARACTERS;i++)
-                change_formation(characters[i].movement, SQUARE);
-            break;
-        case SDLK_e:
-            for (i=0;i<MAX_CHARACTERS;i++)
-                change_formation(characters[i].movement, TRIANGLE);
-            break;
-        case SDLK_r:
-            for (i=0;i<MAX_CHARACTERS;i++)
-                change_formation(characters[i].movement, CIRCLE);
-            break;
-        case SDLK_F5:
-            pcamera->scroll.x = (SCREEN_WIDTH/2)/TILES_WIDTH;
-            pcamera->scroll.y = (SCREEN_HEIGHT/2)/TILES_HEIGHT;
+    }
+}
+
+static void push_arrow(SDL_Event const event, Camera *camera)
+{
+    switch(event.key.keysym.sym)
+    {
+        default:
             break;
         case SDLK_UP:
-            pcamera->scroll.x -= 1;
-            pcamera->scroll.y -= 1;
+            set_scroll(camera, -1, -1);
             break;
         case SDLK_DOWN:
-            pcamera->scroll.x += 1;
-            pcamera->scroll.y += 1;
+            set_scroll(camera, +1, +1);
             break;
         case SDLK_LEFT:
-            pcamera->scroll.x -= 1;
-            pcamera->scroll.y += 1;
+            set_scroll(camera, -1, +1);
             break;
         case SDLK_RIGHT:
-            pcamera->scroll.x += 1;
-            pcamera->scroll.y -= 1;
+            set_scroll(camera, +1, -1);
             break;
     }
 }
 
-Cursors handle_mouse_motion(
-        SDL_Event const event,
-        Camera const camera,
-        SDL_Rect *mouse_hover_rect,
-        Coord const max_coord
-        )
+// events for Function keys F1...F12
+static void push_fkey(SDL_Event const event, Asset assets[0xFFFF], Camera *camera)
 {
-    Coord position = event_to_coord(event.motion.x, event.motion.y, camera);
-    *mouse_hover_rect = coord_to_isosdlrect(position, camera);
-    if (!is_out_of_map(position, max_coord))
-        return HOVER;
-    else
-        return INVALID;
+    switch(event.key.keysym.sym)
+    {
+        default:
+            break;
+        case SDLK_F5:
+            /* reset camera position to center and scale 1.
+             * reset scale before, as coord depend on scale */
+            reset_camera(camera);
+            center_camera(camera);
+            SCALE_CURSOR
+            break;
+    }
 }
 
-void handle_mouse_click(
-        SDL_Event event,
+static void push_alpha(SDL_Event const event, Bool *quit, Asset assets[0xFFFF])
+{
+    switch(event.key.keysym.sym)
+    {
+        default:
+            break;
+        case SDLK_a:
+            CHANGE_GROUP_FORMATION(LINE)
+            break;
+        case SDLK_z:
+            CHANGE_GROUP_FORMATION(SQUARE)
+            break;
+        case SDLK_e:
+            CHANGE_GROUP_FORMATION(TRIANGLE)
+            break;
+        case SDLK_r:
+            CHANGE_GROUP_FORMATION(CIRCLE)
+            break;
+        case SDLK_q:
+            *quit = TRUE;
+            break;
+    }
+}
+
+static void push_numeric(SDL_Event const event)
+{
+    switch(event.key.keysym.sym)
+    {
+        default:
+            break;
+    }
+}
+
+static void handle_keyboard(
+        SDL_Event const event,
+        Bool *paused,
+        Bool *quit,
+        Asset assets[0xFFFF],
+        Camera *camera
+        )
+{
+    switch (event.key.keysym.sym)
+    {
+        case SDLK_LCTRL:
+        case SDLK_RCTRL:
+        case SDLK_LSHIFT:
+        case SDLK_RSHIFT:
+        case SDLK_LALT:
+        case SDLK_RALT: // alt-gr
+        case SDLK_LGUI: // left super key
+        case SDLK_RGUI: // right super key
+        case SDLK_TAB:
+        case SDLK_CAPSLOCK:
+        case SDLK_BACKQUOTE:
+        case SDLK_SPACE:
+            push_special(event, paused);
+            break;
+        case SDLK_a:
+        case SDLK_b:
+        case SDLK_c:
+        case SDLK_d:
+        case SDLK_e:
+        case SDLK_f:
+        case SDLK_g:
+        case SDLK_h:
+        case SDLK_i:
+        case SDLK_j:
+        case SDLK_k:
+        case SDLK_l:
+        case SDLK_m:
+        case SDLK_n:
+        case SDLK_o:
+        case SDLK_p:
+        case SDLK_q:
+        case SDLK_r:
+        case SDLK_s:
+        case SDLK_t:
+        case SDLK_u:
+        case SDLK_v:
+        case SDLK_w:
+        case SDLK_x:
+        case SDLK_y:
+        case SDLK_z:
+            push_alpha(event, quit, assets);
+            break;
+        case SDLK_0:
+        case SDLK_1:
+        case SDLK_2:
+        case SDLK_3:
+        case SDLK_4:
+        case SDLK_5:
+        case SDLK_6:
+        case SDLK_7:
+        case SDLK_8:
+        case SDLK_9:
+            push_numeric(event);
+            break;
+        case SDLK_F1:
+        case SDLK_F2:
+        case SDLK_F3:
+        case SDLK_F4:
+        case SDLK_F5:
+        case SDLK_F6:
+        case SDLK_F7:
+        case SDLK_F8:
+        case SDLK_F9:
+        case SDLK_F10:
+        case SDLK_F11:
+        case SDLK_F12:
+            push_fkey(event, assets, camera);
+            break;
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_LEFT:
+        case SDLK_RIGHT:
+            push_arrow(event, camera);
+            break;
+    }
+}
+
+static void handle_mouse_wheel(SDL_Event const event, Camera *camera, Asset assets[0xFFFF])
+{
+    if (event.wheel.y > 0)
+        set_zoom(camera, FALSE);
+    else if (event.wheel.y < 0)
+        set_zoom(camera, TRUE);
+    SCALE_CURSOR
+}
+
+static void handle_mouse_motion(
+        SDL_Event const event,
         Camera const camera,
-        Asset characters[MAX_CHARACTERS],
-        unsigned int max_objects,
+        Asset assets[0xFFFF],
+        Map const map,
+        Cursors *mouse
+        )
+{
+    Coord max_coord = int_to_coord(map.maxx, map.maxy);
+
+    // set cursor position for each cursor type
+    for (unsigned int i=HOVER;i<=INVALID;i++)
+        set_image_position(&assets[i].image->sdlrect, event.motion.x, event.motion.y);
+
+    // determine which cursor to show: either HOVER or INVALID
+    Coord position = screen_to_coord(event.motion.x, event.motion.y, camera);
+    *mouse = HOVER;
+    if (is_out_of_map(position, max_coord))
+        *mouse = INVALID;
+}
+
+static void handle_mouse_click(
+        SDL_Event const event,
+        Camera const camera,
+        Asset assets[0xFFFF],
         Map const map
         )
 {
-    unsigned int i;
-
     Coord max_coord = int_to_coord(map.maxx, map.maxy);
 
-    Coord position = event_to_coord(event.button.x, event.button.y, camera);
+    /* We use two sets of coord, click will be used as a save and position will
+     * be the one modified. */
+    Coord click = screen_to_coord(event.button.x, event.button.y, camera);
+    Coord position; init_coord(&position);
 
-    Coord coord; init_coord(&coord);
-
-    if (event.type == SDL_MOUSEBUTTONDOWN)
+    for (unsigned int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
     {
-        for (i=0;i<max_objects;i++)
+        position = click;
+        if (is_pos_legal(position, assets[i].movement->position, max_coord, map.collisions))
         {
-            coord = position;
-            deploy(
-                    &coord,
-                    determine_direction(characters[i].movement->position, coord),
-                    characters[i].movement->formation, i, camera
-                    );
-            if (is_pos_legal(coord, characters[i].movement->position, max_coord, map.collisions))
+            stop_movement(assets[i].movement);
+            deploy(&position, assets[i].movement, i-FIRST_CHAR_ID);
+            assets[i].movement->path[0] = position;
+            switch(event.button.button)
             {
-                characters[i].movement->current_node = 0;
-                characters[i].movement->path[0] = coord;
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    fire_movement(characters[i].movement, PATH);
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    fire_movement(characters[i].movement, TELEPORT);
+                default:
+                    stop_movement(assets[i].movement);
+                    break;
+                case SDL_BUTTON_LEFT:
+                    fire_movement(assets[i].movement, PATH);
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    fire_movement(assets[i].movement, TELEPORT);
+                    break;
             }
-            else
-                stop_movement(characters[i].movement);
         }
     }
+}
+
+static void handle_mouse(SDL_Event const event, Camera *camera, Asset assets[0xFFFF], Map const map, Cursors *mouse)
+{
+    switch(event.type)
+    {
+        case SDL_MOUSEMOTION:
+            handle_mouse_motion(event, *camera, assets, map, mouse);
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            handle_mouse_click(event, *camera, assets, map);
+            break;
+        case SDL_MOUSEWHEEL:
+            handle_mouse_wheel(event, camera, assets);
+            break;
+    }
+}
+
+void handle_event(
+        SDL_Event const event,
+        Asset assets[0xFFFF],
+        Camera *camera,
+        Cursors *mouse,
+        Map const map,
+        Bool *paused,
+        Bool *quit
+        )
+{
+    switch(event.type)
+    {
+        default:
+            break;
+        case SDL_MOUSEMOTION:
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEWHEEL:
+            handle_mouse(event, camera, assets, map, mouse);
+            break;
+        case SDL_KEYDOWN:
+            handle_keyboard(event, paused, quit, assets, camera);
+            break;
+        case SDL_QUIT:
+            *quit = TRUE;
+            break;
+    }
+
 }

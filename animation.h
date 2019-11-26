@@ -1,20 +1,25 @@
 #ifndef RPG_CHARACTERS
 #define RPG_CHARACTERS
 
-#include "errors.h"
-#include "try_throw_catch.h"
 #include "macros.h"
-#include "images.h"
+
 #include "coord.h"
-#include "movement.h"
-#include "map.h"
+#include "images.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
-// structures
+/* The general FPS influences the character FPS too.
+ * For now the FPS is too high to distinguish the characters movements properly,
+ * but this is done on purpose during development. To observe the characters
+ * movement, reduce the FPS == CHARACTER_FPS */
+#define FPS 120
+#define CHARACTER_FPS 12
+
+/* The State structure stores a list of descriptive states in which an animated
+ * object can be found, aka the different types of sprites you can have for a
+ * given same object. */
 typedef enum State State;
 enum State
 {
@@ -27,22 +32,35 @@ enum State
     STILL
 };
 
+/* The animation structure is used to store a bunch of infos useful to set up an
+ * object animation. */
 typedef struct Animation Animation;
 struct Animation
 {
-    State state;
+    State state; // The current state the object is in.
     Bool animated;
-    // possible positions, State, max number of frames
+
+    /* array of infos about the frames of the animated object
+     * [possible directions][State][max number of frames]
+     * This array is NOT set if animation->animated is FALSE. */
     SDL_Rect frames[NW+1][MOVE_SHIELD+1][FPS];
+
     unsigned int total_frames;
     unsigned int current_frame;
     unsigned int framerate;
     unsigned int time; // previous tick (for changing frame)
 };
 
-// prototypes
+/* This function initialize the Animation structure. A number of frames of 2 and
+ * above sets the animated bool to TRUE and initialize the frames SDL_Rect
+ * array. Frames must be a positive > 0 number. */
 void init_animation(Animation *animation, unsigned int const frames);
-void check_animobj_frame(Animation *animation, unsigned int const time);
+
+/* This function is used to change the frame the Animation is currently in if
+ * the object has passed it's framerate timing. The function also stores in the
+ * Animation object the last time it has changed the frame, for
+ * synchronisation. */
+void check_animation_frame(Animation *animation, unsigned int const time);
 
 
 #endif // define RPG_CHARACTERS

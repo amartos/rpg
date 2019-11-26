@@ -1,7 +1,7 @@
 #include "errors.h"
 
 
-// this is only temporary, to change in log in file
+// TODO: this function is only temporary, to change to make a log file
 static void printe(
         time_t const now,
         Errors const err_id,
@@ -20,32 +20,37 @@ static char* errstr(Errors const err_id)
     char *err_msg = NULL;
     MALLOC(err_msg, sizeof(char) * 50, ERR_MSG_MALLOC_FAILURE, NULL);
 
-    if (err_id == VIDEO_INIT_FAILURE)
-        strcpy(err_msg, "Video init failure");
-    else if (err_id == WINDOW_INIT_FAILURE)
-        strcpy(err_msg, "Window init failure");
-    else if (err_id == MAP_MALLOC_FAILURE)
-        strcpy(err_msg, "Map memory allocation failure");
-    else if (err_id == PATHFIND_MALLOC_FAILURE)
-        strcpy(err_msg, "Pathfind memory allocation failure");
-    else if (err_id == DATABASE_READ_FAILURE)
-        strcpy(err_msg, "Database read failure");
-    else if (err_id == QUERY_READ_FAILURE)
-        strcpy(err_msg, "Query read failure");
-    else if (err_id == QUERY_MODIFY_FAILURE)
-        strcpy(err_msg, "Query modification failure");
-    else if (err_id == QUERY_END_FAILURE)
-        strcpy(err_msg, "Query end failure");
-    else if (err_id == IMAGE_MALLOC_FAILURE)
-        strcpy(err_msg, "Image memory allocation failure");
-    else if (err_id == ANIMATION_MALLOC_FAILURE)
-        strcpy(err_msg, "Animation memory allocation failure");
-    else if (err_id == MOVEMENT_MALLOC_FAILURE)
-        strcpy(err_msg, "Movement memory allocation failure");
-    else if (err_id == ERR_MSG_MALLOC_FAILURE)
-        strcpy(err_msg, "err_msg memory allocation failure");
-    else if (err_id == TEXTURE_MALLOC_FAILURE)
-        strcpy(err_msg, "Texture memory allocation failure");
+    switch (err_id)
+    {
+        case VIDEO_INIT_FAILURE:
+            strcpy(err_msg, "Video init failure");
+        case WINDOW_INIT_FAILURE:
+            strcpy(err_msg, "Window init failure");
+        case MAP_MALLOC_FAILURE:
+            strcpy(err_msg, "Map memory allocation failure");
+        case PATHFIND_MALLOC_FAILURE:
+            strcpy(err_msg, "Pathfind memory allocation failure");
+        case DATABASE_READ_FAILURE:
+            strcpy(err_msg, "Database read failure");
+        case QUERY_READ_FAILURE:
+            strcpy(err_msg, "Query read failure");
+        case QUERY_MODIFY_FAILURE:
+            strcpy(err_msg, "Query modification failure");
+        case QUERY_END_FAILURE:
+            strcpy(err_msg, "Query end failure");
+        case IMAGE_MALLOC_FAILURE:
+            strcpy(err_msg, "Image memory allocation failure");
+        case ANIMATION_MALLOC_FAILURE:
+            strcpy(err_msg, "Animation memory allocation failure");
+        case MOVEMENT_MALLOC_FAILURE:
+            strcpy(err_msg, "Movement memory allocation failure");
+        case ERR_MSG_MALLOC_FAILURE:
+            strcpy(err_msg, "err_msg memory allocation failure");
+        case TEXTURE_MALLOC_FAILURE:
+            strcpy(err_msg, "Texture memory allocation failure");
+        default:
+            break;
+    }
 
     return err_msg;
 }

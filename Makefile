@@ -1,6 +1,17 @@
+.PHONY: map_creator pathfinding coord map
+
+#################
+# Common options
+#################
+
 CPP=gcc
 CFLAGS=-O3 -no-pie -g
-LDFLAGS=-lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_gfx -lSDL2_ttf -lm -lsqlite3
+LDFLAGS=-lSDL2 -lSDL2_image -lm -lsqlite3
+
+#################
+# Main program
+#################
+
 BIN=bin
 FILES=*
 EXEC=$(BIN)/exec
@@ -25,29 +36,31 @@ nuke: clean
 #################
 # Tools
 #################
+
 TOOLS=tools
+
 MAP_CREATOR=$(TOOLS)/map_creator.c errors.c screen.c images.c coord.c map.c assets.c macros.c animation.c movement.c pathfinding.c
 MAP_CREATOR_EXEC=$(BIN)/map_creator
-
 map_creator: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAP_CREATOR_EXEC) $(MAP_CREATOR)
 
 #################
 # Test units
 #################
+
 TEST=test
+
 PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c macros.c map.c screen.c
 PFEXEC=$(BIN)/pathfinding_test
-COORD=$(TEST)/coord_test.c coord.c macros.c
-COORDEXEC=$(BIN)/coord_test
-MAP=$(TEST)/map_test.c map.c errors.c
-MAPEXEC=$(BIN)/map_test
-
 pathfinding: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(PFEXEC) $(PATHFINDING)
 
+COORD=$(TEST)/coord_test.c coord.c macros.c
+COORDEXEC=$(BIN)/coord_test
 coord: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(COORDEXEC) $(COORD)
 
+MAP=$(TEST)/map_test.c map.c errors.c
+MAPEXEC=$(BIN)/map_test
 map: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAPEXEC) $(MAP)

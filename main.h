@@ -21,4 +21,17 @@
 #include <sqlite3.h>
 
 
+// Macros used to enclose time limited events
+#define TIME \
+        time = SDL_GetTicks(); \
+        if (time - prev_time > FRAMERATE) \
+        { \
+            prev_time = time;
+
+#define ENDTIME \
+        } \
+        else \
+            SDL_Delay(FRAMERATE - (time - prev_time)); // do not overuse CPU
+
+
 #endif // define RPG_MAIN

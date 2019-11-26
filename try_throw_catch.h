@@ -19,8 +19,10 @@
  * SOFTWARE. 
  */
 
-// Alexandre Martos modifications:
-// - add CATCH_HANDLE macro
+/* *******************************
+ * Alexandre Martos modifications:
+ * - add CATCH_HANDLE macro
+ * ******************************* */
 
 #ifndef _TRY_THROW_CATCH_H_
 #define _TRY_THROW_CATCH_H_

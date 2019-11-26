@@ -3,127 +3,79 @@
 
 int main(int argc, char *argv[])
 {
+    /* i is used for the "for loops".
+     * time and prev_time are used for the framerate calculations */
     unsigned int i = 0, time = 0, prev_time = 0;
 
-    // SDL vars init
+    // SDL structures calls and init
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
-
-    Camera camera; init_camera(&camera);
-    camera.scroll.x = (SCREEN_WIDTH/2) / TILES_WIDTH;
-    camera.scroll.y = (SCREEN_HEIGHT/2) / TILES_HEIGHT;
-
-    Asset assets[0xFFFF]; init_asset_array(assets); load_assets_db(renderer, assets);
-    SDL_Texture *pause_layer = make_colored_rect(renderer, TILES_WIDTH, TILES_HEIGHT, 0, 0, 0, 50);
-
-    SDL_Rect sprites_infos; init_sdl_rect(&sprites_infos);
-    sprites_infos.w = SPRITES_WIDTH; sprites_infos.h = SPRITES_HEIGHT;
-
-    SDL_Rect mouse_hover_rect; init_sdl_rect(&mouse_hover_rect);
-    mouse_hover_rect.w = TILES_WIDTH; mouse_hover_rect.h = TILES_HEIGHT;
-
-    SDL_Rect tiles_infos; init_sdl_rect(&tiles_infos);
-
     SDL_Event event;
 
-    // custom structs init
+    /* Navigation loading
+     * For now only one map is used to test the software.
+     * TODO: load the last map the character were on when saved */
+    Map map; init_map(&map, "test_map");
+    Camera camera; init_camera(&camera); center_camera(&camera);
+    Coord max_coord; init_coord(&max_coord);
+    max_coord.x = map.maxx; max_coord.y = map.maxy;
+
+    /* Assets loading. This contains all infos for all the objects that will be
+     * shown on screen. */
+    Asset assets[0xFFFF]; init_asset_array(assets);
+    load_assets_db(renderer, assets);
+
+    /* Characters start position setting
+     * For now the position is arbitrary and will change depending on the
+     * previous save.
+     * TODO: load characters previous position */
+    for (i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
+    {
+        assets[i].movement->position = int_to_coord(4,4);
+        assets[i].movement->formation = SQUARE;
+        deploy(&assets[i].movement->position, assets[i].movement, i-FIRST_CHAR_ID);
+    }
+
+    /* Cursors setting
+     * Here we set the SDL_Rect w/h of the cursors to scale, and start with the
+     * HOVER cursor type. */
+    for (i=HOVER;i<=INVALID;i++)
+    {
+        assets[i].image->sdlrect.w = TILES_WIDTH(camera);
+        assets[i].image->sdlrect.h = TILES_HEIGHT(camera);
+    }
+    Cursors mouse_type = HOVER;
+    SDL_ShowCursor(SDL_DISABLE); // we use our own cursor, not the OS'
+
+    // Some bools used to pause the game or end the program
     Bool done = FALSE, paused = FALSE;
 
-    Cursors mouse_type = HOVER;
-
-    Coord max_coord; init_coord(&max_coord);
-    Coord position; init_coord(&position);
-
-    // load maps
-    Map test_map; init_map(&test_map, "test_map");
-    max_coord.x = test_map.maxx; max_coord.y = test_map.maxy;
-
-    // load characters
-    Asset all_characters[MAX_CHARACTERS];
-    position.x = 4.0; position.y = 4.0;
-    for (i=0;i<MAX_CHARACTERS;i++)
-    {
-        all_characters[i] = assets[0x100+i];
-        all_characters[i].movement->position = position;
-        all_characters[i].movement->formation = SQUARE;
-        deploy(
-                &all_characters[i].movement->position,
-                all_characters[i].movement->direction,
-                all_characters[i].movement->formation,
-                i, camera
-                );
-    }
-
-    SDL_ShowCursor(SDL_DISABLE);
-
-    // main loop
+    // Main loop
     while (!done)
     {
-        // framerate limited events
-        // this contains drawing on screen and characters movements
-        time = SDL_GetTicks();
-        if (time - prev_time > FRAMERATE)
-        {
-            prev_time = time;
-            for (i=0;i<MAX_CHARACTERS;i++)
-                if (all_characters[i].movement->moving && !paused)
+        while(SDL_PollEvent(&event))
+            handle_event(event, assets, &camera, &mouse_type, map, &paused, &done);
+
+        /* framerate limited events
+         * this uses the time and prev_time ints */
+        TIME
+            for (i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
+                if (assets[i].movement->moving && !paused)
                 {
-                    move(
-                            all_characters[i].movement,
-                            max_coord,
-                            test_map.collisions,
-                            test_map.cost
-                            );
-                    check_animobj_frame(all_characters[i].animation, time);
+                    move(assets[i].movement, max_coord, map.collisions, map.cost);
+                    check_animation_frame(assets[i].animation, time);
                 }
 
-            render_screen(renderer,
-                    assets, pause_layer,
-                    mouse_type, mouse_hover_rect,
-                    camera,
-                    test_map,
-                    paused
-                    );
-        }
-        else // do not overuse CPU
-            SDL_Delay(FRAMERATE - (time - prev_time));
-
-        // events handling
-        while(SDL_PollEvent(&event))
-            switch(event.type)
-            {
-                case SDL_QUIT:
-                    done = TRUE;
-                    break;
-                case SDL_MOUSEMOTION:
-                    mouse_type = handle_mouse_motion(event, camera, &mouse_hover_rect, max_coord);
-                    break;
-                case SDL_MOUSEBUTTONUP:
-                case SDL_MOUSEBUTTONDOWN:
-                    handle_mouse_click(event, camera, all_characters, MAX_CHARACTERS, test_map);
-                    break;
-                case SDL_MOUSEWHEEL:
-                    if (event.wheel.y > 0 && camera.scale < 1)
-                        camera.scale *= 2;
-                    else if (event.wheel.y < 0 && camera.scale > 0.5)
-                        camera.scale *= 0.5;
-                    // scale the mouse cursor while zooming
-                    mouse_hover_rect.w = TILES_WIDTH;
-                    mouse_hover_rect.h = TILES_HEIGHT;
-                    break;
-                case SDL_KEYDOWN:
-                    handle_keyboard(event, &paused, all_characters, &camera);
-                    break;
-            }
-
-        // Render !
-        SDL_RenderPresent(renderer);
+            render_screen(renderer, assets, mouse_type, camera, map, paused);
+            SDL_RenderPresent(renderer);
+        ENDTIME
     }
 
-    // free all freeables
-    free_map(&test_map);
+    free_map(&map);
     free_assets_array(assets);
-    SDL_DestroyTexture(pause_layer);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
 
     return EXIT_SUCCESS;

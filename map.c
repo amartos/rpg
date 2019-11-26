@@ -1,52 +1,51 @@
 #include "map.h"
 
 
-void map_malloc(Map *map)
+// This function allocate memory for a double array of unsigned int of size
+// [maxy][maxy],, initializes it and returns the adress.
+static unsigned int** double_array_malloc(
+        unsigned int const maxx,
+        unsigned int const maxy
+        )
 {
-    unsigned int i,j,t;
-    size_t size;
+    unsigned int x, y, **submap;
 
-    size = sizeof(unsigned int *) * map->maxy;
-    MALLOC(map->collisions, size, MAP_MALLOC_FAILURE, NULL);
-    MALLOC(map->cost, size, MAP_MALLOC_FAILURE, NULL);
-    MALLOC(map->weather, size, MAP_MALLOC_FAILURE, NULL);
-    for(j=0;j<map->maxy;j++)
+    MALLOC(submap, sizeof(unsigned int *) * maxy, MAP_MALLOC_FAILURE, NULL);
+    for(y=0;y<maxy;y++)
     {
-        size = sizeof(unsigned int) * map->maxx;
-        MALLOC(map->collisions[j], size, MAP_MALLOC_FAILURE, NULL);
-        MALLOC(map->cost[j], size, MAP_MALLOC_FAILURE, NULL);
-        MALLOC(map->weather[j], size, MAP_MALLOC_FAILURE, NULL);
-
-        for (i=0;i<map->maxx;i++)
-        {
-            map->collisions[j][i] = 0;
-            map->cost[j][i] = 0;
-            map->weather[j][i] = 0;
-        }
+        MALLOC(submap[y], sizeof(unsigned int) * maxx, MAP_MALLOC_FAILURE, NULL);
+        for (x=0;x<maxx;x++)
+            submap[y][x] = 0;
     }
+    return submap;
+}
 
-    size = sizeof(unsigned int *) * MAX_LEVELS;
-    MALLOC(map->tiles, size, MAP_MALLOC_FAILURE, NULL);
-    for (t=0;t<MAX_LEVELS;t++)
-    {
-        size = sizeof(unsigned int *) * map->maxy;
-        MALLOC(map->tiles[t], size, MAP_MALLOC_FAILURE, NULL);
-        for(j=0;j<map->maxy;j++)
-        {
-            size = sizeof(unsigned int) * map->maxx;
-            MALLOC(map->tiles[t][j], size, MAP_MALLOC_FAILURE, NULL);
-            for (i=0;i<map->maxx;i++)
-                map->tiles[t][j][i] = 0;
-        }
-    }
+// This function allocates memory to each array of the Map structure.
+static void map_malloc(Map *map)
+{
+    unsigned int l;
+
+    map->collisions = double_array_malloc(map->maxx, map->maxy);
+    map->cost = double_array_malloc(map->maxx, map->maxy);
+    map->weather = double_array_malloc(map->maxx, map->maxy);
+
+    MALLOC(map->tiles, sizeof(unsigned int *) * MAX_LEVELS, MAP_MALLOC_FAILURE, NULL);
+    for (l=0;l<MAX_LEVELS;l++)
+        map->tiles[l] = double_array_malloc(map->maxx, map->maxy);
 }
 
 void init_map(Map *map, char map_name[])
 {
+    // usually the letter l is used for the loops in tiles level, but the DB
+    // loops need the letter i.
     unsigned int x, y, i;
     char query[100] = {0};
+
+    // The DB path is defined in the database module
     INIT_DB
 
+    // Here we check the size (x and y) of the map in DB.
+    // It is used for malloc.
     sprintf(query, "SELECT * FROM maps where name='%s';", map_name);
     QUERY_DB(query)
         map->maxx = GET_QUERY_INT(2) + 1;
@@ -55,9 +54,14 @@ void init_map(Map *map, char map_name[])
 
     map_malloc(map);
 
+    // Here we fill the map with the infos from DB.
     sprintf(query, "SELECT * FROM %s;", map_name);
     QUERY_DB(query)
     {
+        // For each tile in the map_name table:
+        // x|y|collide|cost|weather|tiles0|tiles1...
+        // tiles are idendified by a hex number between 0 and 0xFFFF and should
+        // correspond to the id of the images table (see assets module).
         x = GET_QUERY_INT(0);
         y = GET_QUERY_INT(1);
         map->collisions[y][x] = GET_QUERY_INT(2);
@@ -72,11 +76,11 @@ void init_map(Map *map, char map_name[])
 
 void free_map(Map *map)
 {
-    unsigned int t,j;
-    for (t=0;t<MAX_LEVELS;t++)
+    unsigned int l,y;
+    for (l=0;l<MAX_LEVELS;l++)
     {
-        for (j=0;j<map->maxy;j++)
-            free(map->tiles[t][j]);
+        for (y=0;y<map->maxy;y++)
+            free(map->tiles[l][y]);
     }
     free(map->tiles);
     free(map->collisions);

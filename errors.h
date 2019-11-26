@@ -1,16 +1,17 @@
 #ifndef RPG_ERRORS
 #define RPG_ERRORS
 
+#include "macros.h"
+#include "try_throw_catch.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "macros.h"
-#include "try_throw_catch.h"
-
-// structures
-// custom errors
+/* Custom errors definitions
+ * Starts at 1 to avoid some errors in the try_throw_catch module that does not
+ * handle well starting at 0 (see commit 88a5a63). */
 typedef enum Errors Errors;
 enum Errors
 {
@@ -29,7 +30,8 @@ enum Errors
     TEXTURE_MALLOC_FAILURE
 };
 
-// prototypes
+/* This function acts as an error logger and will take actions depending on the
+ * error - mainly exit the program with EXIT_FAILURE for some errors. */
 void handle_error(Errors const err_id, char const *message);
 
 #endif // define RPG_ERROR

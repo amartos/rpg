@@ -22,8 +22,11 @@ void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
     char path[50] = {0}, id_str[10] = {0};
     INIT_DB
 
+    /* In the DB, the columns should be:
+     * id < 0xFFFF | asset type | file path | number of frames | velocity */
     QUERY_DB("SELECT * FROM images;")
     {
+        // IDs are basically numbers in hexadecimal between 0x0 and 0xFFFF.
         id = GET_QUERY_INT(0);
         sprintf(id_str, "id: %04X", id);
 

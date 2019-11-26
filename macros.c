@@ -8,10 +8,23 @@ Bool is_empty_string(char const string[])
 
 Bool is_same_double(double const a, double const b)
 {
-    Bool same = FALSE;
     double epsilon = 1/pow(10, DOUBLE_PRECISION);
     if (fabs(a - b) < epsilon)
-        same = TRUE;
-    return same;
+        return TRUE;
+    return FALSE;
 }
 
+Bool convert_to_bool(int const number)
+{
+    return number == 0 ? FALSE : TRUE;
+}
+
+double degrees(double radians)
+{
+    return radians*180/M_PI;
+}
+
+double radians(double degrees)
+{
+    return degrees*M_PI/180;
+}

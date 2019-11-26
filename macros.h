@@ -3,75 +3,44 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <string.h>
+#include <math.h>
 
 
-// ------------------------------------
-// Coding stuff
-// ------------------------------------
-
-#define get_name(var)  #var // get var name
-#define MAX_SIZE_LINE 1000
-#define DOUBLE_PRECISION 2
-
+// Define a macro for memory allocation repeated code
 #define MALLOC(p, s, e, m) \
     TRY{p = malloc(s); if (p == NULL) {THROW(e);}} \
     CATCH_HANDLE(e, m) ETRY;
 
+// Bool is defined as an enum to be used as a type returned by functions
 typedef enum Bool Bool;
 enum Bool
 {
-    FALSE = 0,
+    FALSE = 0, // ensure FALSE is 0
     TRUE = 1
 };
 
-// ------------------------------------
-// Images
-// ------------------------------------
+/* Returns FALSE for 0, TRUE for else. This function ensures that any number is
+ * converted to TRUE (1), instead of the number. */
+Bool convert_to_bool(int const number);
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
-#define SCREEN_BPP 32
-#define FPS 120
-#define FRAMERATE 1000/FPS
-#define COLOR_PALETTE 3
-#define BG_COLOR 0xFF, 0xFF, 0xFF
-
-typedef enum ColorChannels ColorChannels;
-enum ColorChannels {R, G, B};
-
-// This is the struct used to define the game color palette to be applied to
-// greys sprites
-typedef enum ColorPalette ColorPalette;
-enum ColorPalette 
-{
-    GREEN,
-    RED,
-    BLUE,
-    YELLOW
-};
-
-// ------------------------------------
-// Characters
-// ------------------------------------
-
-// This describes the character's image on screen
-#define SPRITES_WIDTH 32
-#define SPRITES_HEIGHT 32
-#define COLLISION_BOX_OFFSET_X 4
-#define COLLISION_BOX_OFFSET_Y 28
-#define COLLISION_BOX_WIDTH (SPRITES_WIDTH - 2 * COLLISION_BOX_OFFSET_X) // left & right
-#define COLLISION_BOX_HEIGHT (SPRITES_HEIGHT - COLLISION_BOX_OFFSET_Y)
-
-// ------------------------------------
-// Maps
-// ------------------------------------
-
-#define MAX_CHARACTERS 4
-
-// Prototypes
+// Returns TRUE if string is empty
 Bool is_empty_string(char const string[]);
+
+/* Define how many numbers after floating points are considered to compare
+ * doubles. */
+#define DOUBLE_PRECISION 2
+
+/* Returns TRUE if double a == double b up to 10^-DOUBLE_PRECISION
+ * This function is needed to circumvent floating numbers comparison issue.
+ * see here for an explanation:
+ * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ */
 Bool is_same_double(double const a, double const b);
+
+// Convert degrees to radians
+double degrees(double radians);
+
+// Convert radians to degrees
+double radians(double degrees);
 
 #endif // define RPG_MACROS

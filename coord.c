@@ -12,6 +12,14 @@ void reset_coord(Coord *coord)
     init_coord(coord);
 }
 
+Coord sum_coord(Coord const a, Coord const b)
+{
+    Coord sum; init_coord(&sum);
+    sum.x = a.x + b.x;
+    sum.y = a.y + b.y;
+    return sum;
+}
+
 Coord int_to_coord(unsigned int const x, unsigned int const y)
 {
     Coord coord; init_coord(&coord);
@@ -19,144 +27,96 @@ Coord int_to_coord(unsigned int const x, unsigned int const y)
     return coord;
 }
 
-Coord isometric_to_cartesian(Coord const isometric, Camera const camera)
+Coord click_to_tile(Coord const click)
 {
-    Coord cartesian; init_coord(&cartesian);
-    cartesian.x = isometric.y/TILES_HEIGHT + (isometric.x - SCREEN_WIDTH/2)/TILES_WIDTH;
-    cartesian.y = isometric.y/TILES_HEIGHT - (isometric.x - SCREEN_WIDTH/2)/TILES_WIDTH;
-    return cartesian;
-}
-
-Coord cartesian_to_isometric(Coord const cartesian, Camera const camera)
-{
-    Coord isometric; init_coord(&isometric);
-    isometric.x = (cartesian.x - cartesian.y) * TILES_WIDTH/2 + SCREEN_WIDTH/2;
-    isometric.y = (cartesian.x + cartesian.y) * TILES_HEIGHT/2;
-    return isometric;
-}
-
-Coord event_to_coord(Sint32 x, Sint32 y, Camera const camera)
-{
-    Coord map; init_coord(&map);
-    map.x = x; map.y = y;
-    map = isometric_to_cartesian(map, camera);
-    map.x += camera.scroll.x; map.y += camera.scroll.y; // scroll correction
-    return map;
-}
-
-SDL_Rect coord_to_isosdlrect(Coord const coord, Camera const camera)
-{
-
-    Coord isometrified = coord;
-    isometrified.x -= camera.scroll.x; isometrified.y -= camera.scroll.y; // scroll correction
-    isometrified = cartesian_to_isometric(isometrified, camera);
-    SDL_Rect rect;
-    rect.x = isometrified.x; rect.y = isometrified.y;
-    rect.w = TILES_WIDTH; rect.h = TILES_HEIGHT;
-    return rect;
+    unsigned int x = click.x, y = click.y;
+    Coord tile = int_to_coord(x, y);
+    return tile;
 }
 
 Bool is_coord_empty(Coord const coord)
 {
-    if (is_same_double(coord.x, 0.000) && is_same_double(coord.y, 0.000))
-        return TRUE;
-    return FALSE;
+    Coord null; init_coord(&null);
+    return is_same_coord(coord, null);
 }
 
 Bool is_same_coord(Coord const a, Coord const b)
 {
-    Bool same = FALSE;
-    if (
-            is_same_double(a.x, b.x) &&
-            is_same_double(a.y, b.y)
-       )
-        same = TRUE;
-    return same;
+    return is_same_double(a.x, b.x) && is_same_double(a.y, b.y);
 }
 
 Bool is_within_tile(Coord const a, Coord const b)
 {
-    Bool within = FALSE;
-    unsigned int ax = a.x, ay = a.y;
-    unsigned int bx = b.x, by = b.y;
-    if (ax == bx && ay == by)
-        within = TRUE;
-    return within;
+    /* to test if a is within b or reverse, we just test if they are from the
+     * same tile. For this to work, one of them should be the tile coords. */
+    Coord a_tile = click_to_tile(a);
+    Coord b_tile = click_to_tile(b);
+    return is_same_coord(a_tile, b_tile);
 }
 
 Bool is_colliding(Coord const goal, unsigned int** const collision_map, Coord const max_coord)
 {
     unsigned int x = goal.x, y = goal.y;
     if(!is_out_of_map(goal, max_coord))
-        return collision_map[y][x];
+        return convert_to_bool(collision_map[y][x]);
     return TRUE;
 }
 
-Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Coord const max_coord)
+Bool are_corners_colliding(
+        Coord const start,
+        Coord const goal,
+        unsigned int** const collision_map,
+        Coord const max_coord
+        )
 {
-    Coord edge1; init_coord(&edge1);
-    Coord edge2; init_coord(&edge2);
+    /* 0 --------> max_coord.x - 1
+     * | NW N NE
+     * |  W . E
+     * | SW S SE
+     * v
+     * max_coord.y - 1 */
+
+    /* For this function to work we need to check if a corner is near the
+     * diagonal path. This translates to checking if the common neighbours of
+     * the start and goal squares are colliding (aka walls). */
+
     Cardinals direction = determine_direction(start, goal);
-    Bool collide_edge1 = FALSE;
-    Bool collide_edge2 = FALSE;
 
-    switch (direction)
-    {
-        case NW:
-            // North
-            edge1.x = start.x;
-            edge1.y = start.y - 1;
-
-            // West
-            edge2.x = start.x - 1;
-            edge2.y = start.y;
-            break;
-        case NE:
-            // North
-            edge1.x = start.x;
-            edge1.y = start.y - 1;
-
-            // East
-            edge2.x = start.x + 1;
-            edge2.y = start.y;
-            break;
-        case SW:
-            // South
-            edge1.x = start.x;
-            edge1.y = start.y + 1;
-
-            // West
-            edge2.x = start.x - 1;
-            edge2.y = start.y;
-            break;
-        case SE:
-            // North
-            edge1.x = start.x;
-            edge1.y = start.y + 1;
-
-            // East
-            edge2.x = start.x + 1;
-            edge2.y = start.y;
-            break;
-        default:
-            return FALSE;
-    }
-
-    collide_edge1 = is_colliding(edge1, collision_map, max_coord);
-    collide_edge2 = is_colliding(edge2, collision_map, max_coord);
-    if (collide_edge1 || collide_edge2)
-        return TRUE;
-    else
+    /* N, S, W and E directions are not concerned by edge collision
+     * The way the Struct is made makes these cardinals as even numbers */
+    if (direction % 2 == 0)
         return FALSE;
+
+    /* The maximus and decumanus vars are the Coord vars for the neighbours.
+     * maximus is for the N/S axis (it is either the North neighbour or South
+     * neighbour), decumanus for W/E (same, West or East).
+     * see here for var names signification:
+     * https://en.wikipedia.org/wiki/Cardo#Etymology */
+
+    /* For the N/S axis, the neighbours' x coord will never change.
+     * The y axis test checks if the neighbour is North or South. */
+    Coord maximus; init_coord(&maximus);
+    maximus.x = start.x;
+    maximus.y = direction == NW || direction == NE ? start.y - 1 : start.y + 1;
+
+    /* For the W/E axis, it is the neighbours' y coord that does not change.
+     * The x axis test checks if the neighbour is West or East. */
+    Coord decumanus; init_coord(&decumanus);
+    decumanus.x = direction == NW || direction == SW ? start.x - 1 : start.x + 1;
+    decumanus.y = start.y;
+
+    Bool maximus_collide = is_colliding(maximus, collision_map, max_coord);
+    Bool decumanus_collide = is_colliding(decumanus, collision_map, max_coord);
+
+    return maximus_collide || decumanus_collide;
 }
 
 Bool is_out_of_map(Coord const goal, Coord const max_coord)
 {
-    Bool is_out = FALSE;
-    if (goal.x < 0 || goal.y < 0 || goal.x >= max_coord.x || goal.y >= max_coord.y)
-        is_out = TRUE;
-
-    return is_out;
+    return goal.x < 0 ||
+           goal.y < 0 ||
+           goal.x >= max_coord.x ||
+           goal.y >= max_coord.y;
 }
 
 Bool is_pos_legal(
@@ -166,34 +126,32 @@ Bool is_pos_legal(
         unsigned int** const collisions
         )
 {
-    if (
-            !is_same_coord(position, char_pos) &&
-            !is_out_of_map(position, max_coord) &&
-            !is_colliding(position, collisions, max_coord)
-        )
-        return TRUE;
-    else
-        return FALSE;
+    return !is_same_coord(position, char_pos) &&
+           !is_out_of_map(position, max_coord) &&
+           !is_colliding(position, collisions, max_coord);
 }
 
 Cardinals determine_direction(Coord const start, Coord const goal)
 {
-    double angle = atan2(goal.y - start.y, goal.x - start.x)*180/M_PI;
+    /* The 8 cardinals are placed at some specific points on a circle. Thus, it
+     * is possible to calculate the direction by deducing the position of the
+     * goal on the circle with start as the center. In math, the circle coords
+     * are defined as usual, with the Y axis going up. */
+
+    /* First, we need to calculate the angle between the position "start.x+1"
+     * and goal with start as the edge. This is done by using atan2, which takes
+     * an x and y coord in the math system. Here start coords are substracted
+     * from goal as it is the center of the circle. atan2 returns an angle in
+     * radius, converted in degrees by *180/PI. */
+    double angle = degrees(atan2(goal.y - start.y, goal.x - start.x));
+
+    /* The angle divided by 45 is a trick to get the cardinal corresponding
+     * number. However, we need to convert from the math coord system to the
+     * map coord system, by rotating by 90°. */
     int direction = round((90+angle) / 45);
-    // if -135°, it corresponds to the 7th value, but gives -1
-    if (direction < 0)
-        direction = 7;
+
+    // The angle conversion gives -1 for the 8th value because of a -135° angle
+    direction = direction < 0 ? 7 : direction;
+
     return direction;
-}
-
-void init_camera(Camera *camera)
-{
-    init_coord(&camera->scroll);
-    camera->scale = 1;
-}
-
-double scale(unsigned int const size, Camera const camera)
-{
-    double scaled = size * camera.scale;
-    return scaled;
 }
