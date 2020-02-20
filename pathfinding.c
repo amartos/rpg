@@ -31,36 +31,24 @@ static Bool is_queue_empty(unsigned int const max_array, Coord const queue[max_a
     return TRUE;
 }
 
-static unsigned int get_max_score_queued(
-        unsigned int const max_array,
-        Coord const queue[max_array],
-        unsigned int const maxx,
-        unsigned int const cost[][maxx]
+/* We use this function to merge the temp queue within the main queue
+ * at start_index of main queue. */
+static void merge_queue(
+        unsigned int start_index,
+        unsigned int stop_index,
+        Coord temp_queue[],
+        Coord main_queue[]
         )
 {
-    unsigned int i, x, y, max = 0;
-    for (i=0;i<max_array;i++)
+    unsigned int i, temp_index;
+    for (i=start_index;i<stop_index;i++)
     {
-        x = queue[i].x; y = queue[i].y;
-        max = cost[y][x] < max ? max : cost[y][x];
-    }
-    return max;
-}
-
-static void count_scores_queued(
-        unsigned int const max_array,
-        Coord const queue[max_array],
-        unsigned int const maxx,
-        unsigned int const cost[][maxx],
-        unsigned int const max_score,
-        unsigned int counts[max_score+1]
-        )
-{
-    unsigned int i, x, y;
-    for (i=0;i<max_array;i++)
-    {
-        x = queue[i].x; y = queue[i].y;
-        counts[cost[y][x]]++;
+        /* The temp queue starts at 0, thus the start_index is removed from the loop
+         * index var to obtain its own index. */
+        temp_index = i - start_index;
+        if (is_coord_empty(temp_queue[temp_index]))
+            break;
+        main_queue[i] = temp_queue[temp_index];
     }
 }
 
@@ -75,44 +63,84 @@ static void copy_queue(
         to_queue[i] = from_queue[i];
 }
 
-static void order_queue(
+// This is the implementation of the quick sorting algorithm for the queues.
+static void quick_sort(
         unsigned int const max_array,
         Coord queue[max_array],
         unsigned int const maxx,
         unsigned int const cost[][maxx]
         )
 {
-    unsigned int i, j, x, y, index = 0;
-    unsigned int max = get_max_score_queued(max_array, queue, maxx, cost);
-    unsigned int counts[max+1];
-    for (i=0;i<=max;i++)
-        counts[i] = 0;
+    // In case the array is of size 1, just stops the recursion.
+    if (max_array <= 1)
+        return;
 
-    Coord new_queue[max_array];
+    unsigned int i, x, y;
+
+    /* Here is the pivot definition. Given the pathfinding algorithm, the pivot
+     * has a lot of chances to be a set of NULL coords, with a score of 0. */
+    unsigned int ipivot = max_array/2;
+    x = queue[ipivot].x; y = queue[ipivot].y;
+    unsigned int pivot_cost = cost[y][x];
+
+    /* These are the 3 parts that we are interested in. On the "left" side of
+     * the queue we want the costs lower than the pivot's, the center are the
+     * same costs as the pivot, and the right are the bigger costs than the
+     * pivots.
+     * All empty coords are ignored, but NOT coords with a cost of 0. */
+    unsigned int ileft = 0, icenter = 0, iright = 0;
+    Coord left[max_array], center[max_array], right[max_array];
     for (i=0;i<max_array;i++)
-        init_coord(&new_queue[i]);
+    {
+        init_coord(&left[i]);
+        init_coord(&center[i]);
+        init_coord(&right[i]);
+    }
 
-    count_scores_queued(max_array, queue, maxx, cost, max, counts);
+    /* This is a temporary queue we fill with the ordered coords, and then use
+     * it to replace the queue. */
+    Coord ordered_queue[max_array];
+    for (i=0;i<max_array;i++)
+        init_coord(&ordered_queue[i]);
 
-    /* To sort the queue we set a loop from the lowest score (1) to the highest
-     * score (max), and take out the coord in queue in order and put them in a
-     * new queue. This new queue then replaces the former. */
-    for (i=1;i<=max;i++) // score loop
-        if (counts[i])
-            for (j=0;j<max_array;j++) // queue loop
-            {
-                x = queue[j].x; y = queue[j].y;
-                if (cost[y][x] == i)
-                {
-                    new_queue[index] = queue[j];
-                    index++;
-                    counts[i]--;
-                    if (counts[i] <= 0)
-                        break;
-                }
-            }
+    // This is the main loop of the algo, which analyses the queue.
+    for (i=0;i<max_array;i++)
+    {
+        if (is_coord_empty(queue[i]))
+            continue;
 
-    copy_queue(max_array, new_queue, queue);
+        x = queue[i].x; y = queue[i].y;
+        if (cost[y][x] < pivot_cost)
+        {
+            left[ileft] = queue[i];
+            ileft++;
+        }
+        else if (cost[y][x] == pivot_cost)
+        {
+            center[icenter] = queue[i];
+            icenter++;
+        }
+        else if (cost[y][x] > pivot_cost)
+        {
+            right[iright] = queue[i];
+            iright++;
+        }
+    }
+
+    /* This is the recursion part.
+     * The center is ignored, as all the costs scores are the same, == to the
+     * pivot cost. */
+    quick_sort(ileft, left, maxx, cost);
+    quick_sort(iright, right, maxx, cost);
+
+    /* Here we merge the 3 arrays, left, center and right, in the ordered_queue
+     * array. Empty coords are ignored too. */
+    merge_queue(0, ileft, left, ordered_queue);
+    merge_queue(ileft, ileft+icenter, center, ordered_queue);
+    merge_queue(ileft+icenter, ileft+icenter+iright, right, ordered_queue);
+
+    // We replace the queue by the ordered queue.
+    copy_queue(max_array, ordered_queue, queue);
 }
 
 static void get_neighbours(Coord next[8], Coord const current, Coord const max_coord)
@@ -178,11 +206,12 @@ static void pathfinding(
 {
     unsigned int i, x, y, new_cost;
 
-    /* max_array is the maximum number of squares in the map. The worst case is
-     * the queue being filled with each one of them.
-     * This case should never happen in reality, but calculating the max number
-     * of squares set in queue at worse is complicated. */
-    unsigned int max_array = max_coord.x * max_coord.y;
+    /* max_array is the maximum number of squares in the map divide by 10.
+     * The worst case is the queue being filled with each one of them. In
+     * practice, the queue is never filled with more than 300ish for a map of
+     * more than 13k tiles. Division by 10 keeps a security margin, with a
+     * significant increase in speed. */
+    unsigned int max_array = max_coord.x * max_coord.y/10;
 
     Coord queue[max_array];
     for (i=0;i<max_array;i++)
@@ -238,7 +267,7 @@ static void pathfinding(
         else if (is_queue_empty(max_array, queue))
             break;
 
-        order_queue(max_array, queue, maxx, cost);
+        quick_sort(max_array, queue, maxx, cost);
     }
 }
 
