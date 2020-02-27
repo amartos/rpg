@@ -3,7 +3,7 @@
 
 #include "macros.h"
 
-#include "coord.h"
+#include "navigation.h"
 #include "images.h"
 
 #include <stdio.h>

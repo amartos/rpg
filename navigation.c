@@ -1,4 +1,4 @@
-#include "coord.h"
+#include "navigation.h"
 
 
 void init_coord(Coord *coord)
@@ -54,19 +54,18 @@ Bool is_within_tile(Coord const a, Coord const b)
     return is_same_coord(a_tile, b_tile);
 }
 
-Bool is_colliding(Coord const goal, unsigned int** const collision_map, Coord const max_coord)
+Bool is_colliding(Coord const goal, Map const map)
 {
     unsigned int x = goal.x, y = goal.y;
-    if(!is_out_of_map(goal, max_coord))
-        return convert_to_bool(collision_map[y][x]);
+    if(!is_out_of_map(goal, map))
+        return convert_to_bool(map.collisions[y][x]);
     return TRUE;
 }
 
 Bool are_corners_colliding(
         Coord const start,
         Coord const goal,
-        unsigned int** const collision_map,
-        Coord const max_coord
+        Map const map
         )
 {
     /* 0 --------> max_coord.x - 1
@@ -105,30 +104,29 @@ Bool are_corners_colliding(
     decumanus.x = direction == NW || direction == SW ? start.x - 1 : start.x + 1;
     decumanus.y = start.y;
 
-    Bool maximus_collide = is_colliding(maximus, collision_map, max_coord);
-    Bool decumanus_collide = is_colliding(decumanus, collision_map, max_coord);
+    Bool maximus_collide = is_colliding(maximus, map);
+    Bool decumanus_collide = is_colliding(decumanus, map);
 
     return maximus_collide || decumanus_collide;
 }
 
-Bool is_out_of_map(Coord const goal, Coord const max_coord)
+Bool is_out_of_map(Coord const goal, Map const map)
 {
     return goal.x < 0 ||
            goal.y < 0 ||
-           goal.x >= max_coord.x ||
-           goal.y >= max_coord.y;
+           goal.x >= map.max.x ||
+           goal.y >= map.max.y;
 }
 
 Bool is_pos_legal(
         Coord const position,
         Coord const char_pos,
-        Coord const max_coord,
-        unsigned int** const collisions
+        Map const map
         )
 {
     return !is_same_coord(position, char_pos) &&
-           !is_out_of_map(position, max_coord) &&
-           !is_colliding(position, collisions, max_coord);
+           !is_out_of_map(position, map) &&
+           !is_colliding(position, map);
 }
 
 Cardinals determine_direction(Coord const start, Coord const goal)
@@ -154,4 +152,96 @@ Cardinals determine_direction(Coord const start, Coord const goal)
     direction = direction < 0 ? 7 : direction;
 
     return direction;
+}
+
+/* This function allocate memory for a double array of unsigned int of size
+ * [maxy][maxy],, initializes it and returns the adress. */
+static unsigned int** double_array_malloc(
+        unsigned int const maxx,
+        unsigned int const maxy
+        )
+{
+    unsigned int x, y, **submap;
+
+    MALLOC(submap, sizeof(unsigned int *) * maxy, MAP_MALLOC_FAILURE, NULL);
+    for(y=0;y<maxy;y++)
+    {
+        MALLOC(submap[y], sizeof(unsigned int) * maxx, MAP_MALLOC_FAILURE, NULL);
+        for (x=0;x<maxx;x++)
+            submap[y][x] = 0;
+    }
+    return submap;
+}
+
+// This function allocates memory to each array of the Map structure.
+static void map_malloc(Map *map)
+{
+    unsigned int l;
+
+    map->collisions = double_array_malloc((int)map->max.x, (int)map->max.y);
+    map->cost = double_array_malloc((int)map->max.x, (int)map->max.y);
+    map->weather = double_array_malloc((int)map->max.x, (int)map->max.y);
+
+    MALLOC(map->tiles, sizeof(unsigned int *) * MAX_LEVELS, MAP_MALLOC_FAILURE, NULL);
+    for (l=0;l<MAX_LEVELS;l++)
+        map->tiles[l] = double_array_malloc((int)map->max.x, (int)map->max.y);
+}
+
+void init_map(Map *map, char map_name[])
+{
+    /* usually the letter l is used for the loops in tiles level, but the DB
+     * loops need the letter i. */
+    unsigned int x, y, i;
+    char query[100] = {0};
+
+    // The DB path is defined in the database module
+    INIT_DB
+
+    /* Here we check the size (x and y) of the map in DB.
+     * It is used for malloc. */
+    sprintf(query, "SELECT * FROM maps where name='%s';", map_name);
+    QUERY_DB(query)
+        map->max = int_to_coord(GET_QUERY_INT(2) + 1, GET_QUERY_INT(3) + 1);
+    END_QUERY
+
+    map_malloc(map);
+
+    // Here we fill the map with the infos from DB.
+    sprintf(query, "SELECT * FROM %s;", map_name);
+    QUERY_DB(query)
+    {
+        /* For each tile in the map_name table:
+         * x|y|collide|cost|weather|tiles0|tiles1...
+         * tiles are idendified by a hex number between 0 and 0xFFFF and should
+         * correspond to the id of the images table (see assets module). */
+        x = GET_QUERY_INT(0);
+        y = GET_QUERY_INT(1);
+        map->collisions[y][x] = GET_QUERY_INT(2);
+        map->cost[y][x] = GET_QUERY_INT(3);
+        map->weather[y][x] = GET_QUERY_INT(4);
+        for (i=0;i<MAX_LEVELS;i++)
+            map->tiles[i][y][x] = GET_QUERY_INT(5+i);
+    }
+    END_QUERY
+    CLOSE_DB
+}
+
+void free_map(Map *map)
+{
+    unsigned int l,y;
+    for (l=0;l<MAX_LEVELS;l++)
+    {
+        for (y=0;y<map->max.y;y++)
+            free(map->tiles[l][y]);
+    }
+    free(map->tiles);
+    free(map->collisions);
+    free(map->cost);
+    free(map->weather);
+}
+
+void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
+{
+    map->max = int_to_coord(maxx, maxy);
+    map_malloc(map);
 }

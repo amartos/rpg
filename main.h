@@ -5,11 +5,10 @@
 #include "try_throw_catch.h"
 #include "macros.h"
 
-#include "coord.h"
+#include "navigation.h"
 #include "screen.h"
 #include "animation.h"
 #include "movement.h"
-#include "map.h"
 #include "event_handler.h"
 #include "assets.h"
 #include "database.h"

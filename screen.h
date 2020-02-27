@@ -4,8 +4,7 @@
 #include "errors.h"
 #include "macros.h"
 
-#include "coord.h"
-#include "map.h"
+#include "navigation.h"
 #include "assets.h"
 #include "images.h" // for FRAMES dim
 #include "animation.h" // only for FPS

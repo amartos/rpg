@@ -143,14 +143,14 @@ static void quick_sort(
     copy_queue(max_array, ordered_queue, queue);
 }
 
-static void get_neighbours(Coord next[8], Coord const current, Coord const max_coord)
+static void get_neighbours(Coord next[8], Coord const current, Map const map)
 {
-    /* 0 --------> max_coord.x - 1
+    /* 0 --------> map.max.x - 1
      * | NW N NE
      * |  W . E
      * | SW S SE
      * v
-     * max_coord.y - 1 */
+     * map.max.y - 1 */
 
     /* All conditionals are done in case the current coord correspond to one
      * of the edge of the map. */
@@ -158,20 +158,20 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
     next[N].x = current.x;
     next[N].y = current.y > 0 ? current.y - 1 : current.y;
 
-    next[NE].x = current.x < max_coord.x - 1 ? current.x + 1 : current.x;
+    next[NE].x = current.x < map.max.x - 1 ? current.x + 1 : current.x;
     next[NE].y = current.y > 0 ? current.y - 1 : current.y;
 
-    next[E].x = current.x < max_coord.x - 1 ?  current.x + 1 : current.x;
+    next[E].x = current.x < map.max.x - 1 ?  current.x + 1 : current.x;
     next[E].y = current.y;
 
-    next[SE].x = current.x < max_coord.x - 1 ? current.x + 1 : current.x;
-    next[SE].y = current.y < max_coord.y - 1 ? current.y + 1 : current.y;
+    next[SE].x = current.x < map.max.x - 1 ? current.x + 1 : current.x;
+    next[SE].y = current.y < map.max.y - 1 ? current.y + 1 : current.y;
 
     next[S].x = current.x;
-    next[S].y = current.y < max_coord.y - 1 ? current.y + 1 : current.y;
+    next[S].y = current.y < map.max.y - 1 ? current.y + 1 : current.y;
 
     next[SW].x = current.x > 0 ? current.x - 1 : current.x;
-    next[SW].y = current.y < max_coord.y - 1 ? current.y + 1 : current.y;
+    next[SW].y = current.y < map.max.y - 1 ? current.y + 1 : current.y;
 
     next[W].x = current.x > 0 ? current.x - 1 : current.x;
     next[W].y = current.y;
@@ -183,14 +183,14 @@ static void get_neighbours(Coord next[8], Coord const current, Coord const max_c
 static unsigned int calculate_cost(
         unsigned int current_cost,
         Coord const next_coord,
-        unsigned int** const cost_map,
+        Map const map,
         Bool const a_star,
         Coord const goal
         )
 {
     unsigned int x = next_coord.x, y = next_coord.y;
     unsigned int distance = a_star ? abs(goal.x - next_coord.x) + abs(goal.y - next_coord.y) : 0;
-    unsigned int next_cost = 1 + current_cost + cost_map[y][x] + distance;
+    unsigned int next_cost = 1 + current_cost + map.cost[y][x] + distance;
     return next_cost;
 }
 
@@ -199,9 +199,7 @@ static void pathfinding(
         unsigned int const maxx,
         Coord came_from[][maxx],
         Coord start, Coord goal,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
+        Map const map
         )
 {
     unsigned int i, x, y, new_cost;
@@ -211,7 +209,7 @@ static void pathfinding(
      * practice, the queue is never filled with more than 300ish for a map of
      * more than 13k tiles. Division by 10 keeps a security margin, with a
      * significant increase in speed. */
-    unsigned int max_array = max_coord.x * max_coord.y/10;
+    unsigned int max_array = map.max.x * map.max.y/10;
 
     Coord queue[max_array];
     for (i=0;i<max_array;i++)
@@ -224,7 +222,7 @@ static void pathfinding(
         init_coord(&next[i]);
     unsigned int nextx = 0, nexty = 0;
 
-    unsigned int maxy = max_coord.y, cost[maxy][maxx];
+    unsigned int maxy = map.max.y, cost[maxy][maxx];
     for (y=0;y<maxy;y++)
         for (x=0;x<maxx;x++)
             cost[y][x] = 0;
@@ -246,16 +244,16 @@ static void pathfinding(
             break;
         else if (!is_coord_empty(current))
         {
-            get_neighbours(next, current, max_coord);
+            get_neighbours(next, current, map);
 
             for (i=N;i<=NW;i++)
                 if (
-                    is_pos_legal(next[i], start, max_coord, collision_map) &&
-                    !are_corners_colliding(current, next[i], collision_map, max_coord)
+                    is_pos_legal(next[i], start, map) &&
+                    !are_corners_colliding(current, next[i], map)
                     )
                 {
                     nextx = next[i].x; nexty = next[i].y;
-                    new_cost = calculate_cost(cost[curry][currx], next[i], cost_map, a_star, goal);
+                    new_cost = calculate_cost(cost[curry][currx], next[i], map, a_star, goal);
                     if (is_coord_empty(came_from[nexty][nextx]) || new_cost < cost[nexty][nextx])
                     {
                         came_from[nexty][nextx] = current;
@@ -275,32 +273,26 @@ static void dijkstra(
         unsigned int const maxx,
         Coord came_from[][maxx],
         Coord start, Coord goal,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
+        Map const map
         )
 {
-    pathfinding(FALSE, maxx, came_from, start, goal, max_coord, collision_map, cost_map);
+    pathfinding(FALSE, maxx, came_from, start, goal, map);
 }
 
 static void a_star(
         unsigned int const maxx,
         Coord came_from[][maxx],
         Coord start, Coord goal,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
+        Map const map
         )
 {
-    pathfinding(TRUE, maxx, came_from, start, goal, max_coord, collision_map, cost_map);
+    pathfinding(TRUE, maxx, came_from, start, goal, map);
 }
 
 unsigned int find_path(
         Coord path[MAX_PATH_NODES],
         Coord const precise_start, Coord const precise_goal,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
+        Map const map
         )
 {
     unsigned int i, x, y, nodes = 1;
@@ -308,13 +300,13 @@ unsigned int find_path(
     Coord start = click_to_tile(precise_start);
     Coord goal = click_to_tile(precise_goal);
 
-    unsigned int maxx = max_coord.x, maxy = max_coord.y;
+    unsigned int maxx = map.max.x, maxy = map.max.y;
     Coord came_from[maxy][maxx];
     for (y=0;y<maxy;y++)
         for (x=0;x<maxx;x++)
             init_coord(&came_from[y][x]);
 
-    a_star(maxx, came_from, start, goal, max_coord, collision_map, cost_map);
+    a_star(maxx, came_from, start, goal, map);
 
     path[0] = precise_goal;
     Coord current = goal;

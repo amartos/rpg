@@ -17,8 +17,6 @@ int main(int argc, char *argv[])
      * TODO: load the last map the character were on when saved */
     Map map; init_map(&map, "test_map");
     Camera camera; init_camera(&camera); center_camera(&camera);
-    Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.maxx; max_coord.y = map.maxy;
 
     /* Assets loading. This contains all infos for all the objects that will be
      * shown on screen. */
@@ -62,7 +60,7 @@ int main(int argc, char *argv[])
             for (i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
                 if (assets[i].movement->moving && !paused)
                 {
-                    move(assets[i].movement, max_coord, map.collisions, map.cost);
+                    move(assets[i].movement, map);
                     check_animation_frame(assets[i].animation, time);
                 }
 

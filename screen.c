@@ -123,7 +123,6 @@ static void apply_tiles(
     SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord positions; init_coord(&positions);
     Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.maxx; max_coord.y = map.maxy;
 
     /* This defines the minimum and maximum position visible on screen.
      * The positions starts at -1 and goes to max to ensure that the tile on
@@ -138,7 +137,7 @@ static void apply_tiles(
         for (x=minx;x<=maxx;x++)
         {
             positions.x = x; positions.y = y;
-            if (!is_out_of_map(positions, max_coord))
+            if (!is_out_of_map(positions, map))
             {
                 image_rect = coord_to_isosdlrect(positions, camera);
 
@@ -197,14 +196,12 @@ static void apply_characters(
     Coord char_position; init_coord(&char_position);
     State state = MOVE;
     Cardinals direction = N;
-    Coord max_coord; init_coord(&max_coord);
-    max_coord.x = map.maxx; max_coord.y = map.maxy;
 
     for (id=FIRST_CHAR_ID;id<=LAST_CHAR_ID;id++)
     {
         char_position = assets[id].movement->position;
         if (
-                !is_out_of_map(char_position, max_coord) &&
+                !is_out_of_map(char_position, map) &&
                 is_in_sight(char_position, camera)
             )
         {

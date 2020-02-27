@@ -194,12 +194,7 @@ void stop_movement(Movement *movement)
     movement->moving = FALSE;
 }
 
-void move(
-        Movement *movement,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
-        )
+void move(Movement *movement, Map const map)
 {
     switch (movement->movement_type)
     {
@@ -209,9 +204,7 @@ void move(
                     movement->path,
                     movement->position,
                     movement->path[movement->current_node],
-                    max_coord,
-                    collision_map,
-                    cost_map
+                    map
                     );
             if (nodes)
             {

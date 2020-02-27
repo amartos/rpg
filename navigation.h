@@ -1,11 +1,13 @@
-#ifndef RPG_COORD
-#define RPG_COORD
+#ifndef RPG_NAVIGATION
+#define RPG_NAVIGATION
 
 #include "errors.h"
 #include "macros.h"
+#include "database.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
 #include <SDL2/SDL.h>
 #include <math.h>
 
@@ -30,6 +32,33 @@ struct Coord
 {
     double x;
     double y;
+};
+
+/* The main Map structure.
+ * The map representation is:
+ * 0 --------> map.max.x - 1
+ * | NW N NE
+ * |  W . E
+ * | SW S SE
+ * v
+ * map.max.y - 1 */
+typedef struct Map Map;
+struct Map
+{
+    // max number of tiles for x and y
+    // the minimum is always == 0
+    Coord max;
+    unsigned int ***tiles; // image id for each tile
+    // This array is, for now, used as a Bool to determine collision (1 is
+    // colliding, 0 is not). In the future, different types of collision might
+    // be defined, thus needing ids instead of Bool.
+    // Moreover, using the same type as the others arrays of the Map simplifies
+    // code for malloc.
+    unsigned int **collisions; // Bool 
+    unsigned int **cost; // movement cost for each tile
+    // Weather ID for each tile. This might be modified in the future to
+    // integrate a third dimension (or more).
+    unsigned int **weather;
 };
 
 /* Function to initialize Coord struct.
@@ -65,21 +94,35 @@ Bool is_same_coord(Coord const a, Coord const b);
 Bool is_within_tile(Coord const a, Coord const b);
 
 // Returns TRUE if goal is whithin a collision tile.
-Bool is_colliding(Coord const goal, unsigned int** const collision_map, Coord const max_coord);
+Bool is_colliding(Coord const goal, Map const map);
 
 /* When doing a diagonal movement, at least one of the two common neighbours
  * squares between start and goal can be a colliding tile. Thus, the movement
  * pass through a corner, which seems not natural.
  * This function returns TRUE if there is a "corner" tile colliding. */
-Bool are_corners_colliding(Coord const start, Coord const goal, unsigned int** const collision_map, Coord const max_coord);
+Bool are_corners_colliding(Coord const start, Coord const goal, Map const map);
 
 // Returns TRUE if goal coord is out of map.
-Bool is_out_of_map(Coord const goal, Coord const max_coord);
+Bool is_out_of_map(Coord const goal, Map const map);
 
 // Returns FALSE if position if not walkable.
-Bool is_pos_legal(Coord const position, Coord const char_pos, Coord const max_coord, unsigned int** const collisions);
+Bool is_pos_legal(Coord const position, Coord const char_pos, Map const map);
 
 // Returns the cardinal value for the direction vector start -> goal.
 Cardinals determine_direction(Coord const start, Coord const goal);
 
-#endif // define RPG_COORD
+/* The main map initialization function. This NEEDS the map to be fully defined in
+ * the DB which path is defined in the database module. The map_name is used as
+ * a table name, and an entry key in the maps table.
+ * To know more about the DB tables, see the map_crator module. */
+void init_map(Map *map, char map_name[]);
+
+/* This function is used with the map_creator tool, to initialize an empty map
+ * of defined size. This is used only for malloc, as the map does not need to be
+ * in the DB. */
+void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy);
+
+// This function frees all arrays of the Map struct.
+void free_map(Map *map);
+
+#endif // define RPG_NAVIGATION

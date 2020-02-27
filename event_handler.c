@@ -189,8 +189,6 @@ static void handle_mouse_motion(
         Cursors *mouse
         )
 {
-    Coord max_coord = int_to_coord(map.maxx, map.maxy);
-
     // set cursor position for each cursor type
     for (unsigned int i=HOVER;i<=INVALID;i++)
         set_image_position(&assets[i].image->sdlrect, event.motion.x, event.motion.y);
@@ -198,7 +196,7 @@ static void handle_mouse_motion(
     // determine which cursor to show: either HOVER or INVALID
     Coord position = screen_to_coord(event.motion.x, event.motion.y, camera);
     *mouse = HOVER;
-    if (is_out_of_map(position, max_coord))
+    if (is_out_of_map(position, map))
         *mouse = INVALID;
 }
 
@@ -209,8 +207,6 @@ static void handle_mouse_click(
         Map const map
         )
 {
-    Coord max_coord = int_to_coord(map.maxx, map.maxy);
-
     /* We use two sets of coord, click will be used as a save and position will
      * be the one modified. */
     Coord click = screen_to_coord(event.button.x, event.button.y, camera);
@@ -219,7 +215,7 @@ static void handle_mouse_click(
     for (unsigned int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
     {
         position = click;
-        if (is_pos_legal(position, assets[i].movement->position, max_coord, map.collisions))
+        if (is_pos_legal(position, assets[i].movement->position, map))
         {
             stop_movement(assets[i].movement);
             deploy(&position, assets[i].movement, i-FIRST_CHAR_ID);

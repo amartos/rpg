@@ -3,8 +3,8 @@
 
 #include "macros.h"
 
-#include "coord.h"
-#include "map.h"
+#include "navigation.h"
+#include "images.h"
 #include "assets.h"
 #include "screen.h"
 

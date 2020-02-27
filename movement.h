@@ -4,7 +4,7 @@
 #include "errors.h"
 #include "macros.h"
 
-#include "coord.h"
+#include "navigation.h"
 #include "pathfinding.h"
 
 #include <stdio.h>
@@ -66,14 +66,9 @@ void deploy(Coord *position, Movement *movement, unsigned int const char_number)
  * node path[0]. Else, it either teleports the characters to the position, or
  * make them walk through the nodes array. When they reach their goal (or if
  * there is none), the movement stops. */
-void move(
-        Movement *movement,
-        Coord const max_coord,
-        unsigned int** const collision_map,
-        unsigned int** const cost_map
-        );
+void move(Movement *movement, Map const map);
 
-// Triggers character movements and set the bool moving to TRUE
+// set the movement->moving bool to TRUE and the movementtype to what is given
 void fire_movement(Movement *movement, MovementType const movement_type);
 
 /* Stops the characters' movement and reset some of the vars in the Movement
