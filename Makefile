@@ -1,4 +1,4 @@
-.PHONY: map_creator pathfinding coord map
+.PHONY: map_creator
 
 #################
 # Common options
@@ -49,18 +49,17 @@ map_creator: init clean
 #################
 
 TEST=test
+DEP_ALL=errors.c macros.c
+DEP_SCREEN=screen.c images.c assets.c animation.c movement.c
 
-PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c coord.c errors.c macros.c map.c screen.c
+PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c navigation.c $(DEP_ALL) $(DEP_SCREEN)
 PFEXEC=$(BIN)/pathfinding_test
-pathfinding: init clean
+pathfinding_test: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(PFEXEC) $(PATHFINDING)
+	@$(PFEXEC)
 
-COORD=$(TEST)/coord_test.c coord.c macros.c
-COORDEXEC=$(BIN)/coord_test
-coord: init clean
-	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(COORDEXEC) $(COORD)
-
-MAP=$(TEST)/map_test.c map.c errors.c
-MAPEXEC=$(BIN)/map_test
-map: init clean
-	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAPEXEC) $(MAP)
+NAV=$(TEST)/navigation_test.c navigation.c $(DEP_ALL)
+NAVEXEC=$(BIN)/navigation_test
+navigation_test: init clean
+	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(NAVEXEC) $(NAV)
+	@${NAVEXEC}
