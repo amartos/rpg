@@ -208,8 +208,10 @@ static void pathfinding(
      * The worst case is the queue being filled with each one of them. In
      * practice, the queue is never filled with more than 300ish for a map of
      * more than 13k tiles. Division by 10 keeps a security margin, with a
-     * significant increase in speed. */
-    unsigned int max_array = map.max.x * map.max.y/10;
+     * significant increase in speed.
+     * The +10 is for maps with less than 100 tiles, to keep a minimum space for
+     * the array. */
+    unsigned int max_array = 10 + (map.max.x * map.max.y/10);
 
     Coord queue[max_array];
     for (i=0;i<max_array;i++)
