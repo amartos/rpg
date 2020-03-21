@@ -242,6 +242,7 @@ void free_map(Map *map)
 
 void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
 {
-    map->max = int_to_coord(maxx, maxy);
+    if (is_coord_empty(map->max))
+        map->max = int_to_coord(maxx, maxy);
     map_malloc(map);
 }

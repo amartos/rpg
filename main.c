@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
                     check_animation_frame(assets[i].animation, time);
                 }
 
-            render_screen(renderer, assets, mouse_type, camera, map, paused);
+            render_screen(renderer, assets, mouse_type, camera, map, paused, FALSE);
             SDL_RenderPresent(renderer);
         ENDTIME
     }

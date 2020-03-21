@@ -37,9 +37,12 @@ nuke: clean
 # Tools
 #################
 
+DEP_ALL=errors.c macros.c
+DEP_SCREEN=screen.c images.c assets.c animation.c movement.c
+
 TOOLS=tools
 
-MAP_CREATOR=$(TOOLS)/map_creator.c errors.c screen.c images.c coord.c map.c assets.c macros.c animation.c movement.c pathfinding.c
+MAP_CREATOR=$(TOOLS)/map_creator.c $(DEP_ALL) $(DEP_SCREEN) navigation.c pathfinding.c
 MAP_CREATOR_EXEC=$(BIN)/map_creator
 map_creator: init clean
 	@${CPP} $(CFLAGS) ${LDFLAGS} -o $(MAP_CREATOR_EXEC) $(MAP_CREATOR)
@@ -49,8 +52,6 @@ map_creator: init clean
 #################
 
 TEST=test
-DEP_ALL=errors.c macros.c
-DEP_SCREEN=screen.c images.c assets.c animation.c movement.c
 
 PATHFINDING=$(TEST)/pathfinding_test.c pathfinding.c navigation.c $(DEP_ALL) $(DEP_SCREEN)
 PFEXEC=$(BIN)/pathfinding_test

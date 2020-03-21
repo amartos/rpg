@@ -66,14 +66,18 @@ void center_camera(Camera *camera);
 Coord screen_to_coord(int const x, int const y, Camera const camera);
 
 /* This function will draw everything on screen where it should be, and
- * depending on where the camera is placed. */
+ * depending on where the camera is placed.
+ * Cursor struc is not used for the mouse_type var as this function is also used
+ * in the map_creator tool, and the cursor is represented as a tile, not a
+ * Cursor. */
 void render_screen(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
-        Cursors mouse_type,
+        unsigned int mouse_type,
         Camera camera,
         Map const map,
-        Bool paused
+        Bool paused,
+        Bool const grid
         );
 
 #endif // define RPG_SCREEN

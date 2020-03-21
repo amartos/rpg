@@ -224,10 +224,11 @@ static void apply_characters(
 void render_screen(
         SDL_Renderer *renderer,
         Asset assets[0xFFFF],
-        Cursors mouse_type,
+        unsigned int mouse_type,
         Camera camera,
         Map const map,
-        Bool paused
+        Bool paused,
+        Bool const grid
         )
 {
     unsigned int i, level = 0;
@@ -244,10 +245,12 @@ void render_screen(
      * level 0 (all characters are at level 0 max).
      * After the level 0 and characters are applied, all remaining levels are
      * done in a simple loop. */
-    apply_tiles(renderer, assets, map, camera, FALSE, level); // level 0
-    apply_characters(renderer, assets, map, camera);
+    apply_tiles(renderer, assets, map, camera, grid, level); // level 0
+    if(!grid) // grid is only used for map making
+        apply_characters(renderer, assets, map, camera);
+
     for (level=1;level<MAX_LEVELS;level++)
-        apply_tiles(renderer, assets, map, camera, FALSE, level); // level 1+
+        apply_tiles(renderer, assets, map, camera, grid, level); // level 1+
 
     /* Apply the pause layer above everything if game is paused.
      * This is useful for pause layers that are transparent. */
