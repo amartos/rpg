@@ -143,10 +143,10 @@ static void calc_formation_offset(Movement *movement, unsigned int const char_nu
                 break;
             /* square:
              * 01
-             * 23 */
+             * 32 */
             case SQUARE:
-                ox = round_angle(cosd(270 + 45*char_number + 45*direction));
-                oy = round_angle(sind(270 + 45*char_number + 45*direction));
+                ox = round_angle(cosd(270 + 45*char_number - 45 + 45*direction));
+                oy = round_angle(sind(270 + 45*char_number - 45 + 45*direction));
                 break;
             /* "triangle":
              * 2
