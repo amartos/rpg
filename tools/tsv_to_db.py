@@ -7,7 +7,7 @@
 import re, sys, sqlite3
 import argparse
 
-DB_PATH = 'ignore/assets.db'
+DB_PATH = 'assets/assets.db'
 
 # The conversion values need to change if tiles are added to the DB
 # F is considered as NULL and should be used as default value for unknown TSV

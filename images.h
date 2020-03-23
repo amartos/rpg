@@ -17,8 +17,8 @@
  * TODO: unify dimensions for images. This implies to use one sprite per type of
  * image (ground, etc), and use the init_frame_sdlrect to locate the right
  * image */
-#define FRAMES_WIDTH 32
-#define FRAMES_HEIGHT 32
+#define FRAMES_WIDTH 128
+#define FRAMES_HEIGHT 128
 
 /* default images path within the source dir.
  * This will change for the installation path once it is implemented. */

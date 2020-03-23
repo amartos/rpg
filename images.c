@@ -20,8 +20,8 @@ void set_image_position(SDL_Rect *rect, int const x, int const y)
 SDL_Rect init_frame_sdlrect(unsigned int const x, unsigned int const y)
 {
     SDL_Rect rect; init_sdl_rect(&rect);
-    set_image_position(&rect, x*FRAMES_WIDTH/2, y*FRAMES_HEIGHT/2);
-    set_image_size(&rect, FRAMES_WIDTH/2, FRAMES_HEIGHT/2);
+    set_image_position(&rect, x*FRAMES_WIDTH, y*FRAMES_HEIGHT);
+    set_image_size(&rect, FRAMES_WIDTH, FRAMES_HEIGHT);
     return rect;
 }
 

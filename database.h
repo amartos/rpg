@@ -3,7 +3,7 @@
 
 #include <sqlite3.h>
 
-#define DB_PATH "ignore/assets.db"
+#define DB_PATH "assets/assets.db"
 
 /* ************************************
  * The next macros are defined to reduce code complexity when managing sqlite DB

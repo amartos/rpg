@@ -29,13 +29,25 @@ void init_animation(Animation *animation, unsigned int const frames)
      * object. */
     if (animation->animated)
     {
-        /* This depends on the sprite order
-         * TODO: if(sprite changes), reorder
-         * WARNING: This HEAVILY depends on the Direction struct order. */
-        unsigned int d, s, f;
-        for (d=N;d<=NW;d++) // directions
-            for (s=MOVE;s<=MOVE_SHIELD;s++) // States
-                for (f=0;f<animation->total_frames;f++)
-                    animation->frames[d][s][f] = init_frame_sdlrect(d * 2 + f, s);
+        /* unsigned int d, s, f; */
+        /* for (d=N;d<=NW;d++) // directions */
+        /*     for (s=MOVE;s<=MOVE_SHIELD;s++) // States */
+        /*         for (f=0;f<animation->total_frames;f++) */
+        /*             animation->frames[d][s][f] = init_frame_sdlrect(d * 2 + f, s); */
+        unsigned int s = MOVE, f;
+        for (f=0;f<animation->total_frames;f++)
+        {
+            /* The new images used are not in the right order, thus this is set
+             * manually.
+             * TODO: autmate this by modifying the sprites. */
+            animation->frames[N][s][f] = init_frame_sdlrect(f, 3);
+            animation->frames[NE][s][f] = init_frame_sdlrect(f, 3);
+            animation->frames[E][s][f] = init_frame_sdlrect(f, 1);
+            animation->frames[SE][s][f] = init_frame_sdlrect(f, 1);
+            animation->frames[S][s][f] = init_frame_sdlrect(f, 0);
+            animation->frames[SW][s][f] = init_frame_sdlrect(f, 0);
+            animation->frames[W][s][f] = init_frame_sdlrect(f, 0);
+            animation->frames[NW][s][f] = init_frame_sdlrect(f, 2);
+        }
     }
 }

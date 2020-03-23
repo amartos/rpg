@@ -206,9 +206,12 @@ static void apply_characters(
             )
         {
             image_rect = coord_to_isosdlrect(char_position, camera);
-            image_rect.x += TILES_WIDTH(camera)/4; image_rect.y -= TILES_HEIGHT(camera)/4;
-            image_rect.w = scale_size(FRAMES_WIDTH, camera);
-            image_rect.h = scale_size(FRAMES_HEIGHT, camera);
+            // This is to center characters on tile
+            image_rect.y -= TILES_HEIGHT(camera);
+            /* FRAMES dim are /2 because the character image is too big for the
+             * tiles. */
+            image_rect.w = scale_size(FRAMES_WIDTH/2, camera);
+            image_rect.h = scale_size(FRAMES_HEIGHT/2, camera);
             direction = assets[id].movement->direction;
             current_frame = assets[id].animation->current_frame;
             SDL_RenderCopy(
