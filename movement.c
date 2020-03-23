@@ -138,8 +138,8 @@ static void calc_formation_offset(Movement *movement, unsigned int const char_nu
         {
             // Line: 3210
             case LINE:
-                ox = round_angle(cosd(270 + 45*direction)) * (-1 * char_number);
-                oy = round_angle(sind(270 + 45*direction)) * (-1 * char_number);
+                ox = round_angle(cosd(270 + 45*direction)) * -1 * char_number;
+                oy = round_angle(sind(270 + 45*direction)) * -1 * char_number;
                 break;
             /* square:
              * 01
