@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     textures[3] = make_colored_rect(renderer, 155, 155, 155); // grey cost 10
     textures[4] = make_colored_rect(renderer, 0, 128, 0); // green
 
-    Map map; init_map(&map, "PFtest");
+    Map map; init_map(&map, "pathfinding_test");
 
     Camera camera; init_camera(&camera);
 

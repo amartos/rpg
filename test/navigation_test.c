@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     printf("\n########## MAP ##########\n\n");
 
     // init_map from db
-    Map map; init_map(&map, "unittest"); printmap(map);
+    Map map; init_map(&map, "unit_test"); printmap(map);
 
     printf("\n########## COORD & MAP ##########\n\n");
 

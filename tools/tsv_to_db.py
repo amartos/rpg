@@ -64,7 +64,7 @@ def parse_args():
     if args.name:
         name = args.name
     else:
-        name = args.filename
+        name = args.filename.split("/")[-1]
 
     if args.database:
         database = args.database

@@ -30,6 +30,24 @@ sudo apt install python3-pip
 pip3 install --user argparse
 ```
 
+### (re)generate the assets database
+
+This step is mandatory at first install. The sqlite database used by the
+software in testing phase is not in the repo. To generate it, you can either use
+the dedicated python script (it will need argparse, see above), or load the
+database dump.
+
+```sh
+make load_db # load the db dump
+# make generate_db # use the python script
+```
+
+You can also dump the database using:
+
+```sh
+make dump_db
+```
+
 ### build from source
 
 Once requirements are installed, just run `make`.

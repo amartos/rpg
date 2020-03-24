@@ -1,4 +1,4 @@
-.PHONY: map_creator
+.PHONY: map_creator generate_db
 
 #################
 # Common options
@@ -34,13 +34,31 @@ nuke: clean
 	@rm -rf bin
 
 #################
+# DATABASE
+#################
+
+ASSETS_DB=assets/assets.db
+ASSETS_SQL=assets/assets.sql
+TOOLS=tools
+
+dump_db:
+	@sqlite3 $(ASSETS_DB) .dump > $(ASSETS_SQL)
+
+reset_db: load_db
+
+load_db:
+	@rm -f $(ASSETS_DB)
+	@cat $(ASSETS_SQL) | sqlite3 $(ASSETS_DB)
+
+generate_db:
+	@python3 $(TOOLS)/generate_db.py
+
+#################
 # Tools
 #################
 
 DEP_ALL=errors.c macros.c
 DEP_SCREEN=screen.c images.c assets.c animation.c movement.c
-
-TOOLS=tools
 
 MAP_CREATOR=$(TOOLS)/map_creator.c $(DEP_ALL) $(DEP_SCREEN) navigation.c pathfinding.c
 MAP_CREATOR_EXEC=$(BIN)/map_creator
