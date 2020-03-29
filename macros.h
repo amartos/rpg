@@ -38,9 +38,9 @@ Bool is_empty_string(char const string[]);
 Bool is_same_double(double const a, double const b);
 
 // Convert degrees to radians
-double degrees(double radians);
+double degrees(double const radians);
 
 // Convert radians to degrees
-double radians(double degrees);
+double radians(double const degrees);
 
 #endif // define RPG_MACROS

@@ -43,7 +43,7 @@ struct Movement
     Bool moving;
     Cardinals direction; // where the character looks to
     Coord path[MAX_PATH_NODES]; // array of coords to go through when moving
-    unsigned int current_node; // index of current node from path to go to
+    int current_node; // index of current node from path to go to
     MovementType movement_type; // trigger for Movement mechanics
     double velocity; // movement speed in pixels
 };
@@ -53,13 +53,13 @@ void init_movement(Movement *movement);
 
 /* this function sets the formation in the Movement structure and fires movement
  * to make the characters move to their new formation. */
-void change_formation(Movement *movement, Deployment formation);
+void change_formation(Movement *movement, Deployment const formation);
 
 /* this function apply the calculated offset to the given position, depending on
  * the formation and the character. The character 0 is treated as the main
  * character, and its position is never offsetted (it becomes the center of the
  * formation). */
-void deploy(Coord *position, Movement *movement, unsigned int const char_number);
+void deploy(Coord *position, Movement *movement, int const char_number);
 
 /* this makes the characters move depending on the data stored in structure. If
  * the movement type in *movement is PATH, it triggers the pathfinding to the

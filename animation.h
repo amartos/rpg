@@ -45,22 +45,23 @@ struct Animation
      * This array is NOT set if animation->animated is FALSE. */
     SDL_Rect frames[NW+1][MOVE_SHIELD+1][FPS];
 
-    unsigned int total_frames;
-    unsigned int current_frame;
-    unsigned int framerate;
-    unsigned int time; // previous tick (for changing frame)
+    int total_frames;
+    int current_frame;
+    int framerate;
+    int time; // previous tick (for changing frame)
 };
 
 /* This function initialize the Animation structure. A number of frames of 2 and
  * above sets the animated bool to TRUE and initialize the frames SDL_Rect
  * array. Frames must be a positive > 0 number. */
-void init_animation(Animation *animation, unsigned int const frames);
+void init_animation(Animation *animation, int const frames);
 
 /* This function is used to change the frame the Animation is currently in if
  * the object has passed it's framerate timing. The function also stores in the
  * Animation object the last time it has changed the frame, for
- * synchronisation. */
-void check_animation_frame(Animation *animation, unsigned int const time);
+ * synchronisation.
+ * The time_t type is not used as it's a long, and SDL uses Uint32... */
+void check_animation_frame(Animation *animation, int const time);
 
 
 #endif // define RPG_CHARACTERS

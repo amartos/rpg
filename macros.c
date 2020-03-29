@@ -19,12 +19,12 @@ Bool convert_to_bool(int const number)
     return number == 0 ? FALSE : TRUE;
 }
 
-double degrees(double radians)
+double degrees(double const radians)
 {
     return radians*180/M_PI;
 }
 
-double radians(double degrees)
+double radians(double const degrees)
 {
     return degrees*M_PI/180;
 }

@@ -1,7 +1,7 @@
 #include "pathfinding_test.h"
 
 
-SDL_Texture* make_colored_rect(SDL_Renderer *renderer, int const R, int const G, int const B)
+SDL_Texture* make_colored_rect(SDL_Renderer *renderer, Uint8 const R, Uint8 const G, Uint8 const B)
 {
     SDL_Surface *surface = SDL_CreateRGBSurface(0, BASE_TEST_TILES_WIDTH, BASE_TEST_TILES_HEIGHT, SCREEN_BPP, 0, 0, 0, 0);
     SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, R, G, B));
@@ -18,14 +18,16 @@ void render_map(
         SDL_Texture* const textures[],
         Map const map,
         Coord const path[MAX_PATH_NODES],
-        unsigned int nodes
+        int nodes
         )
 {
     SDL_Rect start; init_sdl_rect(&start);
+    int x, y; coord_to_int(start_coord, &x, &y);
+    int sx, sy; coord_to_int(camera.scroll, &sx, &sy);
     set_image_position(
             &start,
-            (start_coord.x+camera.scroll.x)*TEST_TILES_WIDTH(camera),
-            (start_coord.y+camera.scroll.y)*TEST_TILES_HEIGHT(camera)
+            (x+sx)*TEST_TILES_WIDTH(camera),
+            (y+sy)*TEST_TILES_HEIGHT(camera)
             );
     set_image_size(&start, TEST_TILES_WIDTH(camera), TEST_TILES_HEIGHT(camera));
 
@@ -39,13 +41,13 @@ void render_map(
 
     SDL_Rect position; init_sdl_rect(&position);
     set_image_size(&position, TEST_TILES_WIDTH(camera), TEST_TILES_HEIGHT(camera));
-    for (unsigned int y=0;y<map.max.y;y++)
-        for (unsigned int x=0;x<map.max.x;x++)
+    for (int y=0;y<map.max.y;y++)
+        for (int x=0;x<map.max.x;x++)
         {
             set_image_position(
                     &position,
-                    (x+camera.scroll.x) * TEST_TILES_WIDTH(camera),
-                    (y+camera.scroll.y) * TEST_TILES_HEIGHT(camera)
+                    (x+sx) * TEST_TILES_WIDTH(camera),
+                    (y+sy) * TEST_TILES_HEIGHT(camera)
                     );
             if (map.collisions[y][x])
                 SDL_RenderCopy(renderer, textures[1], NULL, &position);
@@ -67,12 +69,12 @@ void render_map(
 
     if (nodes)
     {
-        for (unsigned int i=0;i<nodes;i++)
+        for (int i=0;i<nodes;i++)
         {
             set_image_position(
                     &position,
-                    (path[i].x+camera.scroll.x) * TEST_TILES_WIDTH(camera),
-                    (path[i].y+camera.scroll.y) * TEST_TILES_HEIGHT(camera)
+                    (int)(path[i].x+camera.scroll.x) * TEST_TILES_WIDTH(camera),
+                    (int)(path[i].y+camera.scroll.y) * TEST_TILES_HEIGHT(camera)
                     );
             SDL_RenderCopy(renderer, textures[4], NULL, &position);
         }
@@ -83,7 +85,7 @@ void render_map(
 
 int main(int argc, char *argv[])
 {
-    unsigned int nodes = 0, time = 0, prev_time = 0;
+    int x, y, sx, sy, nodes = 0, time = 0, prev_time = 0;
     Bool done = FALSE;
 
     // SDL vars init
@@ -128,11 +130,12 @@ int main(int argc, char *argv[])
                         set_zoom(&camera, TRUE);
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+                    coord_to_int(camera.scroll, &x, &y);
                     // This is done because the screen_to_coord conversion
                     // function uses other TILES dimensions
                     click = int_to_coord(
-                            (event.button.x / TEST_TILES_WIDTH(camera)) - camera.scroll.x,
-                            (event.button.y / TEST_TILES_HEIGHT(camera)) - camera.scroll.y
+                            (event.button.x / TEST_TILES_WIDTH(camera)) - x,
+                            (event.button.y / TEST_TILES_HEIGHT(camera)) - y
                             );
                     switch(event.button.button)
                     {
@@ -155,16 +158,16 @@ int main(int argc, char *argv[])
                             done = TRUE;
                             break;
                         case SDLK_UP:
-                            camera.scroll.y += 1;
+                            camera.scroll.y += 1.0;
                             break;
                         case SDLK_DOWN:
-                            camera.scroll.y -= 1;
+                            camera.scroll.y -= 1.0;
                             break;
                         case SDLK_LEFT:
-                            camera.scroll.x += 1;
+                            camera.scroll.x += 1.0;
                             break;
                         case SDLK_RIGHT:
-                            camera.scroll.x -= 1;
+                            camera.scroll.x -= 1.0;
                             break;
                     }
                     break;
@@ -178,7 +181,7 @@ int main(int argc, char *argv[])
         ENDTIME
     }
 
-    for (unsigned int i = 0;i<5;i++)
+    for (int i = 0;i<5;i++)
         SDL_DestroyTexture(textures[i]);
 
     SDL_DestroyRenderer(renderer);

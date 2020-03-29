@@ -5,7 +5,7 @@
 #################
 
 CPP=gcc
-CFLAGS=-O3 -no-pie -g
+CFLAGS=-O3 -no-pie -g -Wconversion
 LDFLAGS=-lSDL2 -lSDL2_image -lm -lsqlite3
 
 #################

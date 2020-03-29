@@ -42,7 +42,7 @@ static void get_args(int argc, char *argv[], Map *map, char map_name[MAX_SIZE_LI
  * For now, as there are very few tiles, all subsequent tiling for the isometric
  * z level is done manually.
  * TODO: to be adapted for multiple tiles and any levels. */
-static void set_tile(Map *map, unsigned int const x, unsigned int const y, unsigned int const tile_id)
+static void set_tile(Map *map, int const x, int const y, int const tile_id)
 {
     map->tiles[0][y][x] = tile_id;
     if (tile_id == ID_WALL0)
@@ -52,9 +52,9 @@ static void set_tile(Map *map, unsigned int const x, unsigned int const y, unsig
     }
 }
 
-static void reset_tile(Map *map, unsigned int const x, unsigned int const y)
+static void reset_tile(Map *map, int const x, int const y)
 {
-    for (unsigned int z=0;z<MAX_LEVELS;z++)
+    for (int z=0;z<MAX_LEVELS;z++)
         map->tiles[z][y][x] = 0;
     map->collisions[y][x] = 0;
     map->cost[y][x] = 0;
@@ -63,19 +63,19 @@ static void reset_tile(Map *map, unsigned int const x, unsigned int const y)
 
 static void reset_map(Map *map)
 {
-    for (unsigned int y=0;y<map->max.y;y++)
-        for (unsigned int x=0;x<map->max.x;x++)
+    for (int y=0;y<map->max.y;y++)
+        for (int x=0;x<map->max.x;x++)
             reset_tile(map, x, y);
 }
 
 /* This function change the chosen tile to be set on map. The cursor also
  * changes to reflect which tile is currently selected. */
 static void change_tile(
-        unsigned int *tile_id,
+        int *tile_id,
         Asset assets[0xFFFF],
-        unsigned int const x,
-        unsigned int const y,
-        unsigned int const id
+        int const x,
+        int const y,
+        int const id
         )
 {
     *tile_id = id;    
@@ -84,7 +84,7 @@ static void change_tile(
 
 static void write_to_db(char const map_name[MAX_SIZE_LINE], Map const map)
 {
-    unsigned int x, y, z;
+    int x, y, z;
     char query[MAX_SIZE_LINE] = {0};
     char level_value[MAX_SIZE_LINE] = {0};
     INIT_DB
@@ -125,7 +125,7 @@ static void write_to_db(char const map_name[MAX_SIZE_LINE], Map const map)
 
 int main(int argc, char *argv[])
 {
-    unsigned int tile_id = ID_FLOOR, x, y, time = 0, prev_time = 0;
+    int tile_id = ID_FLOOR, x, y, time = 0, prev_time = 0;
 
     SDL_Window *window; SDL_Renderer *renderer;
     init_screen(&window, &renderer);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     click = screen_to_coord(event.button.x, event.button.y, camera);
-                    x = click.x; y = click.y;
+                    coord_to_int(click, &x, &y);
                     if (!is_out_of_map(click, map))
                         switch(event.button.button)
                         {

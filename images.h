@@ -47,7 +47,7 @@ void set_image_size(SDL_Rect *rect, int const w, int const h);
  * x and y are NOT in pixel, they correspond to the frame position on the
  * sprite. These values are multiplied by the FRAMES dims to get the pixel
  * values within the function itself. */
-SDL_Rect init_frame_sdlrect(unsigned int const x, unsigned int const y);
+SDL_Rect init_frame_sdlrect(int const x, int const y);
 
 // Fills the Image structure with an image from path, stored as an SDL_Texture
 void load_texture_image(SDL_Renderer *renderer, Image *image, char const path[MAX_PATH_LEN]);

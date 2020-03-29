@@ -46,7 +46,7 @@ struct Camera
 void init_camera(Camera *camera);
 
 // Converts size to the right camera scale and returns the new size as double.
-double scale_size(unsigned int const size, Camera const camera);
+int scale_size(int const size, Camera const camera);
 
 // Modify scroll.x by xmod and scroll.y by ymod
 void set_scroll(Camera *camera, int const xmod, int const ymod);
@@ -72,11 +72,11 @@ Coord screen_to_coord(int const x, int const y, Camera const camera);
  * Cursor. */
 void render_screen(
         SDL_Renderer *renderer,
-        Asset assets[0xFFFF],
-        unsigned int mouse_type,
-        Camera camera,
+        Asset const assets[0xFFFF],
+        int const mouse_type,
+        Camera const camera,
         Map const map,
-        Bool paused,
+        Bool const paused,
         Bool const grid
         );
 

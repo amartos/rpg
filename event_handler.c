@@ -190,7 +190,7 @@ static void handle_mouse_motion(
         )
 {
     // set cursor position for each cursor type
-    for (unsigned int i=HOVER;i<=INVALID;i++)
+    for (int i=HOVER;i<=INVALID;i++)
         set_image_position(&assets[i].image->sdlrect, event.motion.x, event.motion.y);
 
     // determine which cursor to show: either HOVER or INVALID
@@ -212,7 +212,7 @@ static void handle_mouse_click(
     Coord click = screen_to_coord(event.button.x, event.button.y, camera);
     Coord position; init_coord(&position);
 
-    for (unsigned int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
+    for (int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
     {
         position = click;
         if (is_pos_legal(position, assets[i].movement->position, map))

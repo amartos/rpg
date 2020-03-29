@@ -10,14 +10,13 @@ static void init_asset(Asset *asset)
 
 void init_asset_array(Asset assets[0xFFFF])
 {
-    unsigned int i;
-    for (i=0;i<0xFFFF;i++)
+    for (int i=0;i<0xFFFF;i++)
         init_asset(&assets[i]);
 }
 
 void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
 {
-    unsigned int id, frames;
+    int id, frames;
     double velocity;
     char path[50] = {0}, id_str[10] = {0};
     INIT_DB
@@ -41,7 +40,7 @@ void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
             init_animation(assets[id].animation, frames);
         }
 
-        velocity = GET_QUERY_INT(4);
+        velocity = (double)GET_QUERY_INT(4);
         if (!is_same_double(velocity, 0.0))
         {
             // This cannot be done before, as velocity can be == 0 in db
@@ -57,8 +56,7 @@ void load_assets_db(SDL_Renderer *renderer, Asset assets[0xFFFF])
 
 void free_assets_array(Asset assets[0xFFFF])
 {
-    unsigned int id;
-    for (id=0;id<0xFFFF;id++)
+    for (int id=0;id<0xFFFF;id++)
         if (assets[id].image != NULL)
         {
             free_image(assets[id].image);

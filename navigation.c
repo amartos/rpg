@@ -20,16 +20,21 @@ Coord sum_coord(Coord const a, Coord const b)
     return sum;
 }
 
-Coord int_to_coord(unsigned int const x, unsigned int const y)
+Coord int_to_coord(int const x, int const y)
 {
     Coord coord; init_coord(&coord);
-    coord.x = x; coord.y = y;
+    coord.x = (double)x; coord.y = (double)y;
     return coord;
+}
+
+void coord_to_int(Coord const coord, int *x, int *y)
+{
+    *x = (int)coord.x; *y = (int)coord.y;
 }
 
 Coord click_to_tile(Coord const click)
 {
-    unsigned int x = click.x, y = click.y;
+    int x, y; coord_to_int(click, &x, &y);
     Coord tile = int_to_coord(x, y);
     return tile;
 }
@@ -56,7 +61,7 @@ Bool is_within_tile(Coord const a, Coord const b)
 
 Bool is_colliding(Coord const goal, Map const map)
 {
-    unsigned int x = goal.x, y = goal.y;
+    int x, y; coord_to_int(goal, &x, &y);
     if(!is_out_of_map(goal, map))
         return convert_to_bool(map.collisions[y][x]);
     return TRUE;
@@ -96,12 +101,12 @@ Bool are_corners_colliding(
      * The y axis test checks if the neighbour is North or South. */
     Coord maximus; init_coord(&maximus);
     maximus.x = start.x;
-    maximus.y = direction == NW || direction == NE ? start.y - 1 : start.y + 1;
+    maximus.y = direction == NW || direction == NE ? start.y - 1.0 : start.y + 1.0;
 
     /* For the W/E axis, it is the neighbours' y coord that does not change.
      * The x axis test checks if the neighbour is West or East. */
     Coord decumanus; init_coord(&decumanus);
-    decumanus.x = direction == NW || direction == SW ? start.x - 1 : start.x + 1;
+    decumanus.x = direction == NW || direction == SW ? start.x - 1.0 : start.x + 1.0;
     decumanus.y = start.y;
 
     Bool maximus_collide = is_colliding(maximus, map);
@@ -112,8 +117,8 @@ Bool are_corners_colliding(
 
 Bool is_out_of_map(Coord const goal, Map const map)
 {
-    return goal.x < 0 ||
-           goal.y < 0 ||
+    return goal.x < 0.0 ||
+           goal.y < 0.0 ||
            goal.x >= map.max.x ||
            goal.y >= map.max.y;
 }
@@ -146,28 +151,30 @@ Cardinals determine_direction(Coord const start, Coord const goal)
     /* The angle divided by 45 is a trick to get the cardinal corresponding
      * number. However, we need to convert from the math coord system to the
      * map coord system, by rotating by 90°. */
-    int direction = round((90+angle) / 45);
+    int direction = (int)round((90.0+angle) / 45.0);
 
     // The angle conversion gives -1 for the 8th value because of a -135° angle
-    direction = direction < 0 ? 7 : direction;
+    direction = direction < 0 ? NW : direction;
 
     return direction;
 }
 
-/* This function allocate memory for a double array of unsigned int of size
+/* This function allocate memory for a double array of int of size
  * [maxy][maxy],, initializes it and returns the adress. */
-static unsigned int** double_array_malloc(
-        unsigned int const maxx,
-        unsigned int const maxy
+static int** double_array_malloc(
+        int const maxx,
+        int const maxy
         )
 {
-    unsigned int x, y, **submap;
+    int **submap;
 
-    MALLOC(submap, sizeof(unsigned int *) * maxy, MAP_MALLOC_FAILURE, NULL);
-    for(y=0;y<maxy;y++)
+    size_t sizey = sizeof(int *) * (unsigned int)abs(maxy);
+    size_t sizex = sizeof(int) * (unsigned int)abs(maxx);
+    MALLOC(submap, sizey, MAP_MALLOC_FAILURE, NULL);
+    for(int y=0;y<maxy;y++)
     {
-        MALLOC(submap[y], sizeof(unsigned int) * maxx, MAP_MALLOC_FAILURE, NULL);
-        for (x=0;x<maxx;x++)
+        MALLOC(submap[y], sizex, MAP_MALLOC_FAILURE, NULL);
+        for (int x=0;x<maxx;x++)
             submap[y][x] = 0;
     }
     return submap;
@@ -176,22 +183,21 @@ static unsigned int** double_array_malloc(
 // This function allocates memory to each array of the Map structure.
 static void map_malloc(Map *map)
 {
-    unsigned int l;
-
     map->collisions = double_array_malloc((int)map->max.x, (int)map->max.y);
     map->cost = double_array_malloc((int)map->max.x, (int)map->max.y);
     map->weather = double_array_malloc((int)map->max.x, (int)map->max.y);
 
-    MALLOC(map->tiles, sizeof(unsigned int *) * MAX_LEVELS, MAP_MALLOC_FAILURE, NULL);
-    for (l=0;l<MAX_LEVELS;l++)
+    size_t sizel = sizeof(int *) * MAX_LEVELS;
+    MALLOC(map->tiles, sizel, MAP_MALLOC_FAILURE, NULL);
+    for (int l=0;l<MAX_LEVELS;l++)
         map->tiles[l] = double_array_malloc((int)map->max.x, (int)map->max.y);
 }
 
-void init_map(Map *map, char map_name[])
+void init_map(Map *map, char const map_name[])
 {
     /* usually the letter l is used for the loops in tiles level, but the DB
      * loops need the letter i. */
-    unsigned int x, y, i;
+    int x, y, i;
     char query[100] = {0};
 
     // The DB path is defined in the database module
@@ -228,10 +234,9 @@ void init_map(Map *map, char map_name[])
 
 void free_map(Map *map)
 {
-    unsigned int l,y;
-    for (l=0;l<MAX_LEVELS;l++)
+    for (int l=0;l<MAX_LEVELS;l++)
     {
-        for (y=0;y<map->max.y;y++)
+        for (int y=0;y<map->max.y;y++)
             free(map->tiles[l][y]);
     }
     free(map->tiles);
@@ -240,7 +245,7 @@ void free_map(Map *map)
     free(map->weather);
 }
 
-void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy)
+void init_empty_map(Map *map, int const maxx, int const maxy)
 {
     if (is_coord_empty(map->max))
         map->max = int_to_coord(maxx, maxy);

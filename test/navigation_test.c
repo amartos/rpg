@@ -3,15 +3,16 @@
 
 static void printmap(Map const map)
 {
-    unsigned int x, y;
-    unsigned int maxx = map.max.x, maxy = map.max.y;
+    int x, y;
+    // This is used by PRINTM
+    int maxx, maxy; coord_to_int(map.max, &maxx, &maxy);
 
     // max coord
     printf("max: x %f, y %f\n", map.max.x, map.max.y);
     printf("\n");
     
     // tiles
-    for (unsigned int i=0; i<MAX_LEVELS;i++)
+    for (int i=0; i<MAX_LEVELS;i++)
     {
         printf("LEVEL %d:\n", i);
         PRINTM(map.tiles[i][y][x]);
@@ -25,28 +26,28 @@ static void printmap(Map const map)
 static void get_neighbours(Coord neighbours[8], Coord const current)
 {
     neighbours[N].x = current.x;
-    neighbours[N].y = current.y - 1;
+    neighbours[N].y = current.y - 1.0;
 
-    neighbours[NE].x = current.x + 1;
-    neighbours[NE].y = current.y - 1;
+    neighbours[NE].x = current.x + 1.0;
+    neighbours[NE].y = current.y - 1.0;
 
-    neighbours[E].x = current.x + 1;
+    neighbours[E].x = current.x + 1.0;
     neighbours[E].y = current.y;
 
-    neighbours[SE].x = current.x + 1;
-    neighbours[SE].y = current.y + 1;
+    neighbours[SE].x = current.x + 1.0;
+    neighbours[SE].y = current.y + 1.0;
 
     neighbours[S].x = current.x;
-    neighbours[S].y = current.y + 1;
+    neighbours[S].y = current.y + 1.0;
 
-    neighbours[SW].x = current.x - 1;
-    neighbours[SW].y = current.y + 1;
+    neighbours[SW].x = current.x - 1.0;
+    neighbours[SW].y = current.y + 1.0;
 
-    neighbours[W].x = current.x - 1;
+    neighbours[W].x = current.x - 1.0;
     neighbours[W].y = current.y;
 
-    neighbours[NW].x = current.x - 1;
-    neighbours[NW].y = current.y - 1;
+    neighbours[NW].x = current.x - 1.0;
+    neighbours[NW].y = current.y - 1.0;
 }
 
 static void printcoord(Coord const coord)

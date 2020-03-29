@@ -17,7 +17,7 @@ void set_image_position(SDL_Rect *rect, int const x, int const y)
     rect->x = x; rect->y = y;
 }
 
-SDL_Rect init_frame_sdlrect(unsigned int const x, unsigned int const y)
+SDL_Rect init_frame_sdlrect(int const x, int const y)
 {
     SDL_Rect rect; init_sdl_rect(&rect);
     set_image_position(&rect, x*FRAMES_WIDTH, y*FRAMES_HEIGHT);
@@ -29,10 +29,9 @@ SDL_Rect init_frame_sdlrect(unsigned int const x, unsigned int const y)
  * load_texture_image and giving path. */
 static void init_image(Image *image)
 {
-    unsigned int i;
     init_sdl_rect(&image->sdlrect);
     image->collision = FALSE;
-    for (i=0;i<MAX_PATH_LEN;i++)
+    for (int i=0;i<MAX_PATH_LEN;i++)
         image->path[i] = '\0';
     MALLOC(image->texture, sizeof(SDL_Texture*), TEXTURE_MALLOC_FAILURE, NULL);
 }

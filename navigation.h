@@ -45,20 +45,20 @@ struct Coord
 typedef struct Map Map;
 struct Map
 {
-    // max number of tiles for x and y
-    // the minimum is always == 0
+    /* max number of tiles for x and y
+     * the minimum is always == 0 */
     Coord max;
-    unsigned int ***tiles; // image id for each tile
-    // This array is, for now, used as a Bool to determine collision (1 is
-    // colliding, 0 is not). In the future, different types of collision might
-    // be defined, thus needing ids instead of Bool.
-    // Moreover, using the same type as the others arrays of the Map simplifies
-    // code for malloc.
-    unsigned int **collisions; // Bool 
-    unsigned int **cost; // movement cost for each tile
-    // Weather ID for each tile. This might be modified in the future to
-    // integrate a third dimension (or more).
-    unsigned int **weather;
+    int ***tiles; // image id for each tile
+    /* This array is, for now, used as a Bool to determine collision (1 is
+     * colliding, 0 is not). In the future, different types of collision might
+     * be defined, thus needing ids instead of Bool.
+     * Moreover, using the same type as the others arrays of the Map simplifies
+     * code for malloc. */
+    int **collisions; // Bool 
+    int **cost; // movement cost for each tile
+    /* Weather ID for each tile. This might be modified in the future to
+     * integrate a third dimension (or more). */
+    int **weather;
 };
 
 /* Function to initialize Coord struct.
@@ -72,7 +72,10 @@ void reset_coord(Coord *coord);
 Coord sum_coord(Coord const a, Coord const b);
 
 // Converts two ints into a returned Coord
-Coord int_to_coord(unsigned int const x, unsigned int const y);
+Coord int_to_coord(int const x, int const y);
+
+// Converts a set of coord into two ints
+void coord_to_int(Coord const coord, int *x, int *y);
 
 /* When given a Coord struct in which the doubles have numbers after the
  * floating point, it returns a Coord struct in which the doubles were
@@ -115,12 +118,12 @@ Cardinals determine_direction(Coord const start, Coord const goal);
  * the DB which path is defined in the database module. The map_name is used as
  * a table name, and an entry key in the maps table.
  * To know more about the DB tables, see the map_crator module. */
-void init_map(Map *map, char map_name[]);
+void init_map(Map *map, char const map_name[]);
 
 /* This function is used with the map_creator tool, to initialize an empty map
  * of defined size. This is used only for malloc, as the map does not need to be
  * in the DB. */
-void init_empty_map(Map *map, unsigned int const maxx, unsigned int const maxy);
+void init_empty_map(Map *map, int const maxx, int const maxy);
 
 // This function frees all arrays of the Map struct.
 void free_map(Map *map);

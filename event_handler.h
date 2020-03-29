@@ -13,7 +13,7 @@
 #include <SDL2/SDL.h>
 
 #define SCALE_CURSOR \
-    for (unsigned int i=HOVER;i<=INVALID;i++) \
+    for (int i=HOVER;i<=INVALID;i++) \
         set_image_size( \
                 &assets[i].image->sdlrect, \
                 TILES_WIDTH(*camera), \
@@ -21,7 +21,7 @@
                 );
 
 #define CHANGE_GROUP_FORMATION(f) \
-            for (unsigned int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++) \
+            for (int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++) \
                 change_formation(assets[i].movement, f);
 
 /* This is the main function used to handle all types of events either coming

@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <math.h>
 #include <unistd.h> // used for optargs
 
 #define MAX_SIZE_LINE 1000
@@ -30,7 +31,7 @@
 
 // Macros used to enclose time limited events
 #define TIME \
-        time = SDL_GetTicks(); \
+        time = (int)SDL_GetTicks(); \
         if (time - prev_time > FRAMERATE) \
         { \
             prev_time = time;
@@ -38,7 +39,7 @@
 #define ENDTIME \
         } \
         else \
-            SDL_Delay(FRAMERATE - (time - prev_time)); // do not overuse CPU
+            SDL_Delay((Uint32)abs(FRAMERATE - (time - prev_time))); // do not overuse CPU
 
 enum {
     ID_FLOOR = 0x4000,

@@ -31,16 +31,15 @@ void init_camera(Camera *camera)
     camera->scale = 1;
 }
 
-double scale_size(unsigned int const size, Camera const camera)
+int scale_size(int const size, Camera const camera)
 {
-    double scaled = size * camera.scale;
-    return scaled;
+    return (int)(size * camera.scale);
 }
 
 void set_scroll(Camera *camera, int const xmod, int const ymod)
 {
-    camera->scroll.x += xmod;
-    camera->scroll.y += ymod;
+    camera->scroll.x += (double)xmod;
+    camera->scroll.y += (double)ymod;
 }
 
 void set_zoom(Camera *camera, Bool const out)
@@ -55,7 +54,7 @@ void set_zoom(Camera *camera, Bool const out)
 void reset_camera(Camera *camera)
 {
     reset_coord(&camera->scroll);
-    camera->scale = 1;
+    camera->scale = 1.0;
 }
 
 void center_camera(Camera *camera)
@@ -100,9 +99,11 @@ static SDL_Rect coord_to_isosdlrect(Coord const coord, Camera const camera)
     Coord isometrified = coord;
     isometrified.x -= camera.scroll.x; isometrified.y -= camera.scroll.y; // scroll correction
     isometrified = cartesian_to_isometric(isometrified, camera);
+    int x, y; coord_to_int(isometrified, &x, &y);
+
     SDL_Rect rect;
-    rect.x = isometrified.x; rect.y = isometrified.y;
-    rect.w = TILES_WIDTH(camera); rect.h = TILES_HEIGHT(camera);
+    set_image_position(&rect, x, y);
+    set_image_size(&rect, TILES_WIDTH(camera), TILES_HEIGHT(camera));
     return rect;
 }
 
@@ -116,10 +117,10 @@ static void apply_tiles(
         Map const map,
         Camera const camera,
         Bool const grid,
-        unsigned int const level
+        int const level
         )
 {
-    unsigned int id = 0;
+    int id = 0;
     SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord positions; init_coord(&positions);
     Coord max_coord; init_coord(&max_coord);
@@ -127,16 +128,15 @@ static void apply_tiles(
     /* This defines the minimum and maximum position visible on screen.
      * The positions starts at -1 and goes to max to ensure that the tile on
      * the screen borders is rendered, even not completely */
-    int minx = camera.scroll.x - 1;
-    int maxx = camera.scroll.x + SCREEN_WIDTH/TILES_WIDTH(camera);
-    int miny = camera.scroll.y - 1;
-    int maxy = camera.scroll.y + SCREEN_HEIGHT/TILES_HEIGHT(camera);
+    int minx = (int)(camera.scroll.x - 1.0);
+    int maxx = (int)(camera.scroll.x + SCREEN_WIDTH/TILES_WIDTH(camera));
+    int miny = (int)(camera.scroll.y - 1.0);
+    int maxy = (int)(camera.scroll.y + SCREEN_HEIGHT/TILES_HEIGHT(camera));
 
-    int x, y;
-    for (y=miny;y<=maxy;y++)
-        for (x=minx;x<=maxx;x++)
+    for (int y=miny;y<=maxy;y++)
+        for (int x=minx;x<=maxx;x++)
         {
-            positions.x = x; positions.y = y;
+            positions = int_to_coord(x, y);
             if (!is_out_of_map(positions, map))
             {
                 image_rect = coord_to_isosdlrect(positions, camera);
@@ -165,8 +165,8 @@ static Bool is_in_sight(Coord const tile_position, Camera const camera)
      * The positions starts at -1 and goes to max to ensure that the tiles on
      * the screen borders are rendered, even not completely */
     Coord min_sight; init_coord(&min_sight);
-    min_sight.x = camera.scroll.x - 1;
-    min_sight.y = camera.scroll.y - 1;
+    min_sight.x = camera.scroll.x - 1.0;
+    min_sight.y = camera.scroll.y - 1.0;
 
     Coord max_sight; init_coord(&max_sight);
     max_sight.x = camera.scroll.x + SCREEN_WIDTH/TILES_WIDTH(camera);
@@ -191,13 +191,13 @@ static void apply_characters(
         Camera const camera
         )
 {
-    unsigned int id, current_frame;
+    int current_frame;
     SDL_Rect image_rect; init_sdl_rect(&image_rect);
     Coord char_position; init_coord(&char_position);
     State state = MOVE;
     Cardinals direction = N;
 
-    for (id=FIRST_CHAR_ID;id<=LAST_CHAR_ID;id++)
+    for (int id=FIRST_CHAR_ID;id<=LAST_CHAR_ID;id++)
     {
         char_position = assets[id].movement->position;
         if (
@@ -226,15 +226,14 @@ static void apply_characters(
 
 void render_screen(
         SDL_Renderer *renderer,
-        Asset assets[0xFFFF],
-        unsigned int mouse_type,
-        Camera camera,
+        Asset const assets[0xFFFF],
+        int const mouse_type,
+        Camera const camera,
         Map const map,
-        Bool paused,
+        Bool const paused,
         Bool const grid
         )
 {
-    unsigned int i, level = 0;
     Coord position; init_coord(&position);
     SDL_RenderClear(renderer); // erase the screen first
 
@@ -248,12 +247,12 @@ void render_screen(
      * level 0 (all characters are at level 0 max).
      * After the level 0 and characters are applied, all remaining levels are
      * done in a simple loop. */
-    apply_tiles(renderer, assets, map, camera, grid, level); // level 0
+    apply_tiles(renderer, assets, map, camera, grid, 0); // level 0
     if(!grid) // grid is only used for map making
         apply_characters(renderer, assets, map, camera);
 
-    for (level=1;level<MAX_LEVELS;level++)
-        apply_tiles(renderer, assets, map, camera, grid, level); // level 1+
+    for (int level=1;level<MAX_LEVELS;level++)
+        apply_tiles(renderer, assets, map, camera, grid, level);
 
     /* Apply the pause layer above everything if game is paused.
      * This is useful for pause layers that are transparent. */
@@ -268,7 +267,7 @@ void render_screen(
     SDL_RenderCopy(renderer, assets[mouse_type].image->texture, NULL, &assets[mouse_type].image->sdlrect);
 
     // show destination for characters
-    for (i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
+    for (int i=FIRST_CHAR_ID;i<=LAST_CHAR_ID;i++)
         if (assets[i].movement->moving)
         {
             position = assets[i].movement->path[0];

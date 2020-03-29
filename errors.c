@@ -18,7 +18,9 @@ static void printe(
 static char* errstr(Errors const err_id)
 {
     char *err_msg = NULL;
-    MALLOC(err_msg, sizeof(char) * 50, ERR_MSG_MALLOC_FAILURE, NULL);
+
+    size_t size = sizeof(char) * 50;
+    MALLOC(err_msg, size, ERR_MSG_MALLOC_FAILURE, NULL);
 
     switch (err_id)
     {

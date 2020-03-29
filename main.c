@@ -4,8 +4,10 @@
 int main(int argc, char *argv[])
 {
     /* i is used for the "for loops".
-     * time and prev_time are used for the framerate calculations */
-    unsigned int i = 0, time = 0, prev_time = 0;
+     * time and prev_time are used for the framerate calculations.
+     * The time_t type is not used to manage time here as SDL uses Uint32 types,
+     * and casting from time_t (aka long) to uint is not advised. */
+    int i = 0, time = 0, prev_time = 0;
 
     // SDL structures calls and init
     SDL_Window *window; SDL_Renderer *renderer;
